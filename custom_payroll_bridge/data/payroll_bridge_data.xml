@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+
+    <record id="hr_salary_rule_absent_deduction" model="hr.salary.rule">
+        <field name="name">Absent Deduction</field>
+        <field name="code">ABSENT_DED</field>
+        <field name="sequence" eval="110"/>
+        <field name="category_id" ref="bi_hr_payroll.DED"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = -(contract.wage / 30.0 * (inputs.ABSENT_DAYS.amount if inputs.ABSENT_DAYS else 0.0))</field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+
+    <record id="bi_hr_payroll.structure_base" model="hr.payroll.structure">
+        <field name="rule_ids" eval="[(4, ref('hr_salary_rule_absent_deduction'))]"/>
+    </record>
+
+</odoo>

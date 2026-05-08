@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_employee_own_payslips" model="ir.actions.act_window">
+        <field name="name">My Payslips</field>
+        <field name="res_model">hr.payslip</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('employee_id.user_id', '=', uid)]</field>
+    </record>
+
+    <menuitem
+        id="menu_employee_own_payslips"
+        name="My Payslips"
+        parent="hr.menu_hr_root"
+        action="action_employee_own_payslips"
+        sequence="99"
+        groups="base.group_user"/>
+
+</odoo>
