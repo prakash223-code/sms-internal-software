@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- LIST VIEW -->
+    <record id="view_company_holiday_list" model="ir.ui.view">
+        <field name="name">company.holiday.list</field>
+        <field name="model">company.holiday</field>
+        <field name="arch" type="xml">
+            <list string="Company Holidays"
+                  decoration-info="holiday_type == 'public'"
+                  decoration-warning="holiday_type == 'event'"
+                  decoration-danger="holiday_type == 'emergency'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="holiday_type"/>
+                <field name="description" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM VIEW -->
+    <record id="view_company_holiday_form" model="ir.ui.view">
+        <field name="name">company.holiday.form</field>
+        <field name="model">company.holiday</field>
+        <field name="arch" type="xml">
+            <form string="Company Holiday">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Diwali, Republic Day..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="holiday_type"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_company_holiday_search" model="ir.ui.view">
+        <field name="name">company.holiday.search</field>
+        <field name="model">company.holiday</field>
+        <field name="arch" type="xml">
+            <search string="Search Holidays">
+                <field name="name"/>
+                <field name="date"/>
+                <filter string="Public Holidays" name="filter_public"
+                        domain="[('holiday_type','=','public')]"/>
+                <filter string="Company Events" name="filter_event"
+                        domain="[('holiday_type','=','event')]"/>
+                <separator/>
+                <filter string="Group by Type" name="group_type"
+                        context="{'group_by': 'holiday_type'}"/>
+                <filter string="Group by Month" name="group_month"
+                        context="{'group_by': 'date:month'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_company_holidays" model="ir.actions.act_window">
+        <field name="name">Company Holidays</field>
+        <field name="res_model">company.holiday</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_company_holiday_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No holidays declared yet.
+            </p>
+            <p>
+                Add public holidays, company events, or emergency closures.
+                Employees will not be marked absent on these days.
+                2nd and 4th Saturdays are automatically treated as holidays
+                based on company policy — no entry needed for those.
+            </p>
+        </field>
+    </record>
+
+</odoo>

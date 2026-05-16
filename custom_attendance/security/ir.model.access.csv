@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_attendance_employee,hr.attendance.employee,hr_attendance.model_hr_attendance,base.group_user,1,0,0,0
+access_hr_attendance_hr,hr.attendance.hr,hr_attendance.model_hr_attendance,hr.group_hr_user,1,1,1,1
+access_hr_attendance_manager,hr.attendance.manager,hr_attendance.model_hr_attendance,hr_attendance.group_hr_attendance_manager,1,1,1,1
+access_monthly_summary_employee,attendance.monthly.summary.employee,model_attendance_monthly_summary,base.group_user,1,0,0,0
+access_monthly_summary_hr,attendance.monthly.summary.hr,model_attendance_monthly_summary,hr.group_hr_user,1,1,1,0
+access_monthly_summary_manager,attendance.monthly.summary.manager,model_attendance_monthly_summary,hr_attendance.group_hr_attendance_manager,1,1,1,1
+access_attendance_checkin_wizard,attendance.checkin.wizard,model_attendance_checkin_wizard,base.group_user,1,1,1,1
+access_company_holiday_manager,company.holiday manager,model_company_holiday,hr.group_hr_user,1,1,1,1
+access_company_holiday_employee,company.holiday employee,model_company_holiday,base.group_user,1,0,0,0
