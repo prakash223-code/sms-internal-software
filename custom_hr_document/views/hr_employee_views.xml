@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_hr_employee_form_documents" model="ir.ui.view">
+    <field name="name">hr.employee.form.documents</field>
+    <field name="model">hr.employee</field>
+    <field name="inherit_id" ref="hr.view_employee_form"/>
+    <field name="arch" type="xml">
+
+      <!-- Smart button -->
+      <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+        <button name="%(custom_hr_document.action_hr_employee_document)d"
+                type="action"
+                class="oe_stat_button"
+                icon="fa-file-text-o"
+                groups="hr.group_hr_user">
+          <field name="document_ids"
+                 string="Documents"
+                 widget="statinfo"/>
+        </button>
+      </xpath>
+
+      <!-- Documents tab -->
+      <xpath expr="//notebook" position="inside">
+        <page string="Documents"
+              name="documents_tab"
+              groups="hr.group_hr_user">
+
+          <field name="document_ids"
+                 string="Documents"
+                 mode="list"
+                 context="{'default_employee_id': id}">
+
+            <list string="Documents"
+                  editable="bottom"
+                  create="1"
+                  delete="1">
+
+              <field name="name"
+                     string="Document Name"
+                     placeholder="e.g. Aadhar Card, Offer Letter"
+                     required="1"/>
+
+              <field name="document_type"
+                     string="Category"
+                     required="1"/>
+
+              <!-- File extension: PDF, PNG, DOCX etc -->
+              <field name="file_type"
+                     string="File Type"
+                     readonly="1"/>
+
+              <field name="file"
+                     filename="filename"
+                     string="File"
+                     widget="binary"
+                     required="1"/>
+
+              <field name="filename"
+                     string="File Name"
+                     readonly="1"/>
+
+              <field name="file_url"
+                     string="Preview"
+                     widget="url"
+                     text="Preview"
+                     invisible="not file_url"
+                     readonly="1"/>
+
+              <field name="upload_date"
+                     string="Uploaded On"
+                     readonly="1"/>
+
+              <field name="uploaded_by"
+                     string="Uploaded By"
+                     readonly="1"/>
+
+              <field name="notes"
+                     string="Notes"
+                     optional="show"/>
+
+            </list>
+          </field>
+
+        </page>
+      </xpath>
+
+    </field>
+  </record>
+</odoo>
