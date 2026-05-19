@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ================================================================
+       DEDICATED MENU — appears in Project app top bar
+       alongside Projects | Tasks | Reporting | Configuration
+       ================================================================ -->
+  <record id="action_project_document_menu" model="ir.actions.act_window">
+    <field name="name">Project Documents</field>
+    <field name="res_model">project.document</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <menuitem id="menu_project_document"
+            name="Documents"
+            parent="project.menu_main_pm"
+            action="action_project_document_menu"
+            sequence="15"
+            groups="project.group_project_user"/>
+
+  <!-- ================================================================
+       PROJECT SETTINGS FORM — inject Documents tab + smart button
+       ================================================================ -->
+  <record id="view_project_project_form_documents" model="ir.ui.view">
+    <field name="name">project.project.form.documents</field>
+    <field name="model">project.project</field>
+    <field name="inherit_id" ref="project.edit_project"/>
+    <field name="arch" type="xml">
+
+      <!-- Smart button — inject before the project name field -->
+      <xpath expr="//field[@name='name']" position="before">
+        <div class="oe_button_box" name="button_box">
+          <button name="%(custom_project_document.action_project_document_menu)d"
+                  type="action"
+                  class="oe_stat_button"
+                  icon="fa-file-text-o"
+                  groups="project.group_project_user">
+            <field name="document_count"
+                   string="Documents"
+                   widget="statinfo"/>
+          </button>
+        </div>
+      </xpath>
+
+      <!-- Documents tab — appended at bottom of sheet -->
+      <xpath expr="//sheet" position="inside">
+        <notebook>
+          <page string="Documents"
+                name="documents_tab"
+                groups="project.group_project_manager">
+
+            <field name="document_ids"
+                   mode="list"
+                   context="{'default_project_id': id}">
+
+              <list editable="bottom" create="1" delete="1">
+                <field name="name"
+                       string="Document Name"
+                       placeholder="e.g. Contract, Blueprint"
+                       required="1"/>
+                <field name="document_type" string="Category" required="1"/>
+                <field name="file_type" string="File Type" readonly="1"/>
+                <field name="file" filename="filename" string="File"
+                       widget="binary" required="1"/>
+                <field name="filename" string="File Name" readonly="1"/>
+                <field name="file_url" string="Preview" widget="url"
+                       text="Preview" invisible="not file_url" readonly="1"/>
+                <field name="upload_date" string="Uploaded On" readonly="1"/>
+                <field name="uploaded_by" string="Uploaded By" readonly="1"/>
+                <field name="notes" string="Notes" optional="show"/>
+              </list>
+            </field>
+
+          </page>
+        </notebook>
+      </xpath>
+
+    </field>
+  </record>
+
+</odoo>
