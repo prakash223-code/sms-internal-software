@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="expense_category_stationery" model="custom.expense.category">
+        <field name="name">Stationery</field>
+        <field name="description">Office stationery and supplies</field>
+    </record>
+
+    <record id="expense_category_snacks" model="custom.expense.category">
+        <field name="name">Office Snacks</field>
+        <field name="description">Tea, coffee, snacks for office use</field>
+    </record>
+
+    <record id="expense_category_travel" model="custom.expense.category">
+        <field name="name">Travel</field>
+        <field name="description">Travel and transportation expenses</field>
+    </record>
+
+    <record id="expense_category_utilities" model="custom.expense.category">
+        <field name="name">Utilities</field>
+        <field name="description">Internet, electricity, and utility bills</field>
+    </record>
+
+    <record id="expense_category_software" model="custom.expense.category">
+        <field name="name">Software / Subscriptions</field>
+        <field name="description">Software licenses and online subscriptions</field>
+    </record>
+
+    <record id="expense_category_misc" model="custom.expense.category">
+        <field name="name">Miscellaneous</field>
+        <field name="description">Other office overhead expenses</field>
+    </record>
+
+</odoo>

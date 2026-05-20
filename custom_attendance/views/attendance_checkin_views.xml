@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_attendance_checkin_wizard_form" model="ir.ui.view">
+        <field name="name">attendance.checkin.wizard.form</field>
+        <field name="model">attendance.checkin.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Attendance">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="employee_id" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <field name="status" readonly="1" widget="badge"
+                               decoration-success="status == 'in'"
+                               decoration-danger="status == 'out'"
+                               decoration-info="status == 'done'"/>
+                    </group>
+
+                    <!-- Currently checked in -->
+                    <group string="Session" invisible="status != 'in'">
+                        <field name="last_check_in" readonly="1"/>
+                        <field name="is_late" readonly="1"/>
+                        <field name="late_minutes" readonly="1"
+                               invisible="not is_late"/>
+                    </group>
+
+                    <!-- Completed today -->
+                    <group string="Today's Attendance" invisible="status != 'done'">
+                        <field name="last_check_in" string="Checked In" readonly="1"/>
+                        <field name="last_check_out" string="Checked Out" readonly="1"/>
+                        <field name="is_late" readonly="1"/>
+                        <field name="late_minutes" readonly="1"
+                               invisible="not is_late"/>
+                    </group>
+
+                    <!-- Completed today — info banner -->
+                    <div class="alert alert-info" role="alert"
+                         invisible="status != 'done'">
+                        Attendance for today is complete. Check-in is not
+                        permitted again until tomorrow.
+                    </div>
+
+                    <footer>
+                        <button name="action_toggle"
+                                type="object"
+                                class="btn-success"
+                                string="Check In"
+                                invisible="status != 'out'"/>
+                        <button name="action_toggle"
+                                type="object"
+                                class="btn-warning"
+                                string="Check Out"
+                                invisible="status != 'in'"/>
+                        <button string="Close"
+                                class="btn-secondary"
+                                special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_attendance_checkin_wizard" model="ir.actions.act_window">
+        <field name="name">Check In / Check Out</field>
+        <field name="res_model">attendance.checkin.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_attendance_checkin_wizard_form"/>
+    </record>
+
+</odoo>

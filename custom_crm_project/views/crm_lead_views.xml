@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Inherit the standard CRM opportunity form.
+        Changes:
+          1. "Convert to Project" button — HR/Manager only, only on Won stage,
+             disappears permanently after conversion
+          2. Converted status banner — appears after conversion
+          3. Smart button — links to the created project
+          4. Hidden field injection — is_converted available for all expressions
+          5. Read-only lock — all core CRM fields become readonly after conversion
+             (view-level enforcement; ORM-level enforcement is in crm_lead.py)
+    -->
+    <record id="crm_lead_view_form_convert" model="ir.ui.view">
+        <field name="name">crm.lead.form.convert.project</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Convert button in header ─────────────────────────────────
+                 Conditions:
+                   - groups="hr.group_hr_user" → only HR / Manager see it
+                   - invisible="is_converted"   → hidden permanently after conversion
+                 The button's Python method also checks stage_id.is_won and raises
+                 a clear UserError if clicked on a non-Won opportunity.
+            -->
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_convert_to_project"
+                    string="Convert to Project"
+                    type="object"
+                    class="btn-primary"
+                    invisible="is_converted"
+                    groups="hr.group_hr_user"
+                    confirm="Are you sure you want to convert this Won opportunity into a project? This action cannot be undone."
+                />
+            </xpath>
+
+            <!-- 2. Status banner ────────────────────────────────────────────
+                 Shown above the sheet after conversion. -->
+            <xpath expr="//sheet" position="before">
+                <div
+                    class="alert alert-success mb-0"
+                    role="alert"
+                    invisible="not is_converted">
+                    <i class="fa fa-check-circle me-1"/>
+                    This opportunity has been <strong>converted to a project</strong>
+                    and is now read-only.
+                </div>
+            </xpath>
+
+            <!-- 3. Smart button — links to the project ──────────────────────
+                 Only visible after conversion. -->
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button
+                    name="action_open_linked_project"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-folder-open"
+                    invisible="not is_converted">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="project_count"/>
+                        </span>
+                        <span class="o_stat_text">Project</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- 4. Inject hidden fields so invisible/readonly expressions work ── -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="is_converted" invisible="1"/>
+            </xpath>
+
+            <!-- 5. Read-only lock on core CRM fields after conversion ────────
+                 We target each field that a user could otherwise edit.
+                 The readonly attribute uses Odoo 17+ inline expression syntax.
+            -->
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="readonly">is_converted</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="readonly">is_converted</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='stage_id']" position="attributes">
+                <attribute name="readonly">is_converted</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="readonly">is_converted</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='team_id']" position="attributes">
+                <attribute name="readonly">is_converted</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='expected_revenue']" position="attributes">
+                <attribute name="readonly">is_converted</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='probability']" position="attributes">
+                <attribute name="readonly">is_converted</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

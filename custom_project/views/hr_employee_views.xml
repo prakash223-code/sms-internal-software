@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_employee_form_team_lead" model="ir.ui.view">
+        <field name="name">hr.employee.form.team.lead</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <!--
+              Place the Team Lead toggle in the Work Information tab,
+              next to the Job Position field so it's contextually clear.
+              Only HR and Manager can see and edit this field.
+            -->
+            <xpath expr="//field[@name='job_id']" position="after">
+                <field name="is_team_lead"
+                       string="Team Lead"
+                       widget="boolean_toggle"
+                       groups="hr.group_hr_user"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

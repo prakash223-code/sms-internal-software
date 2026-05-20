@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_expense_reject_wizard_form" model="ir.ui.view">
+        <field name="name">custom.expense.reject.wizard.form</field>
+        <field name="model">custom.expense.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Expense">
+                <group>
+                    <field name="expense_id" readonly="1"/>
+                    <field name="rejection_reason"
+                           placeholder="Enter reason for rejection (mandatory)..."
+                           required="1"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_reject"
+                            string="Confirm Rejection"
+                            type="object"
+                            class="btn-danger"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

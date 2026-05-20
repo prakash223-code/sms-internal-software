@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_employee_defaults_button" model="ir.ui.view">
+        <field name="name">hr.employee.defaults.button</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Setup Permissions button in form header (HR+ only) -->
+            <xpath expr="//header" position="inside">
+                <button
+                        name="action_setup_employee_permissions"
+                        string="Setup Permissions"
+                        type="object"
+                        class="btn-secondary"
+                        groups="hr.group_hr_user"
+                        help="Assign permissions based on this employee's System Role"/>
+            </xpath>
+
+            <!-- System Role dropdown placed BEFORE user_id to stay in the same group grid cleanly -->
+            <xpath expr="//field[@name='user_id']" position="before">
+                <field
+                        name="employee_role"
+                        string="System Role"
+                        groups="hr.group_hr_user"/>
+            </xpath>
+
+            <!-- Hide the empty properties field from employee form -->
+            <xpath expr="//field[@name='employee_properties']" position="replace"/>
+
+        </field>
+    </record>
+</odoo>

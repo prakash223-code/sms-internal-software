@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_hr_employee_form_custom_id" model="ir.ui.view">
+    <field name="name">hr.employee.form.custom.id</field>
+    <field name="model">hr.employee</field>
+    <field name="inherit_id" ref="hr.view_employee_form"/>
+    <field name="arch" type="xml">
+
+      <!-- ============================================================
+           1. HEADER — Status bar + Confirm / Reset to Draft buttons
+           ============================================================ -->
+      <xpath expr="//header" position="inside">
+
+        <!-- Confirm Employee: visible only in Draft state -->
+        <button name="action_confirm"
+                string="Confirm Employee"
+                type="object"
+                class="btn-primary"
+                invisible="state != 'draft'"
+                confirm="Are you sure you want to confirm this employee?
+An Employee ID will be generated and the record will be locked.
+Make sure the Department is correct before proceeding."/>
+
+        <!-- Reset to Draft: visible only in Confirmed state (Manager only via Python) -->
+        <button name="action_reset_to_draft"
+                string="Reset to Draft"
+                type="object"
+                class="btn-secondary"
+                invisible="state != 'confirmed'"
+                confirm="Reset this employee to Draft? Their Employee ID will be cleared
+and a new one will be generated on re-confirmation.
+This is only allowed if no payroll, attendance, or leave data exists."/>
+
+        <!-- Status bar -->
+        <field name="state"
+               widget="statusbar"
+               statusbar_visible="draft,confirmed"/>
+
+      </xpath>
+
+      <!-- ============================================================
+           2. DRAFT WARNING BANNER
+           Shown clearly so HR knows the record is not yet active.
+           ============================================================ -->
+      <xpath expr="//sheet" position="before">
+        <div class="alert alert-warning mb-0"
+             role="alert"
+             invisible="state != 'draft'">
+          <strong>Draft Record</strong> — This employee has not been confirmed yet.
+          No Employee ID has been generated. Please verify all details
+          (especially the <strong>Department</strong>) before clicking
+          <strong>Confirm Employee</strong>.
+          Draft records can be freely deleted if created by mistake.
+        </div>
+      </xpath>
+
+      <!-- ============================================================
+           3. EMPLOYEE ID — shown after name field
+           In Draft: shows placeholder. In Confirmed: shows generated ID.
+           ============================================================ -->
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="employee_code"
+               string="Employee ID"
+               readonly="1"
+               widget="badge"
+               placeholder="Generated on confirmation"
+               invisible="state != 'confirmed'"/>
+        <span invisible="state != 'draft'"
+              class="text-muted fst-italic">
+          Employee ID will be generated after confirmation.
+        </span>
+      </xpath>
+
+      <!-- ============================================================
+           4. DEPARTMENT — lock after confirmation
+           HR cannot change the department once the ID is generated
+           because the ID encodes the department code.
+           ============================================================ -->
+      <xpath expr="//field[@name='department_id']" position="attributes">
+        <attribute name="readonly">state == 'confirmed'</attribute>
+        <attribute name="help">Department cannot be changed after confirmation
+because the Employee ID is generated from the department code.</attribute>
+      </xpath>
+
+    </field>
+  </record>
+</odoo>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="expense_rule_employee_own" model="ir.rule">
+        <field name="name">Expense: Employee sees own records only</field>
+        <field name="model_id" ref="model_custom_expense"/>
+        <field name="domain_force">[('submitted_by.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="expense_rule_hr_own" model="ir.rule">
+        <field name="name">Expense: HR sees own records only</field>
+        <field name="model_id" ref="model_custom_expense"/>
+        <field name="domain_force">[('submitted_by.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="expense_rule_manager_all" model="ir.rule">
+        <field name="name">Expense: Manager sees all records</field>
+        <field name="model_id" ref="model_custom_expense"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('hr.group_hr_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+</odoo>

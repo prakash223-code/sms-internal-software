@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_custom_expense_employee,custom.expense employee,model_custom_expense,base.group_user,1,1,1,0
+access_custom_expense_hr,custom.expense hr,model_custom_expense,hr.group_hr_user,1,1,1,0
+access_custom_expense_manager,custom.expense manager,model_custom_expense,hr.group_hr_manager,1,1,1,1
+access_custom_expense_category_employee,custom.expense.category employee,model_custom_expense_category,base.group_user,1,0,0,0
+access_custom_expense_category_hr,custom.expense.category hr,model_custom_expense_category,hr.group_hr_user,1,1,1,0
+access_custom_expense_category_manager,custom.expense.category manager,model_custom_expense_category,hr.group_hr_manager,1,1,1,1
+access_expense_reject_wizard_employee,custom.expense.reject.wizard employee,model_custom_expense_reject_wizard,base.group_user,1,1,1,1
+access_expense_reject_wizard_hr,custom.expense.reject.wizard hr,model_custom_expense_reject_wizard,hr.group_hr_user,1,1,1,1
+access_expense_reject_wizard_manager,custom.expense.reject.wizard manager,model_custom_expense_reject_wizard,hr.group_hr_manager,1,1,1,1

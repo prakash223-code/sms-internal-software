@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Inherit the standard Project form.
+        Adds:
+          1. Project Number displayed prominently near the project name
+          2. Smart button linking back to the source CRM query
+    -->
+    <record id="project_form_view_crm_link" model="ir.ui.view">
+        <field name="name">project.project.form.crm.link</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Project Number — shown next to the project name as a badge-style field -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field
+                    name="project_number"
+                    readonly="1"
+                    placeholder="—"
+                    widget="char"
+                    class="text-muted"
+                    invisible="not project_number"
+                />
+            </xpath>
+
+            <!-- 2. Smart button — links back to the originating CRM query.
+                 Only visible when the project was created from a CRM query. -->
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button
+                    name="action_open_source_query"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-commenting"
+                    invisible="not crm_lead_id">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">1</span>
+                        <span class="o_stat_text">Source Query</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- 3. Hidden fields needed by invisible conditions above -->
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="crm_lead_id" invisible="1"/>
+                <field name="project_number" invisible="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

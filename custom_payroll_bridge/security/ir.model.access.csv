@@ -1,0 +1,20 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_payslip_employee,hr.payslip employee read,bi_hr_payroll.model_hr_payslip,base.group_user,1,0,0,0
+access_hr_payslip_line_employee,hr.payslip.line employee read,bi_hr_payroll.model_hr_payslip_line,base.group_user,1,0,0,0
+access_hr_payslip_input_employee,hr.payslip.input employee read,bi_hr_payroll.model_hr_payslip_input,base.group_user,1,0,0,0
+access_hr_payslip_worked_days_employee,hr.payslip.worked_days employee read,bi_hr_payroll.model_hr_payslip_worked_days,base.group_user,1,0,0,0
+access_hr_version_employee,hr.version employee read,hr.model_hr_version,base.group_user,1,0,0,0
+access_hr_contract_type_employee,hr.contract.type employee read,hr.model_hr_contract_type,base.group_user,1,0,0,0
+access_hr_payslip_hr,hr.payslip hr full,bi_hr_payroll.model_hr_payslip,hr.group_hr_user,1,1,1,1
+access_hr_payslip_line_hr,hr.payslip.line hr full,bi_hr_payroll.model_hr_payslip_line,hr.group_hr_user,1,1,1,1
+access_hr_payslip_input_hr,hr.payslip.input hr full,bi_hr_payroll.model_hr_payslip_input,hr.group_hr_user,1,1,1,1
+access_hr_payslip_worked_days_hr,hr.payslip.worked_days hr full,bi_hr_payroll.model_hr_payslip_worked_days,hr.group_hr_user,1,1,1,1
+access_hr_version_hr,hr.version hr full,hr.model_hr_version,hr.group_hr_user,1,1,1,1
+access_hr_contract_type_hr,hr.contract.type hr full,hr.model_hr_contract_type,hr.group_hr_user,1,1,1,1
+access_hr_payslip_manager,hr.payslip manager full,bi_hr_payroll.model_hr_payslip,hr.group_hr_manager,1,1,1,1
+access_hr_payslip_line_manager,hr.payslip.line manager full,bi_hr_payroll.model_hr_payslip_line,hr.group_hr_manager,1,1,1,1
+access_hr_payslip_input_manager,hr.payslip.input manager full,bi_hr_payroll.model_hr_payslip_input,hr.group_hr_manager,1,1,1,1
+access_hr_payslip_worked_days_manager,hr.payslip.worked_days manager full,bi_hr_payroll.model_hr_payslip_worked_days,hr.group_hr_manager,1,1,1,1
+access_hr_version_manager,hr.version manager full,hr.model_hr_version,hr.group_hr_manager,1,1,1,1
+access_hr_contract_type_manager,hr.contract.type manager full,hr.model_hr_contract_type,hr.group_hr_manager,1,1,1,1
+access_res_partner_bank_employee,res.partner.bank employee read,base.model_res_partner_bank,base.group_user,1,0,0,0

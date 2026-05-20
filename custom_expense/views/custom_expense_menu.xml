@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_custom_expense_root"
+        name="Expenses"
+        sequence="50"/>
+
+    <menuitem
+        id="menu_custom_expense_my"
+        name="My Expenses"
+        parent="menu_custom_expense_root"
+        action="action_custom_expense_hr"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_custom_expense_all"
+        name="All Expenses"
+        parent="menu_custom_expense_root"
+        action="action_custom_expense_manager"
+        sequence="20"
+        groups="hr.group_hr_manager"/>
+
+    <menuitem
+        id="menu_custom_expense_config"
+        name="Configuration"
+        parent="menu_custom_expense_root"
+        sequence="90"
+        groups="hr.group_hr_manager"/>
+
+    <menuitem
+        id="menu_custom_expense_categories"
+        name="Expense Categories"
+        parent="menu_custom_expense_config"
+        action="action_custom_expense_category"
+        sequence="10"
+        groups="hr.group_hr_manager"/>
+
+</odoo>
