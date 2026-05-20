@@ -23,6 +23,7 @@
         'views/monthly_summary_views.xml',
         'views/attendance_checkin_views.xml',
         'views/company_holiday_views.xml',
+        'views/attendance_batch_wizard_views.xml',
         'views/attendance_menu.xml',
     ],
     'post_init_hook': 'post_init_hook',

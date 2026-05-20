@@ -8,3 +8,5 @@ access_monthly_summary_manager,attendance.monthly.summary.manager,model_attendan
 access_attendance_checkin_wizard,attendance.checkin.wizard,model_attendance_checkin_wizard,base.group_user,1,1,1,1
 access_company_holiday_manager,company.holiday manager,model_company_holiday,hr.group_hr_user,1,1,1,1
 access_company_holiday_employee,company.holiday employee,model_company_holiday,base.group_user,1,0,0,0
+access_attendance_batch_wizard_hr,attendance.summary.batch.wizard.hr,model_attendance_summary_batch_wizard,hr.group_hr_user,1,1,1,1
+access_attendance_batch_wizard_manager,attendance.summary.batch.wizard.manager,model_attendance_summary_batch_wizard,hr_attendance.group_hr_attendance_manager,1,1,1,1
