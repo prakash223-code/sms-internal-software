@@ -6,9 +6,13 @@
         <field name="code">ABSENT_DED</field>
         <field name="sequence" eval="110"/>
         <field name="category_id" ref="bi_hr_payroll.DED"/>
+        <!-- none = always evaluate; amount_python handles the 0 case -->
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = -(contract.wage / 30.0 * (inputs.ABSENT_DAYS.amount if inputs.ABSENT_DAYS else 0.0))</field>
+        <field name="amount_python_compute">
+absent_days = inputs.ABSENT_DAYS.amount if inputs.ABSENT_DAYS else 0.0
+result = -(contract.wage / 30.0 * absent_days)
+        </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
 
