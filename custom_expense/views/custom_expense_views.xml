@@ -154,31 +154,6 @@
 
                                 </div>
 
-                                <!-- Quick Status Indicator -->
-                                <div>
-
-                                    <span invisible="state != 'approved'"
-                                          class="badge bg-success">
-                                        Approved
-                                    </span>
-
-                                    <span invisible="state != 'submitted'"
-                                          class="badge bg-warning text-dark">
-                                        Waiting
-                                    </span>
-
-                                    <span invisible="state != 'rejected'"
-                                          class="badge bg-danger">
-                                        Rejected
-                                    </span>
-
-                                    <span invisible="state != 'draft'"
-                                          class="badge bg-secondary">
-                                        Draft
-                                    </span>
-
-                                </div>
-
                             </div>
 
                         </div>
