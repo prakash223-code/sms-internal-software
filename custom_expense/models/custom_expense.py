@@ -73,7 +73,7 @@ class CustomExpense(models.Model):
         help='Attach bill or invoice proof. Mandatory before submission.',
     )
     attachment_count = fields.Integer(
-        string='Attachment Count',
+        string='Expense Attachments',
         compute='_compute_attachment_count',
     )
 
