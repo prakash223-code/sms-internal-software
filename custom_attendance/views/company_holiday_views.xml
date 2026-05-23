@@ -7,12 +7,17 @@
         <field name="model">company.holiday</field>
         <field name="arch" type="xml">
             <list string="Company Holidays"
-                  decoration-info="holiday_type == 'public'"
-                  decoration-warning="holiday_type == 'event'"
+                  decoration-success="is_working_override == True"
+                  decoration-info="holiday_type == 'public' and not is_working_override"
+                  decoration-warning="holiday_type == 'event' and not is_working_override"
                   decoration-danger="holiday_type == 'emergency'">
                 <field name="date"/>
+                <field name="day_label" string="Day" readonly="1"/>
                 <field name="name"/>
-                <field name="holiday_type"/>
+                <field name="holiday_type"
+                       invisible="is_working_override"/>
+                <field name="is_working_override"
+                       string="Compensatory Working Day"/>
                 <field name="description" optional="hide"/>
             </list>
         </field>
@@ -23,22 +28,54 @@
         <field name="name">company.holiday.form</field>
         <field name="model">company.holiday</field>
         <field name="arch" type="xml">
-            <form string="Company Holiday">
+            <form string="Company Holiday / Working Day">
                 <sheet>
                     <div class="oe_title">
-                        <h1><field name="name" placeholder="e.g. Diwali, Republic Day..."/></h1>
+                        <h1>
+                            <field name="name"
+                                   placeholder="e.g. Power Shutdown, Diwali, Working Saturday..."/>
+                        </h1>
                     </div>
+
+                    <!-- Working day override banner -->
+                    <div class="alert alert-success" role="alert"
+                         invisible="not is_working_override">
+                        <strong>Compensatory Working Day</strong> —
+                        This Saturday will be treated as a
+                        <strong>working day</strong> for this date only.
+                        Employees will be allowed to check in.
+                    </div>
+
+                    <!-- Holiday banner -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="is_working_override">
+                        <strong>Holiday</strong> —
+                        Employees will <strong>not</strong> be allowed
+                        to check in on this date.
+                    </div>
+
                     <group>
                         <group>
                             <field name="date"/>
-                            <field name="holiday_type"/>
+                            <field name="day_label" string="Day" readonly="1"/>
                         </group>
                         <group>
                             <field name="active"/>
                         </group>
                     </group>
+
+                    <group string="Type">
+                        <field name="is_working_override"
+                               string="Compensatory Working Day (Saturday only)"/>
+                        <!-- Holiday type only shown for actual holidays -->
+                        <field name="holiday_type"
+                               invisible="is_working_override"
+                               required="not is_working_override"/>
+                    </group>
+
                     <group string="Notes">
-                        <field name="description" nolabel="1"/>
+                        <field name="description" nolabel="1"
+                               placeholder="e.g. Monthly power shutdown compensation..."/>
                     </group>
                 </sheet>
             </form>
@@ -53,10 +90,15 @@
             <search string="Search Holidays">
                 <field name="name"/>
                 <field name="date"/>
+                <separator/>
                 <filter string="Public Holidays" name="filter_public"
-                        domain="[('holiday_type','=','public')]"/>
+                        domain="[('holiday_type','=','public'),
+                                 ('is_working_override','=',False)]"/>
                 <filter string="Company Events" name="filter_event"
-                        domain="[('holiday_type','=','event')]"/>
+                        domain="[('holiday_type','=','event'),
+                                 ('is_working_override','=',False)]"/>
+                <filter string="Compensatory Working Days" name="filter_override"
+                        domain="[('is_working_override','=',True)]"/>
                 <separator/>
                 <filter string="Group by Type" name="group_type"
                         context="{'group_by': 'holiday_type'}"/>
@@ -78,9 +120,13 @@
             </p>
             <p>
                 Add public holidays, company events, or emergency closures.
-                Employees will not be marked absent on these days.
-                2nd and 4th Saturdays are automatically treated as holidays
-                based on company policy — no entry needed for those.
+                Employees cannot check in on these days.
+            </p>
+            <p>
+                To declare a <strong>compensatory working Saturday</strong>
+                (e.g. after a power shutdown holiday), create a record
+                for that Saturday and enable
+                <strong>"Compensatory Working Day"</strong>.
             </p>
         </field>
     </record>

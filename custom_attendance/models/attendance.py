@@ -36,12 +36,12 @@ class CustomAttendance(models.Model):
 
     @api.depends('check_in', 'employee_id')
     def _compute_is_late(self):
-        LATE_HOUR = 9
+        LATE_HOUR   = 9
         LATE_MINUTE = 30  # After 09:30 AM = late
 
         for record in self:
             if not record.check_in or not record.employee_id:
-                record.is_late = False
+                record.is_late    = False
                 record.late_minutes = 0
                 continue
 
@@ -51,24 +51,22 @@ class CustomAttendance(models.Model):
             except pytz.UnknownTimeZoneError:
                 tz = pytz.timezone('Asia/Kolkata')
 
-            # check_in is stored in UTC, convert to employee local time
             check_in_utc = record.check_in
             if check_in_utc.tzinfo is None:
                 check_in_utc = pytz.utc.localize(check_in_utc)
 
             check_in_local = check_in_utc.astimezone(tz)
 
-            # Define late threshold in local time (same date as check-in)
             late_threshold = tz.localize(
                 datetime.combine(check_in_local.date(), time(LATE_HOUR, LATE_MINUTE))
             )
 
             if check_in_local > late_threshold:
-                record.is_late = True
-                delta = check_in_local - late_threshold
+                record.is_late      = True
+                delta               = check_in_local - late_threshold
                 record.late_minutes = int(delta.total_seconds() // 60)
             else:
-                record.is_late = False
+                record.is_late      = False
                 record.late_minutes = 0
 
     # ------------------------------------------------------------------
@@ -99,8 +97,9 @@ class CustomAttendance(models.Model):
         """
         Single entry point for employee check-in / check-out.
         Rules:
+          - If today is a company holiday or 2nd/4th Saturday → block check-in.
           - If open session exists → check out.
-          - If no open session → check in, BUT only if no completed session exists today.
+          - If no open session → check in, only if no completed session exists today.
         """
         employee = self._get_current_employee()
         if not employee:
@@ -110,29 +109,44 @@ class CustomAttendance(models.Model):
             ))
 
         now = fields.Datetime.now()
-        open_attendance = self._get_open_session(employee)
 
-        if open_attendance:
-            # ── CHECKOUT ──
-            open_attendance.write({'check_out': now})
-            return {
-                'status': 'checked_out',
-                'check_out': now,
-                'employee': employee.name,
-                'is_late': open_attendance.is_late,
-                'late_minutes': open_attendance.late_minutes,
-            }
-
-        # ── PRE-CHECKIN: block if already completed a cycle today ──
+        # ── Resolve employee local date ────────────────────────────────
         tz_name = employee.tz or 'Asia/Kolkata'
         try:
             tz = pytz.timezone(tz_name)
         except pytz.UnknownTimeZoneError:
             tz = pytz.timezone('Asia/Kolkata')
 
-        now_utc = pytz.utc.localize(now)
-        today_local = now_utc.astimezone(tz).date()
+        now_utc       = pytz.utc.localize(now)
+        today_local   = now_utc.astimezone(tz).date()
 
+        # ── HOLIDAY CHECK — block check-in only, allow check-out ──────
+        open_attendance = self._get_open_session(employee)
+
+        if not open_attendance:
+            # Only block check-in, not check-out (employee already inside)
+            Holiday = self.env['company.holiday'].sudo()
+            if Holiday.is_holiday(today_local):
+                # Build a friendly message explaining WHY it's a holiday
+                holiday_name = self._get_holiday_name(today_local)
+                raise UserError(_(
+                    'Check-in is not allowed today.\n\n'
+                    'Reason: %s\n\n'
+                    'Enjoy your day off!'
+                ) % holiday_name)
+
+        if open_attendance:
+            # ── CHECKOUT ──────────────────────────────────────────────
+            open_attendance.write({'check_out': now})
+            return {
+                'status':       'checked_out',
+                'check_out':    now,
+                'employee':     employee.name,
+                'is_late':      open_attendance.is_late,
+                'late_minutes': open_attendance.late_minutes,
+            }
+
+        # ── PRE-CHECKIN: block if already completed a cycle today ──────
         today_start_utc = tz.localize(
             datetime.combine(today_local, time(0, 0, 0))
         ).astimezone(pytz.utc).replace(tzinfo=None)
@@ -143,9 +157,9 @@ class CustomAttendance(models.Model):
 
         completed_today = self.search([
             ('employee_id', '=', employee.id),
-            ('check_in', '>=', today_start_utc),
-            ('check_in', '<=', today_end_utc),
-            ('check_out', '!=', False),
+            ('check_in',    '>=', today_start_utc),
+            ('check_in',    '<=', today_end_utc),
+            ('check_out',   '!=', False),
         ], limit=1)
 
         if completed_today:
@@ -154,15 +168,15 @@ class CustomAttendance(models.Model):
                 'Check-in is allowed only once per day.'
             ))
 
-        # ── CHECKIN ──
+        # ── CHECKIN ───────────────────────────────────────────────────
         new_record = self.create({
             'employee_id': employee.id,
-            'check_in': now,
+            'check_in':    now,
         })
         return {
-            'status': 'checked_in',
-            'check_in': now,
-            'employee': employee.name,
+            'status':       'checked_in',
+            'check_in':     now,
+            'employee':     employee.name,
             'attendance_id': new_record.id,
         }
 
@@ -170,14 +184,31 @@ class CustomAttendance(models.Model):
     # HELPERS
     # ------------------------------------------------------------------
 
-    def ensure_one_employee_context(self):
-        """Verify the calling user is linked to an employee."""
-        employee = self._get_current_employee()
-        if not employee:
-            raise UserError(_(
-                'No employee record is linked to your user account. '
-                'Please contact HR or the system administrator.'
-            ))
+    def _get_holiday_name(self, check_date):
+        """
+        Returns a human-readable reason string for why today is a holiday.
+        Covers declared holidays and 2nd/4th Saturday rule.
+        """
+        from datetime import date as date_type
+        from odoo.addons.custom_attendance.models.company_holiday import CompanyHoliday
+
+        # 2nd / 4th Saturday check
+        if check_date.weekday() == 5:
+            from odoo.addons.custom_attendance.models.company_holiday import CompanyHoliday as CH
+            occ = CH._saturday_occurrence(check_date)
+            if occ in (2, 4):
+                ordinal = {2: '2nd', 4: '4th'}.get(occ, str(occ))
+                return f'{ordinal} Saturday — Weekly Off'
+
+        # Declared holiday record
+        holiday = self.env['company.holiday'].sudo().search([
+            ('date',   '=', check_date),
+            ('active', '=', True),
+        ], limit=1)
+        if holiday:
+            return f'{holiday.name} ({dict(self.env["company.holiday"]._fields["holiday_type"].selection).get(holiday.holiday_type, "")})'
+
+        return 'Company Holiday'
 
     def _get_current_employee(self):
         return self.env['hr.employee'].search(
@@ -188,7 +219,7 @@ class CustomAttendance(models.Model):
         """Return the open (no check_out) attendance record for an employee, if any."""
         return self.search([
             ('employee_id', '=', employee.id),
-            ('check_out', '=', False),
+            ('check_out',   '=', False),
         ], limit=1)
 
     # ------------------------------------------------------------------
@@ -210,58 +241,47 @@ class CustomAttendance(models.Model):
             except pytz.UnknownTimeZoneError:
                 tz = pytz.timezone('Asia/Kolkata')
 
-            # Build 19:00 local time for the check-in date
             check_in_utc = attendance.check_in
             if check_in_utc.tzinfo is None:
                 check_in_utc = pytz.utc.localize(check_in_utc)
 
-            check_in_local = check_in_utc.astimezone(tz)
-            auto_checkout_local = tz.localize(
+            check_in_local        = check_in_utc.astimezone(tz)
+            auto_checkout_local   = tz.localize(
                 datetime.combine(check_in_local.date(), time(19, 0))
             )
+            auto_checkout_utc     = auto_checkout_local.astimezone(pytz.utc).replace(tzinfo=None)
 
-            # Convert back to UTC for storage
-            auto_checkout_utc = auto_checkout_local.astimezone(pytz.utc).replace(tzinfo=None)
-
-            # Only auto-checkout if 19:00 has already passed
             now_utc = fields.Datetime.now()
             if now_utc >= auto_checkout_utc:
                 attendance.write({
-                    'check_out': auto_checkout_utc,
+                    'check_out':     auto_checkout_utc,
                     'auto_checkout': True,
                 })
 
     # ------------------------------------------------------------------
-    # UTILITY: get present days for a given employee + month/year
-    # Used by monthly summary computation
+    # UTILITY: get present days / late days for monthly summary
     # ------------------------------------------------------------------
 
     @api.model
     def get_present_days(self, employee_id, year, month):
-        """
-        Returns a set of dates (date objects) on which the employee was present.
-        Multiple sessions on the same day count as ONE present day.
-        Only Monday–Saturday are considered (Sunday excluded).
-        """
         import calendar
         from datetime import date
 
-        # Build UTC range for the full month
         first_day = datetime(year, month, 1, 0, 0, 0)
         last_day_num = calendar.monthrange(year, month)[1]
-        last_day = datetime(year, month, last_day_num, 23, 59, 59)
+        last_day  = datetime(year, month, last_day_num, 23, 59, 59)
 
         attendances = self.search_read(
             domain=[
                 ('employee_id', '=', employee_id),
-                ('check_in', '>=', first_day),
-                ('check_in', '<=', last_day),
+                ('check_in',    '>=', first_day),
+                ('check_in',    '<=', last_day),
             ],
             fields=['check_in', 'employee_id'],
         )
 
         employee = self.env['hr.employee'].browse(employee_id)
-        tz_name = employee.tz or 'Asia/Kolkata'
+        tz_name  = employee.tz or 'Asia/Kolkata'
         try:
             tz = pytz.timezone(tz_name)
         except pytz.UnknownTimeZoneError:
@@ -274,26 +294,22 @@ class CustomAttendance(models.Model):
                 check_in_utc = pytz.utc.localize(check_in_utc)
             local_date = check_in_utc.astimezone(tz).date()
 
-            # Exclude Sundays (weekday() == 6)
-            if local_date.weekday() != 6:
+            if local_date.weekday() != 6:   # exclude Sundays
                 present_dates.add(local_date)
 
         return present_dates
 
     @api.model
     def get_late_days(self, employee_id, year, month):
-        """
-        Returns count of late check-ins for the given employee/month.
-        """
         import calendar
 
-        first_day = datetime(year, month, 1, 0, 0, 0)
+        first_day    = datetime(year, month, 1, 0, 0, 0)
         last_day_num = calendar.monthrange(year, month)[1]
-        last_day = datetime(year, month, last_day_num, 23, 59, 59)
+        last_day     = datetime(year, month, last_day_num, 23, 59, 59)
 
         return self.search_count([
             ('employee_id', '=', employee_id),
-            ('check_in', '>=', first_day),
-            ('check_in', '<=', last_day),
-            ('is_late', '=', True),
+            ('check_in',    '>=', first_day),
+            ('check_in',    '<=', last_day),
+            ('is_late',     '=', True),
         ])
