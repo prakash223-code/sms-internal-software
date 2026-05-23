@@ -16,6 +16,7 @@
         'security/payroll_security.xml',
         'data/payroll_bridge_data.xml',
         'views/payslip_bridge_views.xml',
+        'views/payslip_kanban_fix.xml',
         'views/employee_payslip_menu.xml',
         'views/employee_defaults_view.xml',
     ],

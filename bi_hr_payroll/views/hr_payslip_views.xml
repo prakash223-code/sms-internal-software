@@ -87,7 +87,7 @@
 		<field name="arch" type="xml">
 			<kanban class="o_kanban_mobile">
 				<templates>
-					<t t-name="kanban-box">
+					<t t-name="card">
 						<div t-attf-class="oe_kanban_content oe_kanban_global_click">
 							<div class="row">
 								<div class="col-6">
@@ -130,7 +130,7 @@
 			</header>
 			<sheet>
 				<div class="oe_button_box" name="button_box">
-					<button class="oe_stat_button" name="payslip_line_count" type="object" icon="fa-money" invisible = "payslip_count == 0"> 
+					<button class="oe_stat_button" name="payslip_line_count" type="object" icon="fa-money" invisible = "payslip_count == 0">
 						<field name="payslip_count" widget="statinfo" string="Payslip" help="Payslip Computation Details"/>
 					</button>
 				</div>
