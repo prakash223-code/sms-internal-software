@@ -17,8 +17,10 @@
                 <field name="date" string="Date"/>
                 <field name="day_label" string="Day" readonly="1"/>
                 <field name="name" string="Name"/>
-                <field name="holiday_type" string="Type" invisible="is_working_override"/>
+                <field name="holiday_type" string="Type"
+                       invisible="is_working_override"/>
                 <field name="is_working_override" string="Compensatory Working Day"/>
+                <field name="active" column_invisible="1"/>
                 <field name="description" string="Notes" optional="hide"/>
             </list>
         </field>
@@ -37,45 +39,69 @@
                     <!-- Compensatory working day banner -->
                     <div invisible="not is_working_override"
                          class="o_att_banner o_att_banner_compensatory">
-                        <strong>Compensatory Working Day</strong> —
-                        This Saturday will be treated as a <strong>working day</strong>.
-                        Employees will be able to check in normally.
+                        <i class="fa fa-briefcase" title="Compensatory"/> <strong>Compensatory Working Day</strong> —
+                        This Saturday is treated as a working day.
+                        Employees can check in normally.
                     </div>
 
-                    <!-- Holiday banner -->
+                    <!-- Holiday / closure banner -->
                     <div invisible="is_working_override"
                          class="o_att_banner o_att_banner_holiday">
-                        <strong>Holiday / Closure</strong> —
-                        Employees will <strong>not</strong> be able to check in on this date.
+                        <i class="fa fa-ban" title="Holiday"/> <strong>Holiday / Closure</strong> —
+                        Employees will not be able to check in on this date.
                     </div>
 
-                    <!-- Name hero -->
-                    <div class="oe_title" style="margin-bottom: 16px;">
+                    <!-- Holiday name — main title -->
+                    <div class="oe_title mb-3">
                         <h1>
                             <field name="name"
                                    placeholder="e.g. Diwali, Power Shutdown, Working Saturday…"/>
                         </h1>
                     </div>
 
+                    <!-- Date + Day side by side as prominent cards -->
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="o_att_time_card flex-fill">
+                            <div class="o_att_time_sublabel">
+                                <i class="fa fa-calendar" title="Date"/> Date
+                            </div>
+                            <div class="o_att_time_value">
+                                <field name="date" nolabel="1"/>
+                            </div>
+                        </div>
+                        <div class="o_att_time_card o_att_day_card flex-fill">
+                            <div class="o_att_time_sublabel">
+                                <i class="fa fa-clock-o" title="Day of week"/> Day
+                            </div>
+                            <div class="o_att_day_value">
+                                <field name="day_label" readonly="1" nolabel="1"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="o_att_divider"/>
+
+                    <!-- Classification -->
                     <group>
-                        <group string="Date">
-                            <field name="date"/>
-                            <field name="day_label" string="Day of Week" readonly="1"/>
-                            <field name="active" string="Active"/>
-                        </group>
                         <group string="Classification">
                             <field name="is_working_override"
                                    string="Compensatory Working Day (Saturday only)"/>
-                            <field name="holiday_type" string="Holiday Type"
+                            <field name="holiday_type"
+                                   string="Holiday Type"
                                    invisible="is_working_override"
                                    required="not is_working_override"/>
                         </group>
+                        <group string="Settings">
+                            <field name="active" string="Active"/>
+                        </group>
                     </group>
 
+                    <!-- Notes -->
                     <group string="Notes">
                         <field name="description" nolabel="1"
                                placeholder="Optional — e.g. compensating for 12 May power shutdown…"/>
                     </group>
+
                 </sheet>
             </form>
         </field>
@@ -93,9 +119,11 @@
                 <field name="date"/>
                 <separator/>
                 <filter string="Public Holidays" name="filter_public"
-                        domain="[('holiday_type','=','public'),('is_working_override','=',False)]"/>
+                        domain="[('holiday_type','=','public'),
+                                 ('is_working_override','=',False)]"/>
                 <filter string="Company Events" name="filter_event"
-                        domain="[('holiday_type','=','event'),('is_working_override','=',False)]"/>
+                        domain="[('holiday_type','=','event'),
+                                 ('is_working_override','=',False)]"/>
                 <filter string="Compensatory Working Days" name="filter_override"
                         domain="[('is_working_override','=',True)]"/>
                 <filter string="Emergency Closures" name="filter_emergency"
@@ -120,8 +148,9 @@
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No holidays declared yet.</p>
             <p>Add public holidays, company events, or emergency closures here.</p>
-            <p>To declare a <strong>compensatory working Saturday</strong>, create a record
-               for that Saturday and enable <strong>Compensatory Working Day</strong>.</p>
+            <p>To declare a <strong>compensatory working Saturday</strong>, create a
+               record for that Saturday and enable
+               <strong>Compensatory Working Day</strong>.</p>
         </field>
     </record>
 

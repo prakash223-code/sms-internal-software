@@ -11,16 +11,22 @@
                     <!-- ── SETUP STATE ── -->
                     <div invisible="state != 'draft'">
 
-                        <!-- Step header -->
-                        <div class="o_att_wizard_step_header">
-                            <span class="o_att_wizard_step_badge o_att_wizard_badge_setup">1</span>
-                            <div>
-                                <span class="o_att_wizard_step_title">Select Period and Employees</span>
-                                <span class="o_att_wizard_step_subtitle">
-                                    Choose the month, year, and which employees to process.
-                                </span>
+                        <!-- Header: consistent with other views -->
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="o_att_avatar_circle">
+                                <i class="fa fa-cogs" title="Setup"/>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="o_att_emp_name">
+                                    Generate Monthly Summaries
+                                </div>
+                                <div class="o_att_period_sub">
+                                    Select period and employees to process
+                                </div>
                             </div>
                         </div>
+
+                        <div class="o_att_divider"/>
 
                         <group string="Period">
                             <field name="month" widget="selection"/>
@@ -32,40 +38,54 @@
                                    string="Recompute Existing Draft Summaries"/>
                         </group>
 
-                        <div class="o_att_employees_section">
-                            <div class="o_att_employees_section_label">Employees</div>
-                            <div class="o_att_employees_btn_row">
-                                <button name="action_select_all_employees" type="object"
-                                        string="Select All" class="btn btn-sm btn-outline-secondary"/>
-                                <button name="action_clear_employees" type="object"
-                                        string="Clear" class="btn btn-sm btn-outline-secondary ms-2"/>
-                            </div>
-                            <div class="o_att_employees_hint">
-                                Leave empty to generate for <strong>all active employees</strong>.
-                            </div>
-                            <field name="employee_ids" widget="many2many_tags"
-                                   placeholder="All active employees if empty…" nolabel="1"/>
+                        <!-- Employee selection -->
+                        <div class="o_att_section_label mt-3">Employees</div>
+
+                        <div class="d-flex gap-2 mb-2">
+                            <button name="action_select_all_employees"
+                                    type="object" string="Select All"
+                                    class="btn btn-sm btn-outline-secondary"/>
+                            <button name="action_clear_employees"
+                                    type="object" string="Clear"
+                                    class="btn btn-sm btn-outline-secondary"/>
                         </div>
+
+                        <div class="o_att_employees_hint mb-2">
+                            Leave empty to generate for
+                            <strong>all active employees</strong>.
+                        </div>
+
+                        <field name="employee_ids" widget="many2many_tags"
+                               placeholder="All active employees if empty…"
+                               nolabel="1"/>
 
                     </div>
 
-                    <!-- ── RESULTS STATE ── -->
+                    <!-- ── DONE STATE ── -->
                     <div invisible="state != 'done'">
 
-                        <!-- Step header — done -->
-                        <div class="o_att_wizard_step_header">
-                            <span class="o_att_wizard_step_badge o_att_wizard_badge_done">✓</span>
-                            <div>
-                                <span class="o_att_wizard_step_title">Generation Complete</span>
-                                <span class="o_att_wizard_step_subtitle">
-                                    Summaries have been created or updated successfully.
-                                </span>
+                        <!-- Header: success variant -->
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="o_att_avatar_circle o_att_avatar_success">
+                                <i class="fa fa-check" title="Complete"/>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="o_att_emp_name">
+                                    Generation Complete
+                                </div>
+                                <div class="o_att_period_sub">
+                                    Summaries created or updated successfully
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Total — full width card -->
+                        <div class="o_att_divider"/>
+
+                        <!-- Total — full width -->
                         <div class="o_att_result_total_card">
-                            <span class="o_att_result_total_label">Total Employees Processed</span>
+                            <span class="o_att_result_total_label">
+                                <i class="fa fa-users" title="Total"/> Total Employees Processed
+                            </span>
                             <div class="o_att_result_total_value">
                                 <field name="result_total" readonly="1" nolabel="1"/>
                             </div>
@@ -74,13 +94,17 @@
                         <!-- Created + Recomputed — side by side -->
                         <div class="o_att_result_row">
                             <div class="o_att_result_card o_att_result_card_green">
-                                <span class="o_att_result_label">New Summaries Created</span>
+                                <span class="o_att_result_label">
+                                    <i class="fa fa-plus-circle" title="Created"/> New Summaries Created
+                                </span>
                                 <div class="o_att_result_value">
                                     <field name="result_created" readonly="1" nolabel="1"/>
                                 </div>
                             </div>
                             <div class="o_att_result_card o_att_result_card_blue">
-                                <span class="o_att_result_label">Drafts Recomputed</span>
+                                <span class="o_att_result_label">
+                                    <i class="fa fa-refresh" title="Recomputed"/> Drafts Recomputed
+                                </span>
                                 <div class="o_att_result_value">
                                     <field name="result_recomputed" readonly="1" nolabel="1"/>
                                 </div>
@@ -88,17 +112,21 @@
                         </div>
 
                         <!-- Skipped — shown only when > 0 -->
-                        <div invisible="result_skipped == 0" class="o_att_skipped_card">
-                            <span class="o_att_skipped_label">Skipped (Confirmed or Excluded)</span>
+                        <div invisible="result_skipped == 0"
+                             class="o_att_skipped_card">
+                            <span class="o_att_skipped_label">
+                                <i class="fa fa-minus-circle" title="Skipped"/> Skipped
+                            </span>
                             <div class="o_att_skipped_value">
                                 <field name="result_skipped" readonly="1" nolabel="1"/>
                             </div>
                         </div>
 
-                        <!-- Info note when skipped > 0 -->
-                        <div invisible="result_skipped == 0" class="o_att_banner_skipped_info">
-                            Skipped summaries are either already <strong>Confirmed</strong> (locked)
-                            or existing drafts when <em>Recompute Existing Draft</em> was unchecked.
+                        <div invisible="result_skipped == 0"
+                             class="o_att_banner_skipped_info mt-2">
+                            Skipped summaries are either already
+                            <strong>Confirmed</strong> (locked), or existing drafts
+                            when <em>Recompute Existing Draft</em> was unchecked.
                         </div>
 
                     </div>
@@ -109,11 +137,13 @@
 
                 <footer>
                     <button name="action_generate" type="object"
-                            string="Generate Summaries" class="btn btn-primary"
+                            string="Generate Summaries"
+                            class="btn btn-primary"
                             invisible="state != 'draft'"
                             confirm="This will create or recompute summaries for the selected period. Confirmed summaries will not be touched. Proceed?"/>
                     <button name="action_view_summaries" type="object"
-                            string="View Summaries" class="btn btn-primary"
+                            string="View Summaries"
+                            class="btn btn-primary"
                             invisible="state != 'done'"/>
                     <button string="Close" class="btn btn-light" special="cancel"/>
                 </footer>
@@ -121,7 +151,8 @@
         </field>
     </record>
 
-    <record id="action_attendance_summary_batch_wizard" model="ir.actions.act_window">
+    <record id="action_attendance_summary_batch_wizard"
+            model="ir.actions.act_window">
         <field name="name">Generate Monthly Summaries (Batch)</field>
         <field name="res_model">attendance.summary.batch.wizard</field>
         <field name="view_mode">form</field>

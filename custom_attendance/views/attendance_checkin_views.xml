@@ -5,58 +5,84 @@
         <field name="name">attendance.checkin.wizard.form</field>
         <field name="model">attendance.checkin.wizard</field>
         <field name="arch" type="xml">
-            <form string="Attendance">
+            <form string="Check In / Check Out">
                 <sheet>
 
-                    <!-- Dark header band -->
-                    <div class="o_att_header_band">
-                        <span class="o_att_header_label">Attendance</span>
-                        <span class="o_att_header_title">
-                            <field name="employee_id" readonly="1" nolabel="1"/>
-                        </span>
+                    <!-- Employee header: avatar circle + name + status badge -->
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="o_att_avatar_circle">
+                            <i class="fa fa-user" title="Employee"/>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="o_att_emp_name">
+                                <field name="employee_id" readonly="1" nolabel="1"/>
+                            </div>
+                        </div>
+                        <div>
+                            <field name="status" readonly="1" widget="badge"
+                                   decoration-success="status == 'in'"
+                                   decoration-danger="status == 'out'"
+                                   decoration-info="status == 'done'"/>
+                        </div>
                     </div>
 
-                    <!-- Status badge row -->
-                    <div class="mb-3">
-                        <field name="status" readonly="1" widget="badge"
-                               decoration-success="status == 'in'"
-                               decoration-danger="status == 'out'"
-                               decoration-info="status == 'done'"/>
+                    <div class="o_att_divider"/>
+
+                    <!-- CHECKED IN: active session -->
+                    <div invisible="status != 'in'">
+                        <div class="o_att_session_label">Active Session</div>
+                        <div class="o_att_time_card">
+                            <div class="o_att_time_sublabel">Checked in at</div>
+                            <div class="o_att_time_value">
+                                <field name="last_check_in" readonly="1" nolabel="1"/>
+                            </div>
+                        </div>
+                        <div invisible="not is_late"
+                             class="o_att_banner o_att_banner_late mt-2">
+                            ⚠ Late by
+                            <field name="late_minutes" nolabel="1" readonly="1"/>
+                            minutes — threshold is 9:30 AM
+                        </div>
                     </div>
 
-                    <!-- Checked in: active session -->
-                    <group string="Active Session" invisible="status != 'in'">
-                        <field name="last_check_in" string="Checked In At" readonly="1"/>
-                        <field name="is_late" readonly="1"/>
-                        <field name="late_minutes" string="Late By (Minutes)"
-                               readonly="1" invisible="not is_late"/>
-                    </group>
-
-                    <!-- Completed today -->
-                    <group string="Today's Session" invisible="status != 'done'">
-                        <field name="last_check_in" string="Checked In" readonly="1"/>
-                        <field name="last_check_out" string="Checked Out" readonly="1"/>
-                        <field name="is_late" readonly="1"/>
-                        <field name="late_minutes" string="Late By (Minutes)"
-                               readonly="1" invisible="not is_late"/>
-                    </group>
-
-                    <!-- Done info banner -->
-                    <div invisible="status != 'done'" class="o_att_banner o_att_banner_done">
-                        <strong>All done!</strong> Your attendance is complete for today.
-                        Check-in is not permitted again until tomorrow.
+                    <!-- DONE: completed today -->
+                    <div invisible="status != 'done'">
+                        <div class="o_att_session_label">Today's Attendance</div>
+                        <div class="d-flex gap-3">
+                            <div class="o_att_time_card flex-fill">
+                                <div class="o_att_time_sublabel">Check In</div>
+                                <div class="o_att_time_value">
+                                    <field name="last_check_in" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                            <div class="o_att_time_card flex-fill">
+                                <div class="o_att_time_sublabel">Check Out</div>
+                                <div class="o_att_time_value">
+                                    <field name="last_check_out" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="o_att_banner o_att_banner_done mt-2">
+                            <strong>All done for today.</strong>
+                            Your attendance is recorded. Check-in resumes tomorrow.
+                        </div>
                     </div>
 
-                    <footer>
-                        <button name="action_toggle" type="object"
-                                class="btn btn-primary" string="Check In"
-                                invisible="status != 'out'"/>
-                        <button name="action_toggle" type="object"
-                                class="btn btn-secondary" string="Check Out"
-                                invisible="status != 'in'"/>
-                        <button string="Close" class="btn btn-light" special="cancel"/>
-                    </footer>
+                    <!-- Hidden fields needed by invisible conditions -->
+                    <field name="is_late" invisible="1"/>
+                    <field name="late_minutes" invisible="1"/>
+
                 </sheet>
+
+                <footer>
+                    <button name="action_toggle" type="object"
+                            string="Check In" class="btn btn-primary"
+                            invisible="status != 'out'"/>
+                    <button name="action_toggle" type="object"
+                            string="Check Out" class="btn btn-secondary"
+                            invisible="status != 'in'"/>
+                    <button string="Close" class="btn btn-light" special="cancel"/>
+                </footer>
             </form>
         </field>
     </record>

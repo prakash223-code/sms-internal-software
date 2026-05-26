@@ -25,11 +25,13 @@
                 <field name="state" widget="badge" string="Status"
                        decoration-success="state == 'confirmed'"
                        decoration-warning="state == 'draft'"/>
-                <button name="action_compute" string="Recompute" type="object"
-                        icon="fa-refresh" invisible="state == 'confirmed'"
+                <button name="action_compute" string="Recompute"
+                        type="object" icon="fa-refresh"
+                        invisible="state == 'confirmed'"
                         confirm="This will overwrite existing values. Proceed?"/>
-                <button name="action_confirm" string="Confirm" type="object"
-                        icon="fa-check" invisible="state == 'confirmed'"
+                <button name="action_confirm" string="Confirm"
+                        type="object" icon="fa-check"
+                        invisible="state == 'confirmed'"
                         confirm="Confirming will lock this record. Are you sure?"/>
             </list>
         </field>
@@ -44,107 +46,141 @@
         <field name="arch" type="xml">
             <form string="Monthly Attendance Summary">
                 <header>
-                    <button name="action_compute" string="Compute / Recompute"
+                    <button name="action_compute"
+                            string="Compute / Recompute"
                             type="object" class="btn-primary"
                             invisible="state == 'confirmed'"
                             confirm="This will overwrite current values. Proceed?"/>
-                    <button name="action_confirm" string="Confirm and Lock"
+                    <button name="action_confirm"
+                            string="Confirm and Lock"
                             type="object" class="btn-success"
                             invisible="state == 'confirmed'"
                             confirm="Once confirmed, values cannot be changed without resetting to draft. Proceed?"/>
-                    <button name="action_reset_to_draft" string="Reset to Draft"
-                            type="object" invisible="state == 'draft'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                    <button name="action_reset_to_draft"
+                            string="Reset to Draft"
+                            type="object"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed"/>
                 </header>
                 <sheet>
 
-                    <!-- Page title -->
-                    <div class="oe_title" style="margin-bottom: 4px;">
-                        <h1>
-                            <field name="display_name" readonly="1"/>
-                        </h1>
+                    <!-- ── Employee header ── -->
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="o_att_avatar_circle o_att_avatar_lg">
+                            <i class="fa fa-user" title="Employee"/>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="o_att_emp_name">
+                                <field name="employee_id"
+                                       readonly="id != False"
+                                       nolabel="1"/>
+                            </div>
+                            <div class="o_att_period_sub">
+                                <field name="month"
+                                       readonly="id != False"
+                                       nolabel="1"/>
+                                —
+                                <field name="year"
+                                       readonly="id != False"
+                                       nolabel="1"/>
+                            </div>
+                        </div>
+                        <div>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'confirmed'"
+                                   decoration-warning="state == 'draft'"/>
+                        </div>
                     </div>
 
-                    <!-- Period -->
-                    <group>
-                        <group string="Period">
-                            <field name="employee_id" readonly="id != False"/>
-                            <field name="month" readonly="id != False"/>
-                            <field name="year" readonly="id != False"/>
-                        </group>
-                    </group>
+                    <div class="o_att_divider"/>
 
-                    <!-- Section label -->
+                    <!-- ── Attendance breakdown ── -->
                     <div class="o_att_section_label">Attendance Breakdown</div>
 
                     <!-- Row 1: Working / Present / Late -->
                     <div class="o_att_stats_row">
                         <div class="o_att_stat_card o_att_card_neutral">
-                            <span class="o_att_stat_label">Working Days</span>
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-calendar" title="Working days"/> Working Days
+                            </span>
                             <div class="o_att_stat_value">
                                 <field name="working_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                         <div class="o_att_stat_card o_att_card_green">
-                            <span class="o_att_stat_label">Present</span>
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-check-circle" title="Present"/> Present
+                            </span>
                             <div class="o_att_stat_value">
                                 <field name="present_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                         <div class="o_att_stat_card o_att_card_amber">
-                            <span class="o_att_stat_label">Late Entries</span>
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-clock-o" title="Late entries"/> Late Entries
+                            </span>
                             <div class="o_att_stat_value">
                                 <field name="late_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Row 2: Leave / Unpaid Leave / Absent -->
+                    <!-- Row 2: Leave / Unpaid / Absent -->
                     <div class="o_att_stats_row">
-                        <div class="o_att_stat_card o_att_card_neutral">
-                            <span class="o_att_stat_label">Approved Leave</span>
+                        <div class="o_att_stat_card o_att_card_blue">
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-umbrella" title="Approved leave"/> Approved Leave
+                            </span>
                             <div class="o_att_stat_value">
                                 <field name="leave_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                         <div class="o_att_stat_card o_att_card_orange">
-                            <span class="o_att_stat_label">Unpaid Leave</span>
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-minus-circle" title="Unpaid leave"/> Unpaid Leave
+                            </span>
                             <div class="o_att_stat_value">
                                 <field name="unpaid_leave_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                         <div class="o_att_stat_card o_att_card_red">
-                            <span class="o_att_stat_label">Absent</span>
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-times-circle" title="Absent"/> Absent
+                            </span>
                             <div class="o_att_stat_value">
                                 <field name="absent_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Payroll deduction section -->
+                    <!-- ── Payroll section ── -->
                     <div class="o_att_section_label">Payroll Deduction Reference</div>
 
                     <div class="o_att_payroll_card">
-                        <span class="o_att_payroll_label">Total Unpaid Deduction Days</span>
+                        <span class="o_att_payroll_label">
+                            <i class="fa fa-exclamation-circle" title="Deduction"/> Total Unpaid Deduction Days
+                        </span>
                         <div class="o_att_payroll_value">
                             <field name="unpaid_absent_days" readonly="1" nolabel="1"/>
                         </div>
                         <div class="o_att_payroll_note">
-                            Unpaid Absent Days = Absent Days + Unpaid Leave Days.
-                            This value is used for salary deduction calculation.
+                            Absent Days + Unpaid Leave Days.
+                            Used for salary deduction calculation.
                         </div>
                     </div>
 
-                    <!-- Status info banners -->
-                    <div invisible="state == 'confirmed'" class="o_att_banner o_att_banner_draft">
+                    <!-- ── Status banners ── -->
+                    <div invisible="state == 'confirmed'"
+                         class="o_att_banner o_att_banner_draft">
                         This summary is in <strong>Draft</strong>.
-                        Click <strong>Compute / Recompute</strong> to refresh values,
-                        then <strong>Confirm and Lock</strong> to finalize for payroll.
+                        Use <strong>Compute / Recompute</strong> to refresh,
+                        then <strong>Confirm and Lock</strong> to finalise for payroll.
                     </div>
 
-                    <div invisible="state == 'draft'" class="o_att_banner o_att_banner_confirmed">
-                        ✓ <strong>Confirmed.</strong>
-                        This record is locked and will be used for payroll processing.
+                    <div invisible="state == 'draft'"
+                         class="o_att_banner o_att_banner_confirmed">
+                        ✓ <strong>Confirmed and locked</strong> for payroll processing.
                         Reset to Draft to make changes.
                     </div>
 
@@ -241,11 +277,12 @@
         <field name="domain">[('employee_id.user_id', '=', uid)]</field>
         <field name="view_ids" eval="[
             (5, 0, 0),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_monthly_summary_employee_list')}),
+            (0, 0, {'view_mode': 'list',
+                    'view_id': ref('view_monthly_summary_employee_list')}),
         ]"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">No monthly summaries available yet.</p>
-            <p>Your attendance summary will appear here at the start of each month.</p>
+            <p class="o_view_nocontent_smiling_face">No monthly summaries yet.</p>
+            <p>Your summary appears here at the start of each month.</p>
         </field>
     </record>
 

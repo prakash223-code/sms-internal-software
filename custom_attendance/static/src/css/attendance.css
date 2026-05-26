@@ -239,72 +239,6 @@
     line-height: 1.5;
 }
 
-/* ── Batch wizard — step header ─────────────────────────────── */
-.o_att_wizard_step_header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.o_att_wizard_step_badge {
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
-    text-align: center;
-    border-radius: 50%;
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-.o_att_wizard_badge_setup {
-    background: #0d9488;
-    color: #fff;
-    font-size: 14px;
-}
-
-.o_att_wizard_badge_done {
-    background: #22c55e;
-    color: #fff;
-    font-size: 16px;
-}
-
-.o_att_wizard_step_title {
-    display: block;
-    font-size: 15px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.o_att_wizard_step_subtitle {
-    display: block;
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 2px;
-}
-
-/* ── Batch wizard — employees sub-section ───────────────────── */
-.o_att_employees_section {
-    margin-top: 16px;
-}
-
-.o_att_employees_section_label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.7px;
-    text-transform: uppercase;
-    color: #64748b;
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 8px;
-    margin-bottom: 12px;
-}
-
-.o_att_employees_btn_row {
-    margin-bottom: 10px;
-}
-
 .o_att_employees_hint {
     font-size: 12px;
     color: #64748b;
@@ -404,4 +338,120 @@
     font-weight: 800;
     color: #64748b;
     line-height: 1;
+}
+
+/* ── Checkin wizard ─────────────────────────────────────────── */
+.o_att_avatar_circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1d4ed8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.o_att_emp_name .o_field_widget {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.o_att_divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 0 0 14px;
+}
+
+.o_att_session_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.o_att_time_card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 4px;
+}
+
+.o_att_time_sublabel {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
+.o_att_time_value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+/* ── Summary form — avatar size variant ─────────────────────── */
+.o_att_avatar_lg {
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+}
+
+/* ── Summary form — period subtitle ─────────────────────────── */
+.o_att_period_sub {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ── Stat cards — lighter number weight ─────────────────────── */
+.o_att_stat_value {
+    font-size: 28px;
+    font-weight: 600;   /* was 800 — toned down to match Odoo style */
+    line-height: 1;
+}
+
+/* ── Stat card label icon spacing ───────────────────────────── */
+.o_att_stat_label .fa {
+    margin-right: 4px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* ── Holiday form — day name card variant ───────────────────── */
+.o_att_day_card {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+}
+
+.o_att_day_value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0d9488;
+    line-height: 1.2;
+}
+
+/* ── Avatar circle — success (green) variant ────────────────── */
+.o_att_avatar_success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* ── Result card icon spacing ───────────────────────────────── */
+.o_att_result_label .fa {
+    margin-right: 4px;
+    font-size: 10px;
+    opacity: 0.7;
 }
