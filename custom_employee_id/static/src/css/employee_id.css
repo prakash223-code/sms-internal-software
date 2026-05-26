@@ -1,0 +1,153 @@
+/* =============================================================
+   custom_employee_id — UI Styles
+   Prefix: o_emp_
+   ============================================================= */
+
+/* ── Banners ─────────────────────────────────────────────── */
+.o_emp_banner {
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.o_emp_banner .fa {
+    margin-top: 2px;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+.o_emp_banner_draft {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+}
+.o_emp_banner_confirmed {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #22c55e;
+    color: #14532d;
+    font-weight: 600;
+}
+
+/* ── Employee ID Display Card ─────────────────────────────── */
+.o_emp_id_block {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #f5ffef;
+    border: 1px solid #dbfebf;
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin: 8px 0 4px;
+}
+.o_emp_id_icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #2f7f05;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+.o_emp_id_text_group {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.o_emp_id_label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #4ecd33;
+    opacity: 0.85;
+}
+.o_emp_id_value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #53ad0c;
+    line-height: 1.1;
+}
+/* Override Odoo field widget wrapping inside our value div */
+.o_emp_id_value .o_field_widget,
+.o_emp_id_value .o_field_char {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    font-family: inherit;
+    line-height: inherit;
+}
+
+/* ── Pending (Draft) ID hint ─────────────────────────────── */
+.o_emp_pending_text {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #92400e;
+    background: #fffbeb;
+    border: 1px dashed #fcd34d;
+    border-radius: 5px;
+    padding: 5px 12px;
+    margin: 8px 0 4px;
+}
+
+/* ── Section Labels ──────────────────────────────────────── */
+.o_emp_section_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+/* ── Divider ─────────────────────────────────────────────── */
+.o_emp_divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 4px 0 14px;
+}
+
+/* ── Department Code Card (dept form) ────────────────────── */
+.o_emp_dept_code_card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+.o_emp_dept_code_hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    line-height: 1.5;
+}
+.o_emp_dept_code_hint .fa {
+    margin-top: 2px;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+.o_emp_locked_note {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #991b1b;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-top: 6px;
+}

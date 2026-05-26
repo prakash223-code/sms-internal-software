@@ -5,12 +5,41 @@
     <field name="model">hr.department</field>
     <field name="inherit_id" ref="hr.view_department_form"/>
     <field name="arch" type="xml">
+
+      <!-- ============================================================
+           DEPARTMENT CODE — styled card below the name field
+           Shows:
+           - Editable field when no employees assigned yet
+           - Lock note when dept has employees (dept_code becomes readonly)
+           ============================================================ -->
       <xpath expr="//field[@name='name']" position="after">
-        <field name="dept_code"
-               string="Department Code"
-               placeholder="e.g. IT, CFD, HR"
-               readonly="has_employees"/>
+
+        <!-- Hidden field for invisible conditions -->
+        <field name="has_employees" invisible="1"/>
+
+        <!-- Department Code Card -->
+        <div class="o_emp_dept_code_card">
+
+          <div class="o_emp_section_label">
+            <i class="fa fa-tag" title="Department Code"/> Department Code
+          </div>
+
+          <field name="dept_code"
+                 string="Department Code"
+                 placeholder="e.g. IT, CFD, HR, OPS"
+                 readonly="has_employees"
+                 nolabel="1"/>
+
+          <!-- Lock note — shown only when employees exist -->
+          <div class="o_emp_locked_note" invisible="not has_employees">
+            <i class="fa fa-lock" title="Locked"/>
+            Code is locked — employees are already assigned to this department.
+          </div>
+
+        </div>
+
       </xpath>
+
     </field>
   </record>
 </odoo>

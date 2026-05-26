@@ -39,47 +39,77 @@ This is only allowed if no payroll, attendance, or leave data exists."/>
       </xpath>
 
       <!-- ============================================================
-           2. DRAFT WARNING BANNER
-           Shown clearly so HR knows the record is not yet active.
+           2. BANNERS — shown above the sheet
+           Draft:     amber warning — record incomplete, no ID yet
+           Confirmed: green success — record locked, ID active
            ============================================================ -->
       <xpath expr="//sheet" position="before">
-        <div class="alert alert-warning mb-0"
-             role="alert"
+
+        <!-- Draft warning banner -->
+        <div class="o_emp_banner o_emp_banner_draft"
              invisible="state != 'draft'">
-          <strong>Draft Record</strong> — This employee has not been confirmed yet.
-          No Employee ID has been generated. Please verify all details
-          (especially the <strong>Department</strong>) before clicking
-          <strong>Confirm Employee</strong>.
-          Draft records can be freely deleted if created by mistake.
+          <i class="fa fa-exclamation-triangle" title="Warning"/>
+          <div>
+            <strong>Draft Record</strong> — This employee has not been confirmed yet.
+            No Employee ID has been assigned. Please verify all details,
+            especially the <strong>Department</strong>, before clicking
+            <strong>Confirm Employee</strong>.
+            Draft records can be freely deleted if created in error.
+          </div>
         </div>
+
+        <!-- Confirmed success banner -->
+        <div class="o_emp_banner o_emp_banner_confirmed"
+             invisible="state != 'confirmed'">
+          <i class="fa fa-check-circle" title="Confirmed"/>
+          <div>
+            Employee confirmed and active.
+            The Employee ID is permanent — department and ID cannot be changed.
+            To transfer departments, archive this record and create a new entry.
+          </div>
+        </div>
+
       </xpath>
 
       <!-- ============================================================
-           3. EMPLOYEE ID — shown after name field
-           In Draft: shows placeholder. In Confirmed: shows generated ID.
+           3. EMPLOYEE ID — shown below the name field
+           Draft:     dashed pending pill
+           Confirmed: blue ID card with icon + monospaced code
            ============================================================ -->
       <xpath expr="//field[@name='name']" position="after">
-        <field name="employee_code"
-               string="Employee ID"
-               readonly="1"
-               widget="badge"
-               placeholder="Generated on confirmation"
-               invisible="state != 'confirmed'"/>
-        <span invisible="state != 'draft'"
-              class="text-muted fst-italic">
-          Employee ID will be generated after confirmation.
-        </span>
+
+        <!-- Hidden field needed for invisible expressions below -->
+        <field name="state" invisible="1"/>
+
+        <!-- Confirmed: styled ID card -->
+        <div class="o_emp_id_block" invisible="state != 'confirmed'">
+          <div class="o_emp_id_icon">
+            <i class="fa fa-id-badge" title="Employee ID"/>
+          </div>
+          <div class="o_emp_id_text_group">
+            <div class="o_emp_id_label">Employee ID</div>
+            <div class="o_emp_id_value">
+              <field name="employee_code" readonly="1" nolabel="1"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Draft: pending pill -->
+        <div class="o_emp_pending_text" invisible="state != 'draft'">
+          <i class="fa fa-clock-o" title="Pending"/>
+          Employee ID will be generated on confirmation
+        </div>
+
       </xpath>
 
       <!-- ============================================================
            4. DEPARTMENT — lock after confirmation
-           HR cannot change the department once the ID is generated
+           HR cannot change department once the ID is generated
            because the ID encodes the department code.
            ============================================================ -->
       <xpath expr="//field[@name='department_id']" position="attributes">
         <attribute name="readonly">state == 'confirmed'</attribute>
-        <attribute name="help">Department cannot be changed after confirmation
-because the Employee ID is generated from the department code.</attribute>
+        <attribute name="help">Department cannot be changed after confirmation because the Employee ID is generated from the department code.</attribute>
       </xpath>
 
     </field>
