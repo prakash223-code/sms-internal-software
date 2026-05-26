@@ -1,32 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!--
-        Inherit the standard Project form.
-        Adds:
-          1. Project Number displayed prominently near the project name
-          2. Smart button linking back to the source CRM query
-    -->
     <record id="project_form_view_crm_link" model="ir.ui.view">
         <field name="name">project.project.form.crm.link</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
 
-            <!-- 1. Project Number — shown next to the project name as a badge-style field -->
-            <xpath expr="//field[@name='name']" position="after">
-                <field
-                    name="project_number"
-                    readonly="1"
-                    placeholder="—"
-                    widget="char"
-                    class="text-muted"
-                    invisible="not project_number"
-                />
+            <!-- 1. Hidden fields -->
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="crm_lead_id" invisible="1"/>
+                <field name="project_number" invisible="1"/>
             </xpath>
 
-            <!-- 2. Smart button — links back to the originating CRM query.
-                 Only visible when the project was created from a CRM query. -->
+            <!-- 2. Reference cards — FIX: target oe_title div, not the field inside it
+                 position="after" now places cards BELOW the title, not beside it -->
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <div invisible="not project_number">
+                    <div class="o_crm_section_label">Project Reference</div>
+                    <div class="d-flex gap-3 mb-3">
+
+                        <div class="o_crm_time_card flex-fill">
+                            <div class="o_crm_time_sublabel">
+                                <i class="fa fa-hashtag" title="Project Number"/>
+                                Project Number
+                            </div>
+                            <div class="o_crm_time_value">
+                                <field name="project_number"
+                                       readonly="1"
+                                       nolabel="1"/>
+                            </div>
+                        </div>
+
+                        <div class="o_crm_time_card flex-fill"
+                             invisible="not crm_lead_id">
+                            <div class="o_crm_time_sublabel">
+                                <i class="fa fa-commenting" title="Source Query"/>
+                                Source Query
+                            </div>
+                            <div class="o_crm_time_value">
+                                <field name="crm_lead_id"
+                                       readonly="1"
+                                       nolabel="1"/>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="o_crm_divider"/>
+                </div>
+            </xpath>
+
+            <!-- 3. Smart button -->
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button
                     name="action_open_source_query"
@@ -35,16 +59,10 @@
                     icon="fa-commenting"
                     invisible="not crm_lead_id">
                     <div class="o_field_widget o_stat_info">
-                        <span class="o_stat_value">1</span>
-                        <span class="o_stat_text">Source Query</span>
+                        <div class="o_stat_value">1</div>
+                        <div class="o_stat_text">Source Query</div>
                     </div>
                 </button>
-            </xpath>
-
-            <!-- 3. Hidden fields needed by invisible conditions above -->
-            <xpath expr="//field[@name='name']" position="before">
-                <field name="crm_lead_id" invisible="1"/>
-                <field name="project_number" invisible="1"/>
             </xpath>
 
         </field>

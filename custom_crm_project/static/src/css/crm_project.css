@@ -1,0 +1,198 @@
+/* ─── Avatar Circle ─────────────────────────────────────────────────────── */
+.o_crm_avatar_circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1d4ed8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.o_crm_avatar_success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* ─── Header name ───────────────────────────────────────────────────────── */
+.o_crm_lead_name .o_field_widget {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* ─── Subtitle (stage / partner) ────────────────────────────────────────── */
+.o_crm_lead_sub {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ─── Divider ───────────────────────────────────────────────────────────── */
+.o_crm_divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 0 0 14px;
+}
+
+/* ─── Section label ─────────────────────────────────────────────────────── */
+.o_crm_section_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+/* ─── Banners ───────────────────────────────────────────────────────────── */
+.o_crm_banner {
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.o_crm_banner_confirmed {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #22c55e;
+    color: #14532d;
+    font-weight: 600;
+}
+
+.o_crm_banner_draft {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+    border-left: 4px solid #14b8a6;
+    color: #134e4a;
+}
+
+.o_crm_banner_warning {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+    font-weight: 600;
+}
+
+/* ─── Stat cards ────────────────────────────────────────────────────────── */
+.o_crm_stats_row {
+    display: flex;
+    gap: 2%;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.o_crm_stat_card {
+    flex: 1;
+    min-width: 0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+}
+
+.o_crm_stat_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.o_crm_stat_label .fa {
+    margin-right: 4px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.o_crm_stat_value {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/* colour variants */
+.o_crm_card_neutral {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.o_crm_card_neutral .o_crm_stat_label {
+    color: #64748b;
+}
+
+.o_crm_card_neutral .o_crm_stat_value {
+    color: #0f172a;
+}
+
+.o_crm_card_green {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+}
+
+.o_crm_card_green .o_crm_stat_label,
+.o_crm_card_green .o_crm_stat_value {
+    color: #0d9488;
+}
+
+.o_crm_card_blue {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+}
+
+.o_crm_card_blue .o_crm_stat_label,
+.o_crm_card_blue .o_crm_stat_value {
+    color: #1d4ed8;
+}
+
+.o_crm_card_amber {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+}
+
+.o_crm_card_amber .o_crm_stat_label,
+.o_crm_card_amber .o_crm_stat_value {
+    color: #92400e;
+}
+
+.o_crm_card_red {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+}
+
+.o_crm_card_red .o_crm_stat_label,
+.o_crm_card_red .o_crm_stat_value {
+    color: #991b1b;
+}
+
+/* ─── Time cards ────────────────────────────────────────────────────────── */
+.o_crm_time_card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 4px;
+}
+.o_crm_time_sublabel {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+.o_crm_time_value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.2;
+}

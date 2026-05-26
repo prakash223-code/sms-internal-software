@@ -10,6 +10,11 @@
         'views/crm_lead_views.xml',
         'views/project_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_crm_project/static/src/css/crm_project.css',
+        ],
+    },
     'installable': True,
     'application': False,
 }
