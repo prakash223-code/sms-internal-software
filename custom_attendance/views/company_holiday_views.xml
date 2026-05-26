@@ -1,88 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- LIST VIEW -->
+    <!-- ================================================================
+         LIST
+    ================================================================ -->
     <record id="view_company_holiday_list" model="ir.ui.view">
         <field name="name">company.holiday.list</field>
         <field name="model">company.holiday</field>
         <field name="arch" type="xml">
             <list string="Company Holidays"
+                  default_order="date asc"
                   decoration-success="is_working_override == True"
                   decoration-info="holiday_type == 'public' and not is_working_override"
                   decoration-warning="holiday_type == 'event' and not is_working_override"
                   decoration-danger="holiday_type == 'emergency'">
-                <field name="date"/>
+                <field name="date" string="Date"/>
                 <field name="day_label" string="Day" readonly="1"/>
-                <field name="name"/>
-                <field name="holiday_type"
-                       invisible="is_working_override"/>
-                <field name="is_working_override"
-                       string="Compensatory Working Day"/>
-                <field name="description" optional="hide"/>
+                <field name="name" string="Name"/>
+                <field name="holiday_type" string="Type" invisible="is_working_override"/>
+                <field name="is_working_override" string="Compensatory Working Day"/>
+                <field name="description" string="Notes" optional="hide"/>
             </list>
         </field>
     </record>
 
-    <!-- FORM VIEW -->
+    <!-- ================================================================
+         FORM
+    ================================================================ -->
     <record id="view_company_holiday_form" model="ir.ui.view">
         <field name="name">company.holiday.form</field>
         <field name="model">company.holiday</field>
         <field name="arch" type="xml">
             <form string="Company Holiday / Working Day">
                 <sheet>
-                    <div class="oe_title">
-                        <h1>
-                            <field name="name"
-                                   placeholder="e.g. Power Shutdown, Diwali, Working Saturday..."/>
-                        </h1>
-                    </div>
 
-                    <!-- Working day override banner -->
-                    <div class="alert alert-success" role="alert"
-                         invisible="not is_working_override">
+                    <!-- Compensatory working day banner -->
+                    <div invisible="not is_working_override"
+                         class="o_att_banner o_att_banner_compensatory">
                         <strong>Compensatory Working Day</strong> —
-                        This Saturday will be treated as a
-                        <strong>working day</strong> for this date only.
-                        Employees will be allowed to check in.
+                        This Saturday will be treated as a <strong>working day</strong>.
+                        Employees will be able to check in normally.
                     </div>
 
                     <!-- Holiday banner -->
-                    <div class="alert alert-warning" role="alert"
-                         invisible="is_working_override">
-                        <strong>Holiday</strong> —
-                        Employees will <strong>not</strong> be allowed
-                        to check in on this date.
+                    <div invisible="is_working_override"
+                         class="o_att_banner o_att_banner_holiday">
+                        <strong>Holiday / Closure</strong> —
+                        Employees will <strong>not</strong> be able to check in on this date.
+                    </div>
+
+                    <!-- Name hero -->
+                    <div class="oe_title" style="margin-bottom: 16px;">
+                        <h1>
+                            <field name="name"
+                                   placeholder="e.g. Diwali, Power Shutdown, Working Saturday…"/>
+                        </h1>
                     </div>
 
                     <group>
-                        <group>
+                        <group string="Date">
                             <field name="date"/>
-                            <field name="day_label" string="Day" readonly="1"/>
+                            <field name="day_label" string="Day of Week" readonly="1"/>
+                            <field name="active" string="Active"/>
                         </group>
-                        <group>
-                            <field name="active"/>
+                        <group string="Classification">
+                            <field name="is_working_override"
+                                   string="Compensatory Working Day (Saturday only)"/>
+                            <field name="holiday_type" string="Holiday Type"
+                                   invisible="is_working_override"
+                                   required="not is_working_override"/>
                         </group>
-                    </group>
-
-                    <group string="Type">
-                        <field name="is_working_override"
-                               string="Compensatory Working Day (Saturday only)"/>
-                        <!-- Holiday type only shown for actual holidays -->
-                        <field name="holiday_type"
-                               invisible="is_working_override"
-                               required="not is_working_override"/>
                     </group>
 
                     <group string="Notes">
                         <field name="description" nolabel="1"
-                               placeholder="e.g. Monthly power shutdown compensation..."/>
+                               placeholder="Optional — e.g. compensating for 12 May power shutdown…"/>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- SEARCH VIEW -->
+    <!-- ================================================================
+         SEARCH
+    ================================================================ -->
     <record id="view_company_holiday_search" model="ir.ui.view">
         <field name="name">company.holiday.search</field>
         <field name="model">company.holiday</field>
@@ -92,13 +93,13 @@
                 <field name="date"/>
                 <separator/>
                 <filter string="Public Holidays" name="filter_public"
-                        domain="[('holiday_type','=','public'),
-                                 ('is_working_override','=',False)]"/>
+                        domain="[('holiday_type','=','public'),('is_working_override','=',False)]"/>
                 <filter string="Company Events" name="filter_event"
-                        domain="[('holiday_type','=','event'),
-                                 ('is_working_override','=',False)]"/>
+                        domain="[('holiday_type','=','event'),('is_working_override','=',False)]"/>
                 <filter string="Compensatory Working Days" name="filter_override"
                         domain="[('is_working_override','=',True)]"/>
+                <filter string="Emergency Closures" name="filter_emergency"
+                        domain="[('holiday_type','=','emergency')]"/>
                 <separator/>
                 <filter string="Group by Type" name="group_type"
                         context="{'group_by': 'holiday_type'}"/>
@@ -108,26 +109,19 @@
         </field>
     </record>
 
-    <!-- ACTION -->
+    <!-- ================================================================
+         ACTION
+    ================================================================ -->
     <record id="action_company_holidays" model="ir.actions.act_window">
         <field name="name">Company Holidays</field>
         <field name="res_model">company.holiday</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_company_holiday_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No holidays declared yet.
-            </p>
-            <p>
-                Add public holidays, company events, or emergency closures.
-                Employees cannot check in on these days.
-            </p>
-            <p>
-                To declare a <strong>compensatory working Saturday</strong>
-                (e.g. after a power shutdown holiday), create a record
-                for that Saturday and enable
-                <strong>"Compensatory Working Day"</strong>.
-            </p>
+            <p class="o_view_nocontent_smiling_face">No holidays declared yet.</p>
+            <p>Add public holidays, company events, or emergency closures here.</p>
+            <p>To declare a <strong>compensatory working Saturday</strong>, create a record
+               for that Saturday and enable <strong>Compensatory Working Day</strong>.</p>
         </field>
     </record>
 

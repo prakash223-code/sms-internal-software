@@ -1,0 +1,407 @@
+/* ============================================================
+   custom_attendance — backend CSS
+   Replaces all inline style= attributes in view XML files.
+   Prefix: o_att_  (avoids collisions with Odoo core classes)
+   ============================================================ */
+
+/* ── Dark header band (form tops) ──────────────────────────── */
+.o_att_header_band {
+    background: #1e293b;
+    margin: -16px -16px 20px -16px;
+    padding: 22px 24px 20px;
+    border-radius: 4px 4px 0 0;
+}
+.o_att_header_label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 4px;
+    display: block;
+}
+.o_att_header_title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+    display: block;
+}
+
+/* ── Generic info banners ───────────────────────────────────── */
+.o_att_banner {
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.o_att_banner_late {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+    font-weight: 600;
+}
+
+.o_att_banner_autoco {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #64748b;
+    color: #475569;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.o_att_banner_done {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #22c55e;
+    color: #14532d;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.o_att_banner_correction {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+    margin-bottom: 20px;
+}
+
+.o_att_banner_compensatory {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+    border-left: 4px solid #14b8a6;
+    color: #134e4a;
+    margin-bottom: 20px;
+}
+
+.o_att_banner_holiday {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+    margin-bottom: 20px;
+}
+
+.o_att_banner_draft {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+    border-left: 4px solid #14b8a6;
+    color: #134e4a;
+}
+
+.o_att_banner_confirmed {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #22c55e;
+    color: #14532d;
+}
+
+.o_att_banner_skipped_info {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+    border-left: 4px solid #14b8a6;
+    color: #134e4a;
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+/* ── Status pills row (HR form) ─────────────────────────────── */
+.o_att_pills_row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.o_att_pill {
+    display: inline-block;
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.o_att_pill_late {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.o_att_pill_autoco {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* ── Section separator label ────────────────────────────────── */
+.o_att_section_label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+    margin: 24px 0 16px;
+}
+
+/* ── Stat cards grid (monthly summary) ──────────────────────── */
+.o_att_stats_row {
+    display: flex;
+    gap: 2%;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.o_att_stat_card {
+    flex: 1;
+    min-width: 0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+}
+
+.o_att_stat_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.o_att_stat_value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* Stat card colour variants */
+.o_att_card_neutral   { background: #f8fafc; border: 1px solid #e2e8f0; }
+.o_att_card_neutral   .o_att_stat_label { color: #64748b; }
+.o_att_card_neutral   .o_att_stat_value { color: #0f172a; }
+
+.o_att_card_green     { background: #f0fdfa; border: 1px solid #ccfbf1; }
+.o_att_card_green     .o_att_stat_label { color: #0d9488; }
+.o_att_card_green     .o_att_stat_value { color: #0d9488; }
+
+.o_att_card_amber     { background: #fffbeb; border: 1px solid #fef3c7; }
+.o_att_card_amber     .o_att_stat_label { color: #92400e; }
+.o_att_card_amber     .o_att_stat_value { color: #92400e; }
+
+.o_att_card_orange    { background: #fff7ed; border: 1px solid #ffedd5; }
+.o_att_card_orange    .o_att_stat_label { color: #9a3412; }
+.o_att_card_orange    .o_att_stat_value { color: #9a3412; }
+
+.o_att_card_red       { background: #fef2f2; border: 1px solid #fee2e2; }
+.o_att_card_red       .o_att_stat_label { color: #991b1b; }
+.o_att_card_red       .o_att_stat_value { color: #991b1b; }
+
+.o_att_card_blue      { background: #eff6ff; border: 1px solid #dbeafe; }
+.o_att_card_blue      .o_att_stat_label { color: #1d4ed8; }
+.o_att_card_blue      .o_att_stat_value { color: #1d4ed8; }
+
+/* ── Payroll deduction highlight ────────────────────────────── */
+.o_att_payroll_card {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.o_att_payroll_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #991b1b;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.o_att_payroll_value {
+    font-size: 36px;
+    font-weight: 800;
+    color: #991b1b;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.o_att_payroll_note {
+    font-size: 12px;
+    color: #7f1d1d;
+    line-height: 1.5;
+}
+
+/* ── Batch wizard — step header ─────────────────────────────── */
+.o_att_wizard_step_header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.o_att_wizard_step_badge {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.o_att_wizard_badge_setup {
+    background: #0d9488;
+    color: #fff;
+    font-size: 14px;
+}
+
+.o_att_wizard_badge_done {
+    background: #22c55e;
+    color: #fff;
+    font-size: 16px;
+}
+
+.o_att_wizard_step_title {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.o_att_wizard_step_subtitle {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* ── Batch wizard — employees sub-section ───────────────────── */
+.o_att_employees_section {
+    margin-top: 16px;
+}
+
+.o_att_employees_section_label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.o_att_employees_btn_row {
+    margin-bottom: 10px;
+}
+
+.o_att_employees_hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+/* ── Batch wizard — result cards ────────────────────────────── */
+.o_att_result_total_card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+}
+
+.o_att_result_total_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.o_att_result_total_value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.o_att_result_row {
+    display: flex;
+    gap: 3%;
+    margin-bottom: 12px;
+}
+
+.o_att_result_card {
+    flex: 1;
+    border-radius: 8px;
+    padding: 16px 18px;
+    box-sizing: border-box;
+}
+
+.o_att_result_card_green {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+}
+
+.o_att_result_card_blue {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+}
+
+.o_att_result_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.o_att_result_card_green .o_att_result_label { color: #0d9488; }
+.o_att_result_card_blue  .o_att_result_label { color: #1d4ed8; }
+
+.o_att_result_value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.o_att_result_card_green .o_att_result_value { color: #0d9488; }
+.o_att_result_card_blue  .o_att_result_value { color: #1d4ed8; }
+
+.o_att_skipped_card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+}
+
+.o_att_skipped_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.o_att_skipped_value {
+    font-size: 28px;
+    font-weight: 800;
+    color: #64748b;
+    line-height: 1;
+}

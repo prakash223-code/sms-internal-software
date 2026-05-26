@@ -7,55 +7,54 @@
         <field name="arch" type="xml">
             <form string="Attendance">
                 <sheet>
-                    <div class="oe_title">
-                        <h1><field name="employee_id" readonly="1"/></h1>
+
+                    <!-- Dark header band -->
+                    <div class="o_att_header_band">
+                        <span class="o_att_header_label">Attendance</span>
+                        <span class="o_att_header_title">
+                            <field name="employee_id" readonly="1" nolabel="1"/>
+                        </span>
                     </div>
 
-                    <group>
+                    <!-- Status badge row -->
+                    <div class="mb-3">
                         <field name="status" readonly="1" widget="badge"
                                decoration-success="status == 'in'"
                                decoration-danger="status == 'out'"
                                decoration-info="status == 'done'"/>
-                    </group>
+                    </div>
 
-                    <!-- Currently checked in -->
-                    <group string="Session" invisible="status != 'in'">
-                        <field name="last_check_in" readonly="1"/>
+                    <!-- Checked in: active session -->
+                    <group string="Active Session" invisible="status != 'in'">
+                        <field name="last_check_in" string="Checked In At" readonly="1"/>
                         <field name="is_late" readonly="1"/>
-                        <field name="late_minutes" readonly="1"
-                               invisible="not is_late"/>
+                        <field name="late_minutes" string="Late By (Minutes)"
+                               readonly="1" invisible="not is_late"/>
                     </group>
 
                     <!-- Completed today -->
-                    <group string="Today's Attendance" invisible="status != 'done'">
+                    <group string="Today's Session" invisible="status != 'done'">
                         <field name="last_check_in" string="Checked In" readonly="1"/>
                         <field name="last_check_out" string="Checked Out" readonly="1"/>
                         <field name="is_late" readonly="1"/>
-                        <field name="late_minutes" readonly="1"
-                               invisible="not is_late"/>
+                        <field name="late_minutes" string="Late By (Minutes)"
+                               readonly="1" invisible="not is_late"/>
                     </group>
 
-                    <!-- Completed today — info banner -->
-                    <div class="alert alert-info" role="alert"
-                         invisible="status != 'done'">
-                        Attendance for today is complete. Check-in is not
-                        permitted again until tomorrow.
+                    <!-- Done info banner -->
+                    <div invisible="status != 'done'" class="o_att_banner o_att_banner_done">
+                        <strong>All done!</strong> Your attendance is complete for today.
+                        Check-in is not permitted again until tomorrow.
                     </div>
 
                     <footer>
-                        <button name="action_toggle"
-                                type="object"
-                                class="btn-success"
-                                string="Check In"
+                        <button name="action_toggle" type="object"
+                                class="btn btn-primary" string="Check In"
                                 invisible="status != 'out'"/>
-                        <button name="action_toggle"
-                                type="object"
-                                class="btn-warning"
-                                string="Check Out"
+                        <button name="action_toggle" type="object"
+                                class="btn btn-secondary" string="Check Out"
                                 invisible="status != 'in'"/>
-                        <button string="Close"
-                                class="btn-secondary"
-                                special="cancel"/>
+                        <button string="Close" class="btn btn-light" special="cancel"/>
                     </footer>
                 </sheet>
             </form>

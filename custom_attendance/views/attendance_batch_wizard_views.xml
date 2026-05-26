@@ -9,7 +9,18 @@
                 <sheet>
 
                     <!-- ── SETUP STATE ── -->
-                    <group invisible="state != 'draft'">
+                    <div invisible="state != 'draft'">
+
+                        <!-- Step header -->
+                        <div class="o_att_wizard_step_header">
+                            <span class="o_att_wizard_step_badge o_att_wizard_badge_setup">1</span>
+                            <div>
+                                <span class="o_att_wizard_step_title">Select Period and Employees</span>
+                                <span class="o_att_wizard_step_subtitle">
+                                    Choose the month, year, and which employees to process.
+                                </span>
+                            </div>
+                        </div>
 
                         <group string="Period">
                             <field name="month" widget="selection"/>
@@ -17,80 +28,94 @@
                         </group>
 
                         <group string="Options">
-                            <field name="overwrite_draft"/>
+                            <field name="overwrite_draft"
+                                   string="Recompute Existing Draft Summaries"/>
                         </group>
 
-                        <group string="Employees" colspan="2">
-                            <div class="o_field_widget" colspan="2">
-                                <button name="action_select_all_employees"
-                                        type="object"
-                                        string="Select All Employees"
-                                        class="btn btn-sm btn-secondary me-2"/>
-                                <button name="action_clear_employees"
-                                        type="object"
-                                        string="Clear Selection"
-                                        class="btn btn-sm btn-secondary"/>
-                                <div class="text-muted mt-1" style="font-size:12px;">
-                                    Leave empty to generate for <strong>all active employees</strong>.
-                                </div>
+                        <div class="o_att_employees_section">
+                            <div class="o_att_employees_section_label">Employees</div>
+                            <div class="o_att_employees_btn_row">
+                                <button name="action_select_all_employees" type="object"
+                                        string="Select All" class="btn btn-sm btn-outline-secondary"/>
+                                <button name="action_clear_employees" type="object"
+                                        string="Clear" class="btn btn-sm btn-outline-secondary ms-2"/>
                             </div>
-                            <field name="employee_ids"
-                                   widget="many2many_tags"
-                                   placeholder="All active employees if empty..."
-                                   nolabel="1"
-                                   colspan="2"/>
-                        </group>
+                            <div class="o_att_employees_hint">
+                                Leave empty to generate for <strong>all active employees</strong>.
+                            </div>
+                            <field name="employee_ids" widget="many2many_tags"
+                                   placeholder="All active employees if empty…" nolabel="1"/>
+                        </div>
 
-                    </group>
+                    </div>
 
                     <!-- ── RESULTS STATE ── -->
-                    <group string="Batch Complete" invisible="state != 'done'">
+                    <div invisible="state != 'done'">
 
-                        <div class="alert alert-success" role="alert" colspan="2">
-                            <strong>Batch generation complete!</strong>
-                            Review the results below and click "View Summaries" to open them.
+                        <!-- Step header — done -->
+                        <div class="o_att_wizard_step_header">
+                            <span class="o_att_wizard_step_badge o_att_wizard_badge_done">✓</span>
+                            <div>
+                                <span class="o_att_wizard_step_title">Generation Complete</span>
+                                <span class="o_att_wizard_step_subtitle">
+                                    Summaries have been created or updated successfully.
+                                </span>
+                            </div>
                         </div>
 
-                        <group string="Results" colspan="2">
-                            <field name="result_total"     readonly="1"/>
-                            <field name="result_created"   readonly="1"/>
-                            <field name="result_recomputed" readonly="1"/>
-                            <field name="result_skipped"   readonly="1"/>
-                        </group>
-
-                        <div class="alert alert-info" role="alert"
-                             colspan="2"
-                             invisible="result_skipped == 0">
-                            <strong>Note:</strong> Skipped summaries are either already
-                            <em>Confirmed</em> (protected) or existing drafts when
-                            "Recompute Existing Draft" was unchecked.
+                        <!-- Total — full width card -->
+                        <div class="o_att_result_total_card">
+                            <span class="o_att_result_total_label">Total Employees Processed</span>
+                            <div class="o_att_result_total_value">
+                                <field name="result_total" readonly="1" nolabel="1"/>
+                            </div>
                         </div>
 
-                    </group>
+                        <!-- Created + Recomputed — side by side -->
+                        <div class="o_att_result_row">
+                            <div class="o_att_result_card o_att_result_card_green">
+                                <span class="o_att_result_label">New Summaries Created</span>
+                                <div class="o_att_result_value">
+                                    <field name="result_created" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                            <div class="o_att_result_card o_att_result_card_blue">
+                                <span class="o_att_result_label">Drafts Recomputed</span>
+                                <div class="o_att_result_value">
+                                    <field name="result_recomputed" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skipped — shown only when > 0 -->
+                        <div invisible="result_skipped == 0" class="o_att_skipped_card">
+                            <span class="o_att_skipped_label">Skipped (Confirmed or Excluded)</span>
+                            <div class="o_att_skipped_value">
+                                <field name="result_skipped" readonly="1" nolabel="1"/>
+                            </div>
+                        </div>
+
+                        <!-- Info note when skipped > 0 -->
+                        <div invisible="result_skipped == 0" class="o_att_banner_skipped_info">
+                            Skipped summaries are either already <strong>Confirmed</strong> (locked)
+                            or existing drafts when <em>Recompute Existing Draft</em> was unchecked.
+                        </div>
+
+                    </div>
 
                     <field name="state" invisible="1"/>
 
                 </sheet>
 
                 <footer>
-                    <!-- Setup state buttons -->
-                    <button name="action_generate"
-                            type="object"
-                            string="Generate Summaries"
-                            class="btn-primary"
+                    <button name="action_generate" type="object"
+                            string="Generate Summaries" class="btn btn-primary"
                             invisible="state != 'draft'"
-                            confirm="This will create or recompute attendance summaries for the selected period. Confirmed summaries will not be touched. Proceed?"/>
-
-                    <!-- Done state buttons -->
-                    <button name="action_view_summaries"
-                            type="object"
-                            string="View Summaries"
-                            class="btn-primary"
+                            confirm="This will create or recompute summaries for the selected period. Confirmed summaries will not be touched. Proceed?"/>
+                    <button name="action_view_summaries" type="object"
+                            string="View Summaries" class="btn btn-primary"
                             invisible="state != 'done'"/>
-
-                    <button string="Close"
-                            class="btn-secondary"
-                            special="cancel"/>
+                    <button string="Close" class="btn btn-light" special="cancel"/>
                 </footer>
             </form>
         </field>

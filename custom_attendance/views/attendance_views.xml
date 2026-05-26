@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- ================================================================
-         EMPLOYEE VIEW: form — read only, no create/delete
+         EMPLOYEE: form (read-only)
     ================================================================ -->
     <record id="view_attendance_employee_form" model="ir.ui.view">
         <field name="name">hr.attendance.employee.checkin</field>
@@ -11,9 +11,19 @@
         <field name="arch" type="xml">
             <form string="My Attendance" create="false" edit="false" delete="false">
                 <sheet>
-                    <div class="oe_title">
-                        <h1><field name="employee_id" readonly="1"/></h1>
+                    <!-- Header band -->
+                    <div class="o_att_header_band">
+                        <span class="o_att_header_label">My Attendance Record</span>
+                        <span class="o_att_header_title">
+                            <field name="employee_id" readonly="1" nolabel="1"/>
+                        </span>
                     </div>
+
+                    <!-- Late warning banner -->
+                    <div invisible="not is_late" class="o_att_banner o_att_banner_late">
+                        ⚠ Late Entry — <field name="late_minutes" nolabel="1" readonly="1"/> minutes after 9:30 AM
+                    </div>
+
                     <group>
                         <group string="Session Details">
                             <field name="check_in" readonly="1"/>
@@ -22,19 +32,24 @@
                         </group>
                         <group string="Status">
                             <field name="is_late" readonly="1"/>
-                            <field name="late_minutes" readonly="1"
-                                   invisible="not is_late"/>
-                            <field name="auto_checkout" readonly="1"
-                                   invisible="not auto_checkout"/>
+                            <field name="late_minutes" string="Late By (Min)"
+                                   readonly="1" invisible="not is_late"/>
+                            <field name="auto_checkout" string="Auto Checkout"
+                                   readonly="1" invisible="not auto_checkout"/>
                         </group>
                     </group>
+
+                    <!-- Auto checkout notice -->
+                    <div invisible="not auto_checkout" class="o_att_banner o_att_banner_autoco">
+                        This session was automatically closed at 19:00 because no manual check-out was recorded.
+                    </div>
                 </sheet>
             </form>
         </field>
     </record>
 
     <!-- ================================================================
-         EMPLOYEE VIEW: list — no create, no delete, no edit
+         EMPLOYEE: list
     ================================================================ -->
     <record id="view_attendance_employee_list" model="ir.ui.view">
         <field name="name">hr.attendance.employee.list</field>
@@ -43,19 +58,19 @@
         <field name="arch" type="xml">
             <list string="My Attendance"
                   create="false" delete="false" edit="false"
+                  default_order="check_in desc"
                   decoration-danger="is_late == True"
                   decoration-muted="auto_checkout == True">
-                <field name="check_in"/>
-                <field name="check_out"/>
-                <field name="worked_hours" widget="float_time"/>
-                <field name="is_late"/>
-                <field name="late_minutes" invisible="not is_late"/>
-                <field name="auto_checkout" optional="hide"/>
+                <field name="check_in" string="Date / Check In"/>
+                <field name="check_out" string="Check Out"/>
+                <field name="worked_hours" string="Hours" widget="float_time"/>
+                <field name="is_late" string="Late" readonly="1"/>
+                <field name="late_minutes" string="Late (min)" optional="show"/>
+                <field name="auto_checkout" string="Auto CO" optional="hide" readonly="1"/>
             </list>
         </field>
     </record>
 
-    <!-- EMPLOYEE ACTION -->
     <record id="action_my_attendance" model="ir.actions.act_window">
         <field name="name">My Attendance</field>
         <field name="res_model">hr.attendance</field>
@@ -67,15 +82,13 @@
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_attendance_employee_form')}),
         ]"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">No attendance records found.</p>
+            <p class="o_view_nocontent_smiling_face">No attendance records yet.</p>
+            <p>Use <strong>Check In / Check Out</strong> to record your attendance.</p>
         </field>
     </record>
 
     <!-- ================================================================
-         HR VIEW: list
-         create="false" — HR corrects by editing existing records, not creating new ones.
-         Employees use Check In / Check Out wizard for all attendance entries.
-         delete kept True so HR can remove ghost/duplicate records.
+         HR: list
     ================================================================ -->
     <record id="view_attendance_hr_list" model="ir.ui.view">
         <field name="name">hr.attendance.hr.list</field>
@@ -84,24 +97,22 @@
         <field name="arch" type="xml">
             <list string="All Attendance"
                   create="false"
+                  default_order="check_in desc"
                   decoration-danger="is_late == True"
                   decoration-muted="auto_checkout == True">
-                <field name="employee_id"/>
-                <field name="check_in"/>
-                <field name="check_out"/>
-                <field name="worked_hours" widget="float_time"/>
-                <field name="is_late"/>
-                <field name="late_minutes" invisible="not is_late"/>
-                <field name="auto_checkout" optional="hide"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="check_in" string="Check In"/>
+                <field name="check_out" string="Check Out"/>
+                <field name="worked_hours" string="Hours" widget="float_time"/>
+                <field name="is_late" string="Late" readonly="1"/>
+                <field name="late_minutes" string="Late (min)" optional="show"/>
+                <field name="auto_checkout" string="Auto CO" optional="hide" readonly="1"/>
             </list>
         </field>
     </record>
 
     <!-- ================================================================
-         HR VIEW: form
-         HR / Admin can EDIT check_in and check_out for corrections.
-         Employee field locked after record exists (cannot reassign to another employee).
-         No create — use Check In / Check Out wizard.
+         HR: form (correction mode)
     ================================================================ -->
     <record id="view_attendance_hr_form" model="ir.ui.view">
         <field name="name">hr.attendance.hr.form</field>
@@ -110,27 +121,41 @@
         <field name="arch" type="xml">
             <form string="Attendance Record" create="false">
                 <sheet>
-                    <div class="alert alert-warning" role="alert">
-                        Edit check-in or check-out times here to correct an employee's attendance record.
-                        Do not use this form to create new records — use the Check In / Check Out menu instead.
+                    <!-- Correction banner -->
+                    <div class="o_att_banner o_att_banner_correction">
+                        <strong>HR Correction Mode</strong> — Edit check-in or check-out times to correct
+                        this employee's attendance. To create new records use the
+                        <strong>Check In / Check Out</strong> menu.
                     </div>
-                    <div class="oe_title">
+
+                    <!-- Employee name -->
+                    <div class="oe_title" style="margin-bottom: 16px;">
                         <h1>
-                            <!-- Employee locked once record saved — cannot reassign -->
                             <field name="employee_id" readonly="id != False"/>
                         </h1>
                     </div>
+
+                    <!-- Status pills row -->
+                    <div class="o_att_pills_row">
+                        <span invisible="not is_late" class="o_att_pill o_att_pill_late">
+                            ⚠ Late — <field name="late_minutes" nolabel="1" readonly="1"/> min
+                        </span>
+                        <span invisible="not auto_checkout" class="o_att_pill o_att_pill_autoco">
+                            Auto Checkout
+                        </span>
+                    </div>
+
                     <group>
-                        <group string="Session">
-                            <!-- check_in and check_out are editable for HR corrections -->
+                        <group string="Session Times">
                             <field name="check_in"/>
                             <field name="check_out"/>
-                            <field name="worked_hours" widget="float_time" readonly="1"/>
+                            <field name="worked_hours" string="Hours Worked"
+                                   widget="float_time" readonly="1"/>
                         </group>
                         <group string="Analysis">
                             <field name="is_late" readonly="1"/>
-                            <field name="late_minutes" readonly="1"/>
-                            <field name="auto_checkout" readonly="1"/>
+                            <field name="late_minutes" string="Late By (Min)" readonly="1"/>
+                            <field name="auto_checkout" string="Auto Checkout" readonly="1"/>
                         </group>
                     </group>
                 </sheet>
@@ -138,7 +163,9 @@
         </field>
     </record>
 
-    <!-- HR VIEW: search -->
+    <!-- ================================================================
+         HR: search
+    ================================================================ -->
     <record id="view_attendance_hr_search" model="ir.ui.view">
         <field name="name">hr.attendance.hr.search</field>
         <field name="model">hr.attendance</field>
@@ -146,11 +173,13 @@
         <field name="arch" type="xml">
             <search string="Search Attendance">
                 <field name="employee_id"/>
+                <field name="check_in" string="Date"/>
+                <separator/>
                 <filter string="Late Entries" name="filter_late"
                         domain="[('is_late', '=', True)]"/>
-                <filter string="Auto Checkout Applied" name="filter_auto_checkout"
+                <filter string="Auto Checkout" name="filter_auto"
                         domain="[('auto_checkout', '=', True)]"/>
-                <filter string="Missing Checkout" name="filter_missing_checkout"
+                <filter string="Missing Checkout" name="filter_missing"
                         domain="[('check_out', '=', False)]"/>
                 <separator/>
                 <filter string="Group by Employee" name="group_employee"
@@ -161,12 +190,12 @@
         </field>
     </record>
 
-    <!-- HR ACTION -->
     <record id="action_hr_attendance_all" model="ir.actions.act_window">
         <field name="name">All Attendance</field>
         <field name="res_model">hr.attendance</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_attendance_hr_search"/>
+        <field name="context">{'search_default_group_employee': 1}</field>
         <field name="view_ids" eval="[
             (5, 0, 0),
             (0, 0, {'view_mode': 'list', 'view_id': ref('view_attendance_hr_list')}),
@@ -174,6 +203,7 @@
         ]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No attendance records found.</p>
+            <p>Employees check in using the <strong>Check In / Check Out</strong> menu.</p>
         </field>
     </record>
 
