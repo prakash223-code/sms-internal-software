@@ -22,6 +22,11 @@
         'views/custom_expense_views.xml',
         'views/custom_expense_menu.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_expense/static/src/css/expense.css',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,

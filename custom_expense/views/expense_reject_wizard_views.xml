@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_expense_reject_wizard_form" model="ir.ui.view">
+        <field name="name">custom.expense.reject.wizard.form</field>
+        <field name="model">custom.expense.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Expense">
+                <sheet>
+
+                    <!-- ── Warning banner ── -->
+                    <div class="o_exp_wizard_warning">
+                        <i class="fa fa-exclamation-triangle" title="Warning"/>
+                        <div>
+                            You are about to reject this expense.
+                            A clear reason is required — it will be visible to the submitter.
+                        </div>
+                    </div>
+
+                    <!-- ── Expense reference (readonly context) ── -->
+                    <div class="o_exp_section_label">
+                        <i class="fa fa-file-text-o" title="Expense"/> Expense
+                    </div>
+                    <div class="o_exp_info_card">
+                        <group>
+                            <field name="expense_id" readonly="1" nolabel="1"/>
+                        </group>
+                    </div>
+
+                    <div class="o_exp_divider"/>
+
+                    <!-- ── Rejection reason ── -->
+                    <div class="o_exp_section_label">
+                        <i class="fa fa-comment" title="Reason"/> Rejection Reason
+                    </div>
+                    <field name="rejection_reason"
+                           nolabel="1"
+                           required="1"
+                           placeholder="Provide a clear reason so the employee can correct and resubmit…"/>
+
+                </sheet>
+                <footer>
+                    <button name="action_confirm_reject"
+                            string="Confirm Rejection"
+                            type="object"
+                            class="btn-danger"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

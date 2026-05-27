@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- ================================================================
+         LIST VIEW
+         ================================================================ -->
     <record id="view_custom_expense_category_list" model="ir.ui.view">
         <field name="name">custom.expense.category.list</field>
         <field name="model">custom.expense.category</field>
@@ -13,22 +16,63 @@
         </field>
     </record>
 
+    <!-- ================================================================
+         FORM VIEW
+         ================================================================ -->
     <record id="view_custom_expense_category_form" model="ir.ui.view">
         <field name="name">custom.expense.category.form</field>
         <field name="model">custom.expense.category</field>
         <field name="arch" type="xml">
             <form string="Expense Category">
                 <sheet>
-                    <group>
-                        <field name="name"/>
-                        <field name="description"/>
-                        <field name="active"/>
-                    </group>
+
+                    <!-- ── Category name title ── -->
+                    <div class="oe_title">
+                        <div class="o_exp_ref_block">
+                            <div class="o_exp_ref_icon">
+                                <i class="fa fa-tags" title="Category"/>
+                            </div>
+                            <div class="o_exp_ref_text_group">
+                                <div class="o_exp_ref_label">Category Name</div>
+                                <div class="o_exp_ref_value">
+                                    <field name="name"
+                                           nolabel="1"
+                                           placeholder="e.g. Travel, Stationery…"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="o_exp_divider"/>
+
+                    <!-- ── Description ── -->
+                    <div class="o_exp_section_label">
+                        <i class="fa fa-align-left" title="Description"/> Description
+                    </div>
+                    <field name="description"
+                           nolabel="1"
+                           placeholder="Brief description of what this category covers…"/>
+
+                    <div class="o_exp_divider"/>
+
+                    <!-- ── Active toggle ── -->
+                    <div class="o_exp_section_label">
+                        <i class="fa fa-toggle-on" title="Status"/> Status
+                    </div>
+                    <div class="o_exp_info_card">
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </div>
+
                 </sheet>
             </form>
         </field>
     </record>
 
+    <!-- ================================================================
+         ACTION
+         ================================================================ -->
     <record id="action_custom_expense_category" model="ir.actions.act_window">
         <field name="name">Expense Categories</field>
         <field name="res_model">custom.expense.category</field>

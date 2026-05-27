@@ -1,0 +1,400 @@
+/* =============================================================
+   custom_expense — UI Styles
+   Prefix: o_exp_
+   ============================================================= */
+
+/* ── Banners ─────────────────────────────────────────────────── */
+.o_exp_banner {
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.o_exp_banner .fa {
+    margin-top: 2px;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.o_exp_banner_draft {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #94a3b8;
+    color: #475569;
+}
+
+.o_exp_banner_submitted {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+    font-weight: 600;
+}
+
+.o_exp_banner_approved {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #22c55e;
+    color: #14532d;
+    font-weight: 600;
+}
+
+.o_exp_banner_rejected {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+    font-weight: 600;
+}
+
+/* ── Reference / Title Block ─────────────────────────────────── */
+.o_exp_ref_block {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-bottom: 4px;
+}
+
+.o_exp_ref_icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.o_exp_ref_text_group {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.o_exp_ref_label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #94a3b8;
+}
+
+.o_exp_ref_value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.o_exp_ref_value .o_field_widget,
+.o_exp_ref_value .o_field_char {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    font-family: inherit;
+    line-height: inherit;
+}
+
+/* ── Section Labels ──────────────────────────────────────────── */
+.o_exp_section_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.o_exp_section_label .fa {
+    margin-right: 4px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* ── Divider ─────────────────────────────────────────────────── */
+.o_exp_divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 4px 0 14px;
+}
+
+/* ── Amount Stat Card ────────────────────────────────────────── */
+.o_exp_amount_card {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 12px;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 220px;
+}
+
+.o_exp_amount_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #3b82f6;
+    opacity: 0.85;
+}
+
+.o_exp_amount_value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #000000;
+    line-height: 1.1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.o_exp_amount_value .o_field_widget {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    line-height: inherit;
+}
+
+/* ── Info Card ───────────────────────────────────────────────── */
+.o_exp_info_card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+
+/* ── Rejection Panel ─────────────────────────────────────────── */
+.o_exp_rejection_panel {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+
+.o_exp_rejection_panel .o_exp_section_label {
+    color: #ef4444;
+}
+
+.o_exp_rejection_panel .o_field_widget {
+    color: #991b1b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* ── Kanban Card ─────────────────────────────────────────────── */
+.o_exp_kanban_ref {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+
+.o_exp_kanban_amount {
+    font-size: 26px;
+    font-weight: 700;
+    color: #000000;
+    line-height: 1.1;
+    margin: 8px 0 4px;
+}
+
+.o_exp_kanban_amount .o_field_widget {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    line-height: inherit;
+}
+
+.o_exp_kanban_meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.o_exp_kanban_meta .fa {
+    color: #94a3b8;
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.o_exp_kanban_divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 10px 0;
+}
+
+.o_exp_kanban_footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* ── Wizard ──────────────────────────────────────────────────── */
+.o_exp_wizard_warning {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-left: 4px solid #ef4444;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #991b1b;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.o_exp_wizard_warning .fa {
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+/* ── Amount card currency sub-label ─────────────────────────── */
+.o_exp_amount_currency {
+    font-size: 11px;
+    font-weight: 600;
+    color: #3b82f6;
+    opacity: 0.75;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.o_exp_amount_currency .o_field_widget {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+}
+
+/* ── Kanban C — Avatar + pills (replaces old kanban meta) ─── */
+
+/* Employee avatar row */
+.o_exp_kanban_avatar_row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.o_exp_kanban_avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid #e2e8f0;
+    background: #dbeafe;
+}
+
+.o_exp_kanban_avatar_name {
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_exp_kanban_avatar_name .o_field_widget {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+/* Category / project pills */
+.o_exp_kanban_pill_row {
+    margin-bottom: 5px;
+}
+
+.o_exp_kanban_pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f1f5f9;
+    border: 0.5px solid #e2e8f0;
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: #475569;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.o_exp_kanban_pill .fa {
+    font-size: 10px;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.o_exp_kanban_pill .o_field_widget {
+    font-size: inherit;
+    color: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_exp_kanban_pill_project {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.o_exp_kanban_pill_project .fa {
+    color: #4ade80;
+}
+
+/* Attachment badge in footer */
+.o_exp_kanban_attach_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f8fafc;
+    border: 0.5px solid #e2e8f0;
+    border-radius: 99px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.o_exp_kanban_attach_badge .o_field_widget {
+    font-size: inherit;
+    color: inherit;
+}
+
+/* ── Kanban card rounding + spacing ─────────────────────────── */
+.o_exp_kanban_view .o_kanban_record {
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 0.5px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.o_exp_kanban_view .o_kanban_record:last-child {
+    margin-bottom: 0;
+}
