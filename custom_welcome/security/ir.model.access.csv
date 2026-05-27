@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_welcome_dashboard_user,welcome.dashboard.user,model_welcome_dashboard,base.group_user,1,1,1,1
+access_welcome_quote_user,welcome.quote.user,model_welcome_quote,base.group_user,1,0,0,0
+access_welcome_quote_admin,welcome.quote.admin,model_welcome_quote,base.group_system,1,1,1,1

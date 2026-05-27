@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Top-level menu at sequence 1 so it appears first in the nav bar
+        (before Discuss at sequence 1 — use sequence 0 to beat it, or
+        match it and let Odoo sort alphabetically; adjust to taste).
+        The home action set via post_init_hook is what auto-opens on login;
+        this menu item lets users return to the welcome page at any time.
+    -->
+    <menuitem
+            id="menu_welcome_root"
+            name="Home"
+            sequence="0"
+            action="action_welcome_dashboard"
+            groups="base.group_user"
+            web_icon="custom_welcome,static/description/icon.png"/>
+
+</odoo>

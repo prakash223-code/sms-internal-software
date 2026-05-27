@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_welcome_dashboard_form" model="ir.ui.view">
+        <field name="name">welcome.dashboard.form</field>
+        <field name="model">welcome.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Welcome"
+                  class="o_welcome_form"
+                  create="false" edit="false" delete="false">
+                <sheet>
+
+                    <!-- ══════════════════════════════════════════
+                         GREETING HEADER
+                    ══════════════════════════════════════════ -->
+                    <div class="o_welcome_header">
+                        <div class="o_welcome_greeting">
+                            <field name="greeting_full" readonly="1" nolabel="1"/>
+                        </div>
+                        <div class="o_welcome_date_label">
+                            <i class="fa fa-calendar-o" title="Date"/>
+                            <field name="today_label" readonly="1" nolabel="1"/>
+                        </div>
+                    </div>
+
+                    <!-- ══════════════════════════════════════════
+                         QUOTE OF THE DAY
+                    ══════════════════════════════════════════ -->
+                    <div class="o_welcome_quote_card">
+                        <div class="o_welcome_quote_mark">❝</div>
+                        <div class="o_welcome_quote_body">
+                            <field name="quote_text" readonly="1" nolabel="1"/>
+                        </div>
+                        <div class="o_welcome_quote_author">
+                            —
+                            <field name="quote_author" readonly="1" nolabel="1"/>
+                        </div>
+                    </div>
+
+                    <!-- ══════════════════════════════════════════
+                         ATTENDANCE SECTION
+                    ══════════════════════════════════════════ -->
+                    <div class="o_welcome_section_label">
+                        <i class="fa fa-clock-o" title="Attendance"/>
+                        Today's Attendance
+                    </div>
+
+                    <!-- No employee record -->
+                    <div invisible="status != 'no_employee'"
+                         class="o_welcome_status_card o_welcome_card_warn">
+                        <div class="o_welcome_status_row">
+                            <span class="o_welcome_status_dot o_welcome_dot_warn"/>
+                            <span class="o_welcome_status_text">
+                                No employee record is linked to your account.
+                                Please contact HR.
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Holiday today -->
+                    <div invisible="status != 'holiday'"
+                         class="o_welcome_status_card o_welcome_card_holiday">
+                        <div class="o_welcome_status_row">
+                            <span class="o_welcome_status_dot o_welcome_dot_teal"/>
+                            <span class="o_welcome_status_text o_welcome_text_teal">
+                                <strong>Holiday —</strong>
+                                <field name="holiday_name" readonly="1" nolabel="1"/>
+                            </span>
+                        </div>
+                        <div class="o_welcome_holiday_note">
+                            Enjoy your day off! Check-in is not available today.
+                        </div>
+                    </div>
+
+                    <!-- Ready to check in -->
+                    <div invisible="status != 'out'"
+                         class="o_welcome_status_card o_welcome_card_out">
+                        <div class="o_welcome_status_row">
+                            <span class="o_welcome_status_dot o_welcome_dot_out"/>
+                            <span class="o_welcome_status_text o_welcome_text_muted">
+                                You haven't checked in yet.
+                            </span>
+                        </div>
+                        <div class="o_welcome_action_row">
+                            <button name="action_toggle" type="object"
+                                    string="Check In"
+                                    class="btn o_welcome_btn_checkin"/>
+                        </div>
+                    </div>
+
+                    <!-- Currently checked in -->
+                    <div invisible="status != 'in'"
+                         class="o_welcome_status_card o_welcome_card_in">
+                        <div class="o_welcome_status_row">
+                            <span class="o_welcome_status_dot o_welcome_dot_in"/>
+                            <span class="o_welcome_status_text o_welcome_text_blue">
+                                <strong>Checked In</strong>
+                            </span>
+                        </div>
+
+                        <div class="o_welcome_time_row">
+                            <div class="o_welcome_time_block">
+                                <div class="o_welcome_time_label">Checked in at</div>
+                                <div class="o_welcome_time_value">
+                                    <field name="last_check_in" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Late warning -->
+                        <div invisible="not is_late"
+                             class="o_welcome_late_banner">
+                            ⚠ Late by
+                            <field name="late_minutes" readonly="1" nolabel="1"/>
+                            minutes — threshold is 9:30 AM
+                        </div>
+
+                        <div class="o_welcome_action_row">
+                            <button name="action_toggle" type="object"
+                                    string="Check Out"
+                                    class="btn o_welcome_btn_checkout"/>
+                        </div>
+                    </div>
+
+                    <!-- Completed today -->
+                    <div invisible="status != 'done'"
+                         class="o_welcome_status_card o_welcome_card_done">
+                        <div class="o_welcome_status_row">
+                            <span class="o_welcome_status_dot o_welcome_dot_done"/>
+                            <span class="o_welcome_status_text o_welcome_text_green">
+                                <strong>All Done for Today ✓</strong>
+                            </span>
+                        </div>
+
+                        <div class="o_welcome_time_row">
+                            <div class="o_welcome_time_block">
+                                <div class="o_welcome_time_label">Check In</div>
+                                <div class="o_welcome_time_value">
+                                    <field name="last_check_in" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                            <div class="o_welcome_time_divider"/>
+                            <div class="o_welcome_time_block">
+                                <div class="o_welcome_time_label">Check Out</div>
+                                <div class="o_welcome_time_value">
+                                    <field name="last_check_out" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="o_welcome_done_note">
+                            Your attendance is recorded. See you tomorrow!
+                        </div>
+                    </div>
+
+                    <!-- Quick link to full attendance record -->
+                    <div class="o_welcome_footer_row">
+                        <button name="action_view_my_attendance" type="object"
+                                string="View My Attendance Records →"
+                                class="btn btn-link o_welcome_link_btn"/>
+                    </div>
+
+                    <!-- Hidden fields required by invisible conditions -->
+                    <field name="status" invisible="1"/>
+                    <field name="is_late" invisible="1"/>
+                    <field name="late_minutes" invisible="1"/>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_welcome_dashboard" model="ir.actions.act_window">
+        <field name="name">Welcome</field>
+        <field name="res_model">welcome.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="target">main</field>
+        <field name="view_id" ref="view_welcome_dashboard_form"/>
+    </record>
+
+</odoo>
