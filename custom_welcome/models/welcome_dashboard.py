@@ -8,36 +8,39 @@ from datetime import datetime, time, date
 class WelcomeDashboard(models.TransientModel):
     _name = 'welcome.dashboard'
     _description = 'Welcome Dashboard'
+    _rec_name = 'name'
 
     # ------------------------------------------------------------------
     # FIELDS
     # ------------------------------------------------------------------
 
+    name = fields.Char(default='Welcome', readonly=True)  # ← must be here as a real field
+
     # Greeting
-    greeting_full = fields.Char(readonly=True)   # "Good Morning, Alex!"
-    today_label   = fields.Char(readonly=True)   # "Wednesday, 28 May 2025"
+    greeting_full = fields.Char(readonly=True)
+    today_label = fields.Char(readonly=True)
 
     # Quote
-    quote_text   = fields.Text(readonly=True)
+    quote_text = fields.Text(readonly=True)
     quote_author = fields.Char(readonly=True)
 
-    # Employee (kept for Many2one widget rendering; hidden internally)
+    # Employee
     employee_id = fields.Many2one('hr.employee', readonly=True)
 
     # Attendance state
     status = fields.Selection([
-        ('out',         'Not Checked In'),
-        ('in',          'Checked In'),
-        ('done',        'All Done Today'),
-        ('holiday',     'Holiday Today'),
+        ('out', 'Not Checked In'),
+        ('in', 'Checked In'),
+        ('done', 'All Done Today'),
+        ('holiday', 'Holiday Today'),
         ('no_employee', 'No Employee Linked'),
     ], readonly=True)
 
-    last_check_in  = fields.Datetime(readonly=True)
+    last_check_in = fields.Datetime(readonly=True)
     last_check_out = fields.Datetime(readonly=True)
-    is_late        = fields.Boolean(readonly=True)
-    late_minutes   = fields.Integer(readonly=True)
-    holiday_name   = fields.Char(readonly=True)
+    is_late = fields.Boolean(readonly=True)
+    late_minutes = fields.Integer(readonly=True)
+    holiday_name = fields.Char(readonly=True)
 
     # ------------------------------------------------------------------
     # DEFAULT GET — populates every field on form open
@@ -53,7 +56,7 @@ class WelcomeDashboard(models.TransientModel):
         if quotes:
             idx = date.today().toordinal() % len(quotes)
             q = quotes[idx]
-            res['quote_text']   = q.text
+            res['quote_text'] = q.text
             res['quote_author'] = q.author
 
         # ── 2. Greeting (uses IST for label; employee tz used for attendance) ──
@@ -90,27 +93,27 @@ class WelcomeDashboard(models.TransientModel):
         except pytz.UnknownTimeZoneError:
             tz = pytz.timezone('Asia/Kolkata')
 
-        now_utc     = pytz.utc.localize(fields.Datetime.now())
+        now_utc = pytz.utc.localize(fields.Datetime.now())
         today_local = now_utc.astimezone(tz).date()
 
         # ── 5. Open attendance session? ──
         Attendance = self.env['hr.attendance'].sudo()
         open_session = Attendance.search([
             ('employee_id', '=', employee.id),
-            ('check_out',   '=', False),
+            ('check_out', '=', False),
         ], limit=1)
 
         if open_session:
-            res['status']        = 'in'
+            res['status'] = 'in'
             res['last_check_in'] = open_session.check_in
-            res['is_late']       = open_session.is_late
-            res['late_minutes']  = open_session.late_minutes
+            res['is_late'] = open_session.is_late
+            res['late_minutes'] = open_session.late_minutes
             return res
 
         # ── 6. Holiday check (only blocks check-in, not check-out) ──
         Holiday = self.env['company.holiday'].sudo()
         if Holiday.is_holiday(today_local):
-            res['status']       = 'holiday'
+            res['status'] = 'holiday'
             res['holiday_name'] = (
                 self.env['hr.attendance'].sudo()._get_holiday_name(today_local)
             )
@@ -126,17 +129,17 @@ class WelcomeDashboard(models.TransientModel):
 
         completed = Attendance.search([
             ('employee_id', '=', employee.id),
-            ('check_in',    '>=', today_start_utc),
-            ('check_in',    '<=', today_end_utc),
-            ('check_out',   '!=', False),
+            ('check_in', '>=', today_start_utc),
+            ('check_in', '<=', today_end_utc),
+            ('check_out', '!=', False),
         ], limit=1, order='check_in desc')
 
         if completed:
-            res['status']         = 'done'
-            res['last_check_in']  = completed.check_in
+            res['status'] = 'done'
+            res['last_check_in'] = completed.check_in
             res['last_check_out'] = completed.check_out
-            res['is_late']        = completed.is_late
-            res['late_minutes']   = completed.late_minutes
+            res['is_late'] = completed.is_late
+            res['late_minutes'] = completed.late_minutes
             return res
 
         # ── 8. Free to check in ──
@@ -158,11 +161,11 @@ class WelcomeDashboard(models.TransientModel):
 
         # Reload the welcome dashboard so status refreshes
         return {
-            'type':      'ir.actions.act_window',
+            'type': 'ir.actions.act_window',
             'res_model': 'welcome.dashboard',
             'view_mode': 'form',
-            'target':    'main',
-            'name':      'Welcome',
+            'target': 'main',
+            'name': 'Welcome',
         }
 
     # ------------------------------------------------------------------
