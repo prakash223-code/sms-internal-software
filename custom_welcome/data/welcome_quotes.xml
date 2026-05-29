@@ -21,8 +21,8 @@
 
     <record id="quote_04" model="welcome.quote">
         <field name="sequence">4</field>
-        <field name="text">Strive not to be a success, but rather to be of value.</field>
-        <field name="author">Albert Einstein</field>
+        <field name="text">It always seems impossible until it's done.</field>
+        <field name="author">Nelson Mandela</field>
     </record>
 
     <record id="quote_05" model="welcome.quote">
@@ -39,8 +39,8 @@
 
     <record id="quote_07" model="welcome.quote">
         <field name="sequence">7</field>
-        <field name="text">It always seems impossible until it's done.</field>
-        <field name="author">Nelson Mandela</field>
+        <field name="text">The process is more important than the results.</field>
+        <field name="author">MS Dhoni</field>
     </record>
 
     <record id="quote_08" model="welcome.quote">

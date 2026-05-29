@@ -2,3 +2,6 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_welcome_dashboard_user,welcome.dashboard.user,model_welcome_dashboard,base.group_user,1,1,1,1
 access_welcome_quote_user,welcome.quote.user,model_welcome_quote,base.group_user,1,0,0,0
 access_welcome_quote_admin,welcome.quote.admin,model_welcome_quote,base.group_system,1,1,1,1
+access_company_announcement_user,company.announcement.user,model_company_announcement,base.group_user,1,0,0,0
+access_company_announcement_hr,company.announcement.hr,model_company_announcement,hr.group_hr_user,1,1,1,1
+access_company_announcement_admin,company.announcement.admin,model_company_announcement,base.group_system,1,1,1,1

@@ -11,20 +11,28 @@
                 <sheet>
 
                     <!-- ══════════════════════════════════════════
-                         GREETING HEADER
+                         GREETING HEADER  +  LIVE CLOCK
                     ══════════════════════════════════════════ -->
                     <div class="o_welcome_header">
-                        <div class="o_welcome_greeting">
-                            <field name="greeting_full" readonly="1" nolabel="1"/>
+
+                        <div class="o_welcome_header_left">
+                            <div class="o_welcome_greeting">
+                                <field name="greeting_full" readonly="1" nolabel="1"/>
+                            </div>
+                            <div class="o_welcome_date_label">
+                                <i class="fa fa-calendar-o" title="Date"/>
+                                <field name="today_label" readonly="1" nolabel="1"/>
+                            </div>
                         </div>
-                        <div class="o_welcome_date_label">
-                            <i class="fa fa-calendar-o" title="Date"/>
-                            <field name="today_label" readonly="1" nolabel="1"/>
+
+                        <div class="o_welcome_clock_box">
+                            <widget name="live_clock"/>
                         </div>
+
                     </div>
 
                     <!-- ══════════════════════════════════════════
-                         QUOTE OF THE DAY
+                         QUOTE OF THE DAY  (full width always)
                     ══════════════════════════════════════════ -->
                     <div class="o_welcome_quote_card">
                         <div class="o_welcome_quote_mark">❝</div>
@@ -38,132 +46,228 @@
                     </div>
 
                     <!-- ══════════════════════════════════════════
-                         ATTENDANCE SECTION
+                         TWO-COLUMN CONTENT GRID
+                         Left  : today's attendance
+                         Right : this week + announcements
                     ══════════════════════════════════════════ -->
-                    <div class="o_welcome_section_label">
-                        <i class="fa fa-clock-o" title="Attendance"/>
-                        Today's Attendance
-                    </div>
+                    <div class="o_welcome_content_grid">
 
-                    <!-- No employee record -->
-                    <div invisible="status != 'no_employee'"
-                         class="o_welcome_status_card o_welcome_card_warn">
-                        <div class="o_welcome_status_row">
-                            <span class="o_welcome_status_dot o_welcome_dot_warn"/>
-                            <span class="o_welcome_status_text">
-                                No employee record is linked to your account.
-                                Please contact HR.
-                            </span>
-                        </div>
-                    </div>
+                        <!-- ── LEFT COLUMN ── -->
+                        <div class="o_welcome_col_left">
 
-                    <!-- Holiday today -->
-                    <div invisible="status != 'holiday'"
-                         class="o_welcome_status_card o_welcome_card_holiday">
-                        <div class="o_welcome_status_row">
-                            <span class="o_welcome_status_dot o_welcome_dot_teal"/>
-                            <span class="o_welcome_status_text o_welcome_text_teal">
-                                <strong>Holiday —</strong>
-                                <field name="holiday_name" readonly="1" nolabel="1"/>
-                            </span>
-                        </div>
-                        <div class="o_welcome_holiday_note">
-                            Enjoy your day off! Check-in is not available today.
-                        </div>
-                    </div>
+                            <div class="o_welcome_section_label">
+                                <i class="fa fa-clock-o" title="Attendance"/>
+                                Today's Attendance
+                            </div>
 
-                    <!-- Ready to check in -->
-                    <div invisible="status != 'out'"
-                         class="o_welcome_status_card o_welcome_card_out">
-                        <div class="o_welcome_status_row">
-                            <span class="o_welcome_status_dot o_welcome_dot_out"/>
-                            <span class="o_welcome_status_text o_welcome_text_muted">
-                                You haven't checked in yet.
-                            </span>
-                        </div>
-                        <div class="o_welcome_action_row">
-                            <button name="action_toggle" type="object"
-                                    string="Check In"
-                                    class="btn o_welcome_btn_checkin"/>
-                        </div>
-                    </div>
-
-                    <!-- Currently checked in -->
-                    <div invisible="status != 'in'"
-                         class="o_welcome_status_card o_welcome_card_in">
-                        <div class="o_welcome_status_row">
-                            <span class="o_welcome_status_dot o_welcome_dot_in"/>
-                            <span class="o_welcome_status_text o_welcome_text_blue">
-                                <strong>Checked In</strong>
-                            </span>
-                        </div>
-
-                        <div class="o_welcome_time_row">
-                            <div class="o_welcome_time_block">
-                                <div class="o_welcome_time_label">Checked in at</div>
-                                <div class="o_welcome_time_value">
-                                    <field name="last_check_in" readonly="1" nolabel="1"/>
+                            <!-- No employee record -->
+                            <div invisible="status != 'no_employee'"
+                                 class="o_welcome_status_card o_welcome_card_warn">
+                                <div class="o_welcome_status_row">
+                                    <span class="o_welcome_status_dot o_welcome_dot_warn"/>
+                                    <span class="o_welcome_status_text">
+                                        No employee record is linked to your account.
+                                        Please contact HR.
+                                    </span>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Late warning -->
-                        <div invisible="not is_late"
-                             class="o_welcome_late_banner">
-                            ⚠ Late by
-                            <field name="late_minutes" readonly="1" nolabel="1"/>
-                            minutes — threshold is 9:30 AM
-                        </div>
-
-                        <div class="o_welcome_action_row">
-                            <button name="action_toggle" type="object"
-                                    string="Check Out"
-                                    class="btn o_welcome_btn_checkout"/>
-                        </div>
-                    </div>
-
-                    <!-- Completed today -->
-                    <div invisible="status != 'done'"
-                         class="o_welcome_status_card o_welcome_card_done">
-                        <div class="o_welcome_status_row">
-                            <span class="o_welcome_status_dot o_welcome_dot_done"/>
-                            <span class="o_welcome_status_text o_welcome_text_green">
-                                <strong>All Done for Today ✓</strong>
-                            </span>
-                        </div>
-
-                        <div class="o_welcome_time_row">
-                            <div class="o_welcome_time_block">
-                                <div class="o_welcome_time_label">Check In</div>
-                                <div class="o_welcome_time_value">
-                                    <field name="last_check_in" readonly="1" nolabel="1"/>
+                            <!-- Holiday today -->
+                            <div invisible="status != 'holiday'"
+                                 class="o_welcome_status_card o_welcome_card_holiday">
+                                <div class="o_welcome_status_row">
+                                    <span class="o_welcome_status_dot o_welcome_dot_teal"/>
+                                    <span class="o_welcome_status_text o_welcome_text_teal">
+                                        <strong>Holiday —</strong>
+                                        <field name="holiday_name" readonly="1" nolabel="1"/>
+                                    </span>
+                                </div>
+                                <div class="o_welcome_holiday_note">
+                                    Enjoy your day off! Check-in is not available today.
                                 </div>
                             </div>
-                            <div class="o_welcome_time_divider"/>
-                            <div class="o_welcome_time_block">
-                                <div class="o_welcome_time_label">Check Out</div>
-                                <div class="o_welcome_time_value">
-                                    <field name="last_check_out" readonly="1" nolabel="1"/>
+
+                            <!-- Ready to check in -->
+                            <div invisible="status != 'out'"
+                                 class="o_welcome_status_card o_welcome_card_out">
+                                <div class="o_welcome_status_row">
+                                    <span class="o_welcome_status_dot o_welcome_dot_out"/>
+                                    <span class="o_welcome_status_text o_welcome_text_muted">
+                                        You haven't checked in yet.
+                                    </span>
+                                </div>
+                                <div class="o_welcome_action_row">
+                                    <button name="action_toggle" type="object"
+                                            string="Check In"
+                                            class="btn o_welcome_btn_checkin"/>
                                 </div>
                             </div>
+
+                            <!-- Currently checked in -->
+                            <div invisible="status != 'in'"
+                                 class="o_welcome_status_card o_welcome_card_in">
+                                <div class="o_welcome_status_row">
+                                    <span class="o_welcome_status_dot o_welcome_dot_in"/>
+                                    <span class="o_welcome_status_text o_welcome_text_blue">
+                                        <strong>Checked In</strong>
+                                    </span>
+                                </div>
+
+                                <div class="o_welcome_time_row">
+                                    <div class="o_welcome_time_block">
+                                        <div class="o_welcome_time_label">Checked in at</div>
+                                        <div class="o_welcome_time_value">
+                                            <field name="last_check_in" readonly="1" nolabel="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Late warning — wrapped span keeps number inline -->
+                                <div invisible="not is_late" class="o_welcome_late_banner">
+                                    <span class="o_welcome_late_text">
+                                        &#9888; Late by
+                                        <span class="o_welcome_late_num">
+                                            <field name="late_minutes" readonly="1" nolabel="1"/>
+                                        </span>
+                                        minutes — threshold is 9:30 AM
+                                    </span>
+                                </div>
+
+                                <div class="o_welcome_action_row">
+                                    <button name="action_toggle"
+                                            type="object"
+                                            string="Check Out"
+                                            class="btn o_welcome_btn_checkout"
+                                            confirm="Are you sure you want to check out?"/>
+                                </div>
+                            </div>
+
+                            <!-- Completed today -->
+                            <div invisible="status != 'done'"
+                                 class="o_welcome_status_card o_welcome_card_done">
+                                <div class="o_welcome_status_row">
+                                    <span class="o_welcome_status_dot o_welcome_dot_done"/>
+                                    <span class="o_welcome_status_text o_welcome_text_green">
+                                        <strong>All Done for Today ✓</strong>
+                                    </span>
+                                </div>
+
+                                <div class="o_welcome_time_row">
+                                    <div class="o_welcome_time_block">
+                                        <div class="o_welcome_time_label">Check In</div>
+                                        <div class="o_welcome_time_value">
+                                            <field name="last_check_in" readonly="1" nolabel="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="o_welcome_time_divider"/>
+                                    <div class="o_welcome_time_block">
+                                        <div class="o_welcome_time_label">Check Out</div>
+                                        <div class="o_welcome_time_value">
+                                            <field name="last_check_out" readonly="1" nolabel="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="o_welcome_done_note">
+                                    Your attendance is recorded. See you tomorrow!
+                                </div>
+                            </div>
+
+                            <!-- Footer link -->
+                            <div class="o_welcome_footer_row">
+                                <button name="action_view_my_attendance" type="object"
+                                        string="View My Attendance Records →"
+                                        class="btn btn-link o_welcome_link_btn"/>
+                            </div>
+
                         </div>
 
-                        <div class="o_welcome_done_note">
-                            Your attendance is recorded. See you tomorrow!
-                        </div>
-                    </div>
+                        <!-- ── RIGHT COLUMN ── -->
+                        <div class="o_welcome_col_right">
 
-                    <!-- Quick link to full attendance record -->
-                    <div class="o_welcome_footer_row">
-                        <button name="action_view_my_attendance" type="object"
-                                string="View My Attendance Records →"
-                                class="btn btn-link o_welcome_link_btn"/>
-                    </div>
+                            <!-- This Week (hidden when no employee) -->
+                            <div invisible="status == 'no_employee'">
+
+                                <div class="o_welcome_section_label">
+                                    <i class="fa fa-bar-chart" title="Weekly summary"/>
+                                    This Week
+                                </div>
+
+                                <div class="o_welcome_week_grid">
+
+                                    <div class="o_welcome_week_card o_welcome_week_card_blue">
+                                        <div class="o_welcome_week_label">
+                                            <i class="fa fa-calendar-check-o" title="Days present"/>
+                                            Days Present
+                                        </div>
+                                        <div class="o_welcome_week_value">
+                                            <field name="week_present_days" readonly="1" nolabel="1"/>
+                                            <span class="o_welcome_week_denom">
+                                                /&#160;<field name="week_working_days" readonly="1" nolabel="1"/>
+                                            </span>
+                                        </div>
+                                        <div class="o_welcome_week_sub">working days so far</div>
+                                    </div>
+
+                                    <div class="o_welcome_week_card o_welcome_week_card_teal">
+                                        <div class="o_welcome_week_label">
+                                            <i class="fa fa-clock-o" title="Hours logged"/>
+                                            Hours Logged
+                                        </div>
+                                        <div class="o_welcome_week_value">
+                                            <field name="week_hours" readonly="1" nolabel="1"
+                                                   digits="[4,1]"/>
+                                            <span class="o_welcome_week_denom">&#160;h</span>
+                                        </div>
+                                        <div class="o_welcome_week_sub">this week</div>
+                                    </div>
+
+                                    <div class="o_welcome_week_card o_welcome_week_card_amber">
+                                        <div class="o_welcome_week_label">
+                                            <i class="fa fa-exclamation-triangle" title="Late"/>
+                                            Late Arrivals
+                                        </div>
+                                        <div class="o_welcome_week_value">
+                                            <field name="week_late_count" readonly="1" nolabel="1"/>
+                                        </div>
+                                        <div class="o_welcome_week_sub">this week</div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- Announcements -->
+                            <div class="o_welcome_section_label">
+                                <i class="fa fa-bullhorn" title="Announcements"/>
+                                Announcements
+                            </div>
+
+                            <field name="announcement_ids"
+                                   nolabel="1"
+                                   readonly="1"
+                                   class="o_welcome_announce_list">
+                                <list string=""
+                                      create="false" delete="false" edit="false"
+                                      decoration-info="is_pinned == True">
+                                    <field name="is_pinned"  string="📌" width="32" readonly="1"/>
+                                    <field name="title"      string="Announcement"/>
+                                    <field name="date_label" string="When" readonly="1"/>
+                                    <field name="posted_by"  string="By"/>
+                                    <field name="body"       string="Details" optional="show"/>
+                                </list>
+                            </field>
+
+                        </div>
+
+                    </div><!-- /o_welcome_content_grid -->
 
                     <!-- Hidden fields required by invisible conditions -->
-                    <field name="status" invisible="1"/>
-                    <field name="is_late" invisible="1"/>
-                    <field name="late_minutes" invisible="1"/>
+                    <field name="status"            invisible="1"/>
+                    <field name="is_late"           invisible="1"/>
+                    <field name="late_minutes"      invisible="1"/>
+                    <field name="week_present_days" invisible="1"/>
+                    <field name="week_working_days" invisible="1"/>
 
                 </sheet>
             </form>
