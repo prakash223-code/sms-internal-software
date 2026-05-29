@@ -4,15 +4,6 @@ import { Component, onMounted, onWillUnmount, useRef, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
-// --------------------------------------------------------------------
-// LiveClock — infinite forward-rolling odometer
-//
-// Strategy: never decrease translateY. The tape grows downward.
-// Each tick we append the new digit at the bottom, animate down
-// one row, then trim old nodes from the top (keeping tape lean).
-// 9→0 and any other wrap is seamless because we always go forward.
-// --------------------------------------------------------------------
-
 class LiveClock extends Component {
 
     static template = xml`
@@ -32,12 +23,12 @@ class LiveClock extends Component {
     /*border: 1.5px solid #e2e8f0;*/
     border-radius: 12px;
     overflow: hidden;
-    padding: 0 22px;
+    padding: 0 14px;
     height: 82px;
-    min-width: 248px;
-    /*box-shadow: 0 2px 14px rgba(0,0,0,0.07);*/
+    box-shadow: 0 2px 14px rgba(0,0,0,0.07);
     user-select: none;
     box-sizing: border-box;
+    width: fit-content;
 }
 .owc_inner {
     display: flex;
@@ -46,15 +37,15 @@ class LiveClock extends Component {
     overflow: hidden;
     position: relative;
     z-index: 1;
+    gap: 0;
 }
 .owc_col {
     position: relative;
-    width: 34px;
+    width: 32px;
     height: 82px;
     overflow: hidden;
     flex-shrink: 0;
 }
-/* tape starts with one digit; we append downward */
 .owc_tape {
     display: flex;
     flex-direction: column;
@@ -84,7 +75,7 @@ class LiveClock extends Component {
     color: #cbd5e1;
     line-height: 82px;
     height: 82px;
-    width: 22px;
+    width: 12px;
     text-align: center;
     flex-shrink: 0;
     transition: opacity 0.15s ease;
@@ -113,13 +104,12 @@ class LiveClock extends Component {
 
     static props = { ...standardWidgetProps };
 
-    static ROW_H     = 82;
-    static DURATION  = 700;   // ms — comfortable mechanical pace
-    static EASING    = "cubic-bezier(0.4, 0.0, 0.2, 1)";
+    static ROW_H    = 82;
+    static DURATION = 700;
+    static EASING   = "cubic-bezier(0.4, 0.0, 0.2, 1)";
 
     setup() {
         this.shellRef  = useRef("shell");
-        // per-slot state: { tape, offset (px already translated), nodeCount }
         this._cols     = {};
         this._colons   = [];
         this._interval = null;
@@ -152,7 +142,6 @@ class LiveClock extends Component {
                 this._cols[key] = { tape, offset: 0, nodeCount: 0 };
             });
 
-            // Seed with current time — no animation
             const now = new Date();
             const hh  = String(now.getHours()  ).padStart(2,"0");
             const mm  = String(now.getMinutes()).padStart(2,"0");
@@ -160,7 +149,7 @@ class LiveClock extends Component {
             const init = { h0:hh[0], h1:hh[1], m0:mm[0], m1:mm[1], s0:ss[0], s1:ss[1] };
 
             Object.entries(init).forEach(([key, d]) => {
-                this._appendDigit(key, d);   // adds node, no animation
+                this._appendDigit(key, d);
             });
 
             this._updateColons(now.getSeconds() % 2 === 0);
@@ -170,54 +159,39 @@ class LiveClock extends Component {
         onWillUnmount(() => clearInterval(this._interval));
     }
 
-    // ── append a digit span to the bottom of a tape (no animation) ──
     _appendDigit(key, digit) {
         const col  = this._cols[key];
         const span = document.createElement("span");
-        span.className  = "owc_digit";
+        span.className   = "owc_digit";
         span.textContent = String(digit);
         col.tape.appendChild(span);
         col.nodeCount++;
     }
 
-    // ── roll forward to a new digit ──────────────────────────────────
     _roll(key, newDigit) {
         const col  = this._cols[key];
         const { tape } = col;
 
-        // Peek at what's currently showing (last appended digit)
-        const current = tape.lastElementChild
-            ? tape.lastElementChild.textContent
-            : null;
-
-        if (current === String(newDigit)) return;  // unchanged
+        const current = tape.lastElementChild?.textContent;
+        if (current === String(newDigit)) return;
 
         const RH = LiveClock.ROW_H;
-
-        // Append the new digit below
         this._appendDigit(key, newDigit);
 
-        // New translateY = -(nodeCount - 1) * ROW_H  (show the last node)
         const targetOffset = -(col.nodeCount - 1) * RH;
-
-        // Animate
         tape.style.transition = `transform ${LiveClock.DURATION}ms ${LiveClock.EASING}`;
         tape.style.transform  = `translateY(${targetOffset}px)`;
         col.offset = targetOffset;
 
-        // After animation: trim all but the last node, reset to translateY(0)
-        const trimDelay = LiveClock.DURATION + 50;
         setTimeout(() => {
-            // keep only the last child
             while (tape.children.length > 1) {
                 tape.removeChild(tape.firstElementChild);
                 col.nodeCount--;
             }
-            // silent snap back to 0
             tape.style.transition = "none";
             tape.style.transform  = "translateY(0px)";
             col.offset = 0;
-        }, trimDelay);
+        }, LiveClock.DURATION + 50);
     }
 
     _updateColons(visible) {
