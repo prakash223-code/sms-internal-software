@@ -25,7 +25,7 @@ class ProjectProject(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Project Documents',
             'res_model': 'project.document',
-            'view_mode': 'list,form',
+            'view_mode': 'kanban,list,form',
             'domain': [('project_id', '=', self.id)],
             'context': {'default_project_id': self.id},
         }

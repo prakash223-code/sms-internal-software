@@ -1,13 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--  ================================================================
-           FORM VIEW
-           ================================================================  -->
+
+    <!-- ================================================================
+         FORM VIEW
+         ================================================================ -->
     <record id="view_hr_employee_document_form" model="ir.ui.view">
         <field name="name">hr.employee.document.form</field>
         <field name="model">hr.employee.document</field>
         <field name="arch" type="xml">
             <form string="Employee Document">
-                <!--  ── Banners (before sheet) ────────────────────────────  -->
+
+                <!-- Banners — before <sheet> so they span full width on all viewports -->
                 <div class="o_hrd_banner o_hrd_banner_info" invisible="filename">
                     <i class="fa fa-cloud-upload" title="Upload Required"/>
                     <div>
@@ -22,8 +25,10 @@
                         — use the Preview link below to open it in your browser.
                     </div>
                 </div>
+
                 <sheet>
-                    <!--  ── Title / Reference block ─────────────────────────  -->
+
+                    <!-- Reference block — uses flex + max-width so it scales on every screen -->
                     <div class="oe_title">
                         <div class="o_hrd_ref_block">
                             <div class="o_hrd_ref_icon">
@@ -37,12 +42,14 @@
                             </div>
                         </div>
                     </div>
-                    <!--  ── Document Details ─────────────────────────────────  -->
+
+                    <!-- Document Details -->
                     <div class="o_hrd_section_label">
                         <i class="fa fa-info-circle" title="Details"/>
                         Document Details
                     </div>
                     <div class="o_hrd_info_card">
+                        <!-- Two nested groups → Odoo stacks them on narrow viewports automatically -->
                         <group>
                             <group>
                                 <field name="employee_id" readonly="1"/>
@@ -54,8 +61,10 @@
                             </group>
                         </group>
                     </div>
+
                     <div class="o_hrd_divider"/>
-                    <!--  ── File ────────────────────────────────────────────  -->
+
+                    <!-- File upload -->
                     <div class="o_hrd_section_label">
                         <i class="fa fa-paperclip" title="File"/>
                         Attached File
@@ -64,20 +73,22 @@
                         <group>
                             <field name="file" filename="filename" string="Attach File" widget="binary"/>
                             <field name="filename" invisible="1"/>
-                            <!--  File type badge (shows after upload)  -->
-                            <div invisible="not file_type or file_type == '—'" style="padding: 2px 0 4px 0;">
+                            <!-- File type badge — shown after a file is uploaded -->
+                            <div invisible="not file_type or file_type == '—'" style="padding:2px 0 4px 0;">
                                 <span class="o_hrd_filetype_badge">
                                     <i class="fa fa-file-o" title="Type"/>
                                     <field name="file_type" readonly="1" nolabel="1"/>
                                 </span>
                             </div>
-                            <!--  Preview link  -->
-                            <field name="file_url" string="Preview in Browser" widget="url" text="Click to Preview"
-                                   invisible="not file_url" readonly="1"/>
+                            <!-- Preview link -->
+                            <field name="file_url" string="Preview in Browser" widget="url"
+                                   text="Click to Preview" invisible="not file_url" readonly="1"/>
                         </group>
                     </div>
+
                     <div class="o_hrd_divider"/>
-                    <!--  ── Notes ───────────────────────────────────────────  -->
+
+                    <!-- Notes -->
                     <div class="o_hrd_section_label">
                         <i class="fa fa-sticky-note-o" title="Notes"/>
                         Notes
@@ -86,47 +97,61 @@
                         <field name="notes" string="" nolabel="1"
                                placeholder="Optional remarks about this document..."/>
                     </group>
+
                 </sheet>
             </form>
         </field>
     </record>
-    <!--  ================================================================
-           LIST VIEW — standalone (via smart button)
-           ================================================================  -->
+
+
+    <!-- ================================================================
+         LIST VIEW
+         ================================================================ -->
     <record id="view_hr_employee_document_list" model="ir.ui.view">
         <field name="name">hr.employee.document.list</field>
         <field name="model">hr.employee.document</field>
         <field name="arch" type="xml">
-            <list string="Documents" create="1" delete="1" decoration-info="document_type == 'id_proof'"
+            <list string="Documents" create="1" delete="1"
+                  decoration-info="document_type == 'id_proof'"
                   decoration-success="document_type in ('educational', 'contract')"
-                  decoration-warning="document_type == 'experience'" decoration-danger="document_type == 'medical'">
+                  decoration-warning="document_type == 'experience'"
+                  decoration-danger="document_type == 'medical'">
+
+                <!-- Always-visible columns — minimal set that fits on mobile -->
                 <field name="name" string="Document Name"/>
                 <field name="document_type" string="Category" widget="badge"
                        decoration-info="document_type == 'id_proof'"
                        decoration-success="document_type in ('educational', 'contract')"
                        decoration-warning="document_type == 'experience'"
                        decoration-danger="document_type == 'medical'"/>
-                <field name="file_type" string="Type" readonly="1"/>
-                <field name="employee_id" string="Employee"/>
-                <field name="file" filename="filename" string="File" widget="binary"/>
-                <field name="filename" string="File Name" readonly="1"/>
-                <field name="file_url" string="Preview" widget="url" text="Preview" invisible="not file_url"
-                       readonly="1"/>
-                <field name="upload_date" string="Uploaded On" readonly="1"/>
-                <field name="uploaded_by" string="Uploaded By" readonly="1"/>
-                <field name="notes" string="Notes" optional="show"/>
+
+                <!-- optional columns collapse on narrow screens via Odoo list widget -->
+                <field name="file_type" string="Type" readonly="1" optional="show"/>
+                <field name="employee_id" string="Employee" optional="show"/>
+                <field name="file" filename="filename" string="File"
+                       widget="binary" optional="show"/>
+                <field name="filename" string="File Name" readonly="1" optional="hide"/>
+                <field name="file_url" string="Preview" widget="url"
+                       text="Preview" invisible="not file_url" readonly="1" optional="show"/>
+                <field name="upload_date" string="Uploaded On" readonly="1" optional="show"/>
+                <field name="uploaded_by" string="Uploaded By" readonly="1" optional="hide"/>
+                <field name="notes" string="Notes" optional="hide"/>
+
             </list>
         </field>
     </record>
-    <!--  ================================================================
-           KANBAN VIEW
-           ================================================================  -->
+
+
+    <!-- ================================================================
+         KANBAN VIEW
+         ================================================================ -->
     <record id="view_hr_employee_document_kanban" model="ir.ui.view">
         <field name="name">hr.employee.document.kanban</field>
         <field name="model">hr.employee.document</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="document_type" quick_create="false" class="o_hrd_kanban_view">
-                <!--  Fields needed in the template  -->
+            <kanban default_group_by="document_type" quick_create="false"
+                    class="o_hrd_kanban_view">
+
                 <field name="name"/>
                 <field name="document_type"/>
                 <field name="file_type"/>
@@ -135,72 +160,111 @@
                 <field name="uploaded_by"/>
                 <field name="file_url"/>
                 <field name="filename"/>
+
                 <templates>
                     <t t-name="card">
-                        <!--  ── Header: name + document_type badge ───────────  -->
-                        <div class="d-flex justify-content-between align-items-start mb-2" style="gap:8px;">
-                            <div class="o_hrd_kanban_name">
-                                <field name="name"/>
+
+                        <!-- ── Header: coloured file-type icon + title + badge ── -->
+                        <div class="o_hrd_card_header">
+
+                            <!-- File-type icon: colour and FA icon chosen by extension -->
+                            <t t-set="ft"
+                               t-value="record.file_type.raw_value ? record.file_type.raw_value.toUpperCase() : ''"/>
+                            <div t-attf-class="o_hrd_doc_icon #{
+                  ft == 'PDF'  ? 'o_hrd_icon_pdf'   :
+                  ft == 'DOC' or ft == 'DOCX' ? 'o_hrd_icon_word'  :
+                  ft == 'XLS' or ft == 'XLSX' ? 'o_hrd_icon_excel' :
+                  ft == 'PNG' or ft == 'JPG' or ft == 'JPEG' or ft == 'GIF' or ft == 'WEBP' or ft == 'SVG' ? 'o_hrd_icon_image' :
+                  ft == 'PPT' or ft == 'PPTX' ? 'o_hrd_icon_ppt'   :
+                  ft == 'ZIP' or ft == 'RAR'  or ft == '7Z' ? 'o_hrd_icon_zip'   :
+                  ft == 'TXT' ? 'o_hrd_icon_txt'   :
+                  'o_hrd_icon_other'
+              }">
+                                <i t-attf-class="fa #{
+                    ft == 'PDF'  ? 'fa-file-pdf-o'        :
+                    ft == 'DOC' or ft == 'DOCX' ? 'fa-file-word-o'       :
+                    ft == 'XLS' or ft == 'XLSX' ? 'fa-file-excel-o'      :
+                    ft == 'PNG' or ft == 'JPG' or ft == 'JPEG' or ft == 'GIF' or ft == 'WEBP' or ft == 'SVG' ? 'fa-file-image-o' :
+                    ft == 'PPT' or ft == 'PPTX' ? 'fa-file-powerpoint-o' :
+                    ft == 'ZIP' or ft == 'RAR'  or ft == '7Z' ? 'fa-file-archive-o' :
+                    ft == 'TXT' ? 'fa-file-text-o'        :
+                    'fa-file-o'
+                }" t-att-title="ft or 'File'"/>
+                                <t t-if="ft">
+                                    <span class="o_hrd_doc_icon_ext">
+                                        <t t-esc="ft"/>
+                                    </span>
+                                </t>
                             </div>
-                            <field name="document_type" widget="badge" decoration-info="document_type == 'id_proof'"
-                                   decoration-success="document_type in ('educational', 'contract')"
-                                   decoration-warning="document_type == 'experience'"
-                                   decoration-danger="document_type == 'medical'"/>
+
+                            <!-- Title column: document name + type badge -->
+                            <div class="o_hrd_card_title">
+                                <div class="o_hrd_card_name">
+                                    <field name="name"/>
+                                </div>
+                                <field name="document_type" widget="badge"
+                                       decoration-info="document_type == 'id_proof'"
+                                       decoration-success="document_type in ('educational', 'contract')"
+                                       decoration-warning="document_type == 'experience'"
+                                       decoration-danger="document_type == 'medical'"/>
+                            </div>
                         </div>
-                        <!--  ── File type pill ───────────────────────────────  -->
-                        <div class="o_hrd_kanban_pill"
-                             t-if="record.file_type.raw_value and record.file_type.raw_value != '—'"
-                             style="margin-bottom:4px; width:fit-content;">
-                            <i class="fa fa-file-o" title="File Type"/>
-                            <t t-esc="record.file_type.raw_value"/>
-                        </div>
+
                         <div class="o_hrd_kanban_divider"/>
-                        <!--  ── Employee avatar row ──────────────────────────  -->
-                        <div class="o_hrd_kanban_avatar_row">
-                            <img t-att-src="'/web/image/hr.employee/' + record.employee_id.raw_value + '/avatar_128'"
-                                 class="o_hrd_kanban_avatar" alt="Employee"/>
-                            <span class="o_hrd_kanban_avatar_name">
+
+                        <!-- ── Meta: employee + upload date ─────────────────── -->
+                        <div class="o_hrd_card_meta">
+                            <div class="o_hrd_card_meta_row">
+                                <i class="fa fa-user-o" title="Employee"/>
                                 <field name="employee_id"/>
-                            </span>
+                            </div>
+                            <div class="o_hrd_card_meta_row">
+                                <i class="fa fa-calendar-o" title="Upload Date"/>
+                                <field name="upload_date"/>
+                                <t t-if="record.uploaded_by.raw_value">
+                                    <span class="o_hrd_card_meta_sep">·</span>
+                                    <field name="uploaded_by"/>
+                                </t>
+                            </div>
                         </div>
-                        <!--  ── Upload date ──────────────────────────────────  -->
-                        <div class="o_hrd_kanban_meta">
-                            <i class="fa fa-calendar-o" title="Upload Date"/>
-                            <field name="upload_date"/>
-                            <t t-if="record.uploaded_by.raw_value">
-                                <span class="o_hrd_kanban_meta_sep">·</span>
-                                <field name="uploaded_by"/>
-                            </t>
-                        </div>
+
                         <div class="o_hrd_kanban_divider"/>
-                        <!--  ── Footer: preview / no file ───────────────────  -->
-                        <div class="o_hrd_kanban_footer">
+
+                        <!-- ── Footer: preview or no-file pill ──────────────── -->
+                        <div class="o_hrd_card_footer">
                             <t t-if="record.file_url.raw_value">
-                                <a class="o_hrd_preview_badge" t-att-href="record.file_url.raw_value" target="_blank"
+                                <a class="o_hrd_preview_btn"
+                                   role="button"
+                                   t-att-href="record.file_url.raw_value"
+                                   target="_blank"
                                    onclick="event.stopPropagation()">
-                                    <i class="fa fa-eye" title="Preview File"/>
+                                    <i class="fa fa-eye" title="Preview"/>
                                     Preview File
                                 </a>
                             </t>
                             <t t-else="">
-                                <span class="o_hrd_nofile_badge">
+                                <div class="o_hrd_nofile_btn">
                                     <i class="fa fa-cloud-upload" title="No File"/>
-                                    No file yet
-                                </span>
+                                    No file attached
+                                </div>
                             </t>
                         </div>
+
                     </t>
                 </templates>
             </kanban>
         </field>
     </record>
-    <!--  ================================================================
-           ACTION — list + kanban + form
-           ================================================================  -->
+
+
+    <!-- ================================================================
+         ACTION
+         ================================================================ -->
     <record id="action_hr_employee_document" model="ir.actions.act_window">
         <field name="name">Employee Documents</field>
         <field name="res_model">hr.employee.document</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">{'default_employee_id': active_id}</field>
     </record>
+
 </odoo>

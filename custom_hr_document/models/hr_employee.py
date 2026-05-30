@@ -23,7 +23,7 @@ class HrEmployee(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Employee Documents',
             'res_model': 'hr.employee.document',
-            'view_mode': 'list,kanban,form',
+            'view_mode': 'kanban,list,form',
             'domain': [('employee_id', '=', self.id)],
             'context': {'default_employee_id': self.id},
         }

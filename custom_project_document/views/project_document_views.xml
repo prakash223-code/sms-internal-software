@@ -9,106 +9,245 @@
     <field name="model">project.document</field>
     <field name="arch" type="xml">
       <form string="Project Document">
+
+        <!-- Banners before <sheet> — span full viewport width -->
+        <div class="o_prd_banner o_prd_banner_pending" invisible="filename">
+          <i class="fa fa-cloud-upload" title="Upload Required"/>
+          <div><strong>No file yet</strong> — attach a document file below to complete this record.</div>
+        </div>
+        <div class="o_prd_banner o_prd_banner_success" invisible="not filename">
+          <i class="fa fa-check-circle" title="File Uploaded"/>
+          <div><strong>File attached</strong> — use the Preview link below to open it in your browser.</div>
+        </div>
+
         <sheet>
+
+          <!-- Reference block: scales from 320px to 1440px via CSS -->
+          <div class="oe_title">
+            <div class="o_prd_ref_block">
+              <div class="o_prd_ref_icon">
+                <i class="fa fa-folder-open" title="Project Document"/>
+              </div>
+              <div class="o_prd_ref_text_group">
+                <div class="o_prd_ref_label">Document Name</div>
+                <div class="o_prd_ref_value">
+                  <field name="name" nolabel="1"
+                         placeholder="e.g. Project Contract, Design Blueprint"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Document Details -->
+          <div class="o_prd_section_label">
+            <i class="fa fa-info-circle" title="Details"/> Document Details
+          </div>
+          <div class="o_prd_info_card">
+            <group>
+              <group>
+                <field name="project_id" readonly="1"/>
+                <field name="document_type"/>
+              </group>
+              <group>
+                <field name="upload_date" readonly="1"/>
+                <field name="uploaded_by" readonly="1"/>
+              </group>
+            </group>
+          </div>
+
+          <div class="o_prd_divider"/>
+
+          <!-- File upload -->
+          <div class="o_prd_section_label">
+            <i class="fa fa-paperclip" title="File"/> Attached File
+          </div>
+          <div class="o_prd_file_card">
+            <group>
+              <field name="file" filename="filename" string="Attach File" widget="binary"/>
+              <field name="filename" invisible="1"/>
+              <!-- File type badge — visible after upload -->
+              <div invisible="not file_type or file_type == '—'" style="padding:2px 0 4px 0;">
+                <span class="o_prd_filetype_badge">
+                  <i class="fa fa-file-o" title="Type"/>
+                  <field name="file_type" readonly="1" nolabel="1"/>
+                </span>
+              </div>
+              <field name="file_url" string="Preview in Browser" widget="url"
+                     text="Click to Preview" invisible="not file_url" readonly="1"/>
+            </group>
+          </div>
+
+          <div class="o_prd_divider"/>
+
+          <!-- Notes -->
+          <div class="o_prd_section_label">
+            <i class="fa fa-sticky-note-o" title="Notes"/> Notes
+          </div>
           <group>
-            <group string="Document Details">
-              <field name="name"
-                     string="Document Name"
-                     placeholder="e.g. Project Contract, Design Blueprint"/>
-              <field name="document_type"/>
-              <field name="project_id" readonly="1"/>
-            </group>
-            <group string="Upload Info">
-              <field name="file_type" readonly="1"/>
-              <field name="upload_date" readonly="1"/>
-              <field name="uploaded_by" readonly="1"/>
-            </group>
-          </group>
-
-          <group string="File">
-            <field name="file"
-                   filename="filename"
-                   string="Attach File"
-                   widget="binary"/>
-            <field name="filename" invisible="1"/>
-            <field name="file_url"
-                   string="Preview in Browser"
-                   widget="url"
-                   text="Click to Preview"
-                   invisible="not file_url"
-                   readonly="1"/>
-          </group>
-
-          <group string="Notes">
-            <field name="notes"
-                   string=""
+            <field name="notes" string="" nolabel="1"
                    placeholder="Optional remarks about this document..."/>
           </group>
+
         </sheet>
       </form>
     </field>
   </record>
 
+
   <!-- ================================================================
-       LIST VIEW — standalone (opened via smart button)
+       LIST VIEW
        ================================================================ -->
   <record id="view_project_document_list" model="ir.ui.view">
     <field name="name">project.document.list</field>
     <field name="model">project.document</field>
     <field name="arch" type="xml">
-      <list string="Documents"
-            create="1"
-            delete="1">
+      <list string="Documents" create="1" delete="1"
+            decoration-success="document_type in ('contract', 'approval')"
+            decoration-info="document_type in ('blueprint', 'report', 'minutes')"
+            decoration-warning="document_type in ('invoice', 'handover')">
 
-        <field name="name"
-               string="Document Name"/>
+        <!-- Always-visible on mobile -->
+        <field name="name" string="Document Name"/>
+        <field name="document_type" string="Category" widget="badge"
+               decoration-success="document_type in ('contract', 'approval')"
+               decoration-info="document_type in ('blueprint', 'report', 'minutes')"
+               decoration-warning="document_type in ('invoice', 'handover')"/>
 
-        <field name="document_type"
-               string="Category"/>
-
-        <field name="file_type"
-               string="File Type"
-               readonly="1"/>
-
-        <field name="file"
-               filename="filename"
-               string="File"
-               widget="binary"/>
-
-        <field name="filename"
-               string="File Name"
-               readonly="1"/>
-
-        <field name="file_url"
-               string="Preview"
-               widget="url"
-               text="Preview"
-               invisible="not file_url"
-               readonly="1"/>
-
-        <field name="upload_date"
-               string="Uploaded On"
-               readonly="1"/>
-
-        <field name="uploaded_by"
-               string="Uploaded By"
-               readonly="1"/>
-
-        <field name="notes"
-               string="Notes"
-               optional="show"/>
+        <!-- Optional columns — collapse on narrow screens -->
+        <field name="file_type"   string="Type"        readonly="1"  optional="show"/>
+        <field name="project_id"  string="Project"                   optional="show"/>
+        <field name="file" filename="filename" string="File"
+               widget="binary"                                        optional="show"/>
+        <field name="filename"    string="File Name"   readonly="1"  optional="hide"/>
+        <field name="file_url"    string="Preview"     widget="url"
+               text="Preview" invisible="not file_url" readonly="1"  optional="show"/>
+        <field name="upload_date" string="Uploaded On" readonly="1"  optional="show"/>
+        <field name="uploaded_by" string="Uploaded By" readonly="1"  optional="hide"/>
+        <field name="notes"       string="Notes"                      optional="hide"/>
 
       </list>
     </field>
   </record>
 
+
   <!-- ================================================================
-       ACTION
+       KANBAN VIEW
+       ================================================================ -->
+  <record id="view_project_document_kanban" model="ir.ui.view">
+    <field name="name">project.document.kanban</field>
+    <field name="model">project.document</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="document_type" quick_create="false"
+              class="o_prd_kanban_view">
+
+        <field name="name"/>
+        <field name="document_type"/>
+        <field name="file_type"/>
+        <field name="project_id"/>
+        <field name="upload_date"/>
+        <field name="uploaded_by"/>
+        <field name="file_url"/>
+        <field name="filename"/>
+
+        <templates>
+          <t t-name="card">
+
+            <!-- ── Header: file-type icon + name + category badge ── -->
+            <div class="o_prd_card_header">
+
+              <!-- Coloured icon keyed on file extension -->
+              <t t-set="ft" t-value="record.file_type.raw_value ? record.file_type.raw_value.toUpperCase() : ''"/>
+              <div t-attf-class="o_prd_doc_icon #{
+                  ft == 'PDF'  ? 'o_prd_icon_pdf'   :
+                  ft == 'DOC' or ft == 'DOCX' ? 'o_prd_icon_word'  :
+                  ft == 'XLS' or ft == 'XLSX' ? 'o_prd_icon_excel' :
+                  ft == 'PNG' or ft == 'JPG' or ft == 'JPEG' or ft == 'GIF' or ft == 'WEBP' or ft == 'SVG' ? 'o_prd_icon_image' :
+                  ft == 'PPT' or ft == 'PPTX' ? 'o_prd_icon_ppt'   :
+                  ft == 'ZIP' or ft == 'RAR'  or ft == '7Z' ? 'o_prd_icon_zip'   :
+                  ft == 'TXT' ? 'o_prd_icon_txt'   :
+                  'o_prd_icon_other'
+              }">
+                <i t-attf-class="fa #{
+                    ft == 'PDF'  ? 'fa-file-pdf-o'        :
+                    ft == 'DOC' or ft == 'DOCX' ? 'fa-file-word-o'       :
+                    ft == 'XLS' or ft == 'XLSX' ? 'fa-file-excel-o'      :
+                    ft == 'PNG' or ft == 'JPG' or ft == 'JPEG' or ft == 'GIF' or ft == 'WEBP' or ft == 'SVG' ? 'fa-file-image-o' :
+                    ft == 'PPT' or ft == 'PPTX' ? 'fa-file-powerpoint-o' :
+                    ft == 'ZIP' or ft == 'RAR'  or ft == '7Z' ? 'fa-file-archive-o' :
+                    ft == 'TXT' ? 'fa-file-text-o'        :
+                    'fa-file-o'
+                }" t-att-title="ft or 'File'"/>
+                <t t-if="ft">
+                  <span class="o_prd_doc_icon_ext"><t t-esc="ft"/></span>
+                </t>
+              </div>
+
+              <!-- Title column: name + document_type badge -->
+              <div class="o_prd_card_title">
+                <div class="o_prd_card_name">
+                  <field name="name"/>
+                </div>
+                <field name="document_type" widget="badge"
+                       decoration-success="document_type in ('contract', 'approval')"
+                       decoration-info="document_type in ('blueprint', 'report', 'minutes')"
+                       decoration-warning="document_type in ('invoice', 'handover')"/>
+              </div>
+            </div>
+
+            <div class="o_prd_kanban_divider"/>
+
+            <!-- ── Meta: project + uploader + date ───────────────── -->
+            <div class="o_prd_card_meta">
+              <div class="o_prd_card_meta_row">
+                <i class="fa fa-briefcase" title="Project"/>
+                <field name="project_id"/>
+              </div>
+              <div class="o_prd_card_meta_row">
+                <i class="fa fa-calendar-o" title="Upload Date"/>
+                <field name="upload_date"/>
+                <t t-if="record.uploaded_by.raw_value">
+                  <span class="o_prd_card_meta_sep">·</span>
+                  <field name="uploaded_by"/>
+                </t>
+              </div>
+            </div>
+
+            <div class="o_prd_kanban_divider"/>
+
+            <!-- ── Footer: preview or no-file ────────────────────── -->
+            <div class="o_prd_card_footer">
+              <t t-if="record.file_url.raw_value">
+                <a class="o_prd_preview_btn"
+                   role="button"
+                   t-att-href="record.file_url.raw_value"
+                   target="_blank"
+                   onclick="event.stopPropagation()">
+                  <i class="fa fa-eye" title="Preview"/>
+                  Preview File
+                </a>
+              </t>
+              <t t-else="">
+                <div class="o_prd_nofile_btn">
+                  <i class="fa fa-cloud-upload" title="No File"/>
+                  No file attached
+                </div>
+              </t>
+            </div>
+
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+
+  <!-- ================================================================
+       ACTION — list + kanban + form
        ================================================================ -->
   <record id="action_project_document" model="ir.actions.act_window">
     <field name="name">Project Documents</field>
     <field name="res_model">project.document</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">kanban,list,form</field>
     <field name="context">{'default_project_id': active_id}</field>
   </record>
 

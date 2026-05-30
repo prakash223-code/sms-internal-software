@@ -1,12 +1,14 @@
 /* =============================================================
-   custom_hr_document — UI Styles
-   Prefix: o_hrd_
+   custom_hr_document — UI Styles  |  Prefix: o_hrd_
+   Responsive: mobile-first, tested at 320 / 576 / 768 / 1024 / 1280px
    ============================================================= */
 
-/* ── Banners (place before <sheet>) ──────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   BANNERS  (rendered before <sheet>)
+───────────────────────────────────────────────────────────── */
 .o_hrd_banner {
     border-radius: 6px;
-    padding: 12px 16px;
+    padding: 11px 14px;
     font-size: 13px;
     line-height: 1.6;
     margin-bottom: 0;
@@ -14,16 +16,22 @@
     align-items: flex-start;
     gap: 10px;
 }
-.o_hrd_banner .fa { margin-top: 2px; flex-shrink: 0; font-size: 14px; }
+.o_hrd_banner .fa {
+    margin-top: 2px;
+    flex-shrink: 0;
+    font-size: 14px;
+}
 
 .o_hrd_banner_info    { background:#eff6ff; border:1px solid #bfdbfe; border-left:4px solid #3b82f6; color:#1e3a5f; }
 .o_hrd_banner_success { background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #22c55e; color:#14532d; font-weight:600; }
 .o_hrd_banner_danger  { background:#fef2f2; border:1px solid #fee2e2; border-left:4px solid #ef4444; color:#991b1b; font-weight:600; }
 .o_hrd_banner_pending { background:#fffbeb; border:1px solid #fef3c7; border-left:4px solid #f59e0b; color:#78350f; font-weight:600; }
 
-/* ── Reference / ID block ────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   REFERENCE BLOCK  (oe_title area)
+───────────────────────────────────────────────────────────── */
 .o_hrd_ref_block {
-    display: inline-flex;
+    display: flex;                  /* flex so it stretches on mobile */
     align-items: center;
     gap: 12px;
     background: #f8fafc;
@@ -31,6 +39,9 @@
     border-radius: 10px;
     padding: 10px 18px;
     margin-bottom: 4px;
+    box-sizing: border-box;
+    width: 100%;                    /* fill oe_title on all screens */
+    max-width: 560px;               /* cap on large monitors */
 }
 .o_hrd_ref_icon {
     width: 36px; height: 36px; border-radius: 50%;
@@ -38,168 +49,324 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 15px; flex-shrink: 0;
 }
-.o_hrd_ref_text_group { display: flex; flex-direction: column; gap: 1px; }
+.o_hrd_ref_text_group { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
 .o_hrd_ref_label {
     font-size: 10px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.7px; color: #94a3b8;
 }
 .o_hrd_ref_value {
-    font-size: 20px; font-weight: 700; color: #0f172a; line-height: 1.15;
+    font-size: 18px; font-weight: 700; color: #0f172a;
+    line-height: 1.15; min-width: 0;
 }
 .o_hrd_ref_value .o_field_widget,
 .o_hrd_ref_value .o_field_char {
     font-size: inherit; font-weight: inherit;
     color: inherit; font-family: inherit; line-height: inherit;
+    white-space: normal; word-break: break-word;
 }
 
-/* ── Section label ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   SECTION LABEL
+───────────────────────────────────────────────────────────── */
 .o_hrd_section_label {
     font-size: 11px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.6px; color: #94a3b8; margin-bottom: 8px;
 }
 .o_hrd_section_label .fa { margin-right: 4px; font-size: 10px; opacity: 0.7; }
 
-/* ── Divider ─────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   DIVIDER
+───────────────────────────────────────────────────────────── */
 .o_hrd_divider { border: none; border-top: 1px solid #f1f5f9; margin: 12px 0 16px; }
 
-/* ── Info card ───────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   INFO CARD  &  FILE CARD
+───────────────────────────────────────────────────────────── */
 .o_hrd_info_card {
     background: #f8fafc; border: 1px solid #e2e8f0;
     border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+    box-sizing: border-box;
 }
-
-/* ── File card (blue tint) ───────────────────────────────────── */
 .o_hrd_file_card {
     background: #eff6ff; border: 1px solid #bfdbfe;
     border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+    box-sizing: border-box;
 }
 
-/* ── File type badge (inline pill) ──────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   FILE TYPE BADGE  (form)
+───────────────────────────────────────────────────────────── */
 .o_hrd_filetype_badge {
     display: inline-flex; align-items: center; gap: 5px;
     font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: #1e3a5f; color: #fff;
+    letter-spacing: 0.5px; background: #1e3a5f; color: #fff;
     border-radius: 4px; padding: 3px 8px; margin-top: 4px;
 }
 .o_hrd_filetype_badge .fa { font-size: 10px; }
 
-/* ── Stat card ───────────────────────────────────────────────── */
-.o_hrd_stat_card {
-    background: #eff6ff; border: 1px solid #bfdbfe;
-    border-radius: 10px; padding: 14px 20px;
-    margin-bottom: 12px; display: inline-flex;
-    flex-direction: column; gap: 2px; min-width: 160px;
-}
-.o_hrd_stat_label {
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.6px; color: #3b82f6; opacity: 0.85;
-}
-.o_hrd_stat_value {
-    font-size: 22px; font-weight: 700; color: #1d4ed8; line-height: 1.1;
-}
-.o_hrd_stat_value .o_field_widget { font-size: inherit; font-weight: inherit; color: inherit; }
-
 
 /* ═══════════════════════════════════════════════════════════════
-   KANBAN STYLES
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ── Card shell ──────────────────────────────────────────────── */
+   KANBAN — card shell
+═══════════════════════════════════════════════════════════════ */
 .o_hrd_kanban_view .o_kanban_record {
-    border-radius: 12px;
-    border: 0.5px solid #e2e8f0;
+    border-radius: 14px;
+    border: 1px solid #e8edf2;
     overflow: hidden;
     margin-bottom: 10px;
-    transition: box-shadow 0.15s ease, transform 0.1s ease;
+    background: #ffffff;
+    transition: box-shadow 0.18s ease, transform 0.12s ease, border-color 0.18s ease;
 }
-.o_hrd_kanban_view .o_kanban_record:hover {
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.10);
-    transform: translateY(-1px);
+/* Hover only on non-touch devices */
+@media (hover: hover) {
+    .o_hrd_kanban_view .o_kanban_record:hover {
+        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.09);
+        border-color: #c7d6e8;
+        transform: translateY(-2px);
+    }
 }
 .o_hrd_kanban_view .o_kanban_record:last-child { margin-bottom: 0; }
 
-/* ── Document type accent strip (top border per type) ─────────── */
-.o_hrd_kanban_view .o_kanban_record { border-top: 3px solid #e2e8f0; }
-
-/* ── Ref / name line ─────────────────────────────────────────── */
-.o_hrd_kanban_name {
-    font-size: 14px; font-weight: 700; color: #0f172a;
-    line-height: 1.3; flex: 1; min-width: 0;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+/* ── File-type icon (colored square in card header) ─────────── */
+.o_hrd_doc_icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0; position: relative;
 }
-.o_hrd_kanban_name .o_field_widget { font-size: inherit; font-weight: inherit; color: inherit; }
-
-/* ── File type pill ──────────────────────────────────────────── */
-.o_hrd_kanban_pill {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: #f1f5f9; border: 0.5px solid #e2e8f0;
-    border-radius: 99px; padding: 3px 10px;
-    font-size: 11px; font-weight: 600; color: #475569;
+.o_hrd_doc_icon_ext {
+    position: absolute; bottom: -2px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px; font-weight: 800; letter-spacing: 0.3px;
+    text-transform: uppercase; line-height: 1;
+    border-radius: 3px; padding: 1px 4px;
+    border: 1px solid rgba(0,0,0,0.08);
 }
-.o_hrd_kanban_pill .fa { font-size: 10px; color: #94a3b8; flex-shrink: 0; }
-.o_hrd_kanban_pill .o_field_widget { font-size: inherit; color: inherit; font-weight: inherit; }
 
-/* Colored pill variants by file type */
-.o_hrd_pill_pdf    { background:#fef2f2; border-color:#fee2e2; color:#991b1b; }
-.o_hrd_pill_pdf .fa { color:#ef4444; }
-.o_hrd_pill_img    { background:#f0fdf4; border-color:#bbf7d0; color:#166534; }
-.o_hrd_pill_img .fa { color:#4ade80; }
-.o_hrd_pill_doc    { background:#eff6ff; border-color:#bfdbfe; color:#1e40af; }
-.o_hrd_pill_doc .fa { color:#3b82f6; }
+/* Colour variants */
+.o_hrd_icon_pdf   { background:#fef2f2; border:1.5px solid #fecaca; color:#dc2626; }
+.o_hrd_icon_pdf   .o_hrd_doc_icon_ext { color:#dc2626; background:#fef2f2; border-color:#fca5a5; }
+.o_hrd_icon_word  { background:#eff6ff; border:1.5px solid #bfdbfe; color:#2563eb; }
+.o_hrd_icon_word  .o_hrd_doc_icon_ext { color:#2563eb; background:#eff6ff; border-color:#93c5fd; }
+.o_hrd_icon_excel { background:#f0fdf4; border:1.5px solid #bbf7d0; color:#16a34a; }
+.o_hrd_icon_excel .o_hrd_doc_icon_ext { color:#16a34a; background:#f0fdf4; border-color:#86efac; }
+.o_hrd_icon_image { background:#faf5ff; border:1.5px solid #e9d5ff; color:#9333ea; }
+.o_hrd_icon_image .o_hrd_doc_icon_ext { color:#9333ea; background:#faf5ff; border-color:#d8b4fe; }
+.o_hrd_icon_ppt   { background:#fff7ed; border:1.5px solid #fed7aa; color:#ea580c; }
+.o_hrd_icon_ppt   .o_hrd_doc_icon_ext { color:#ea580c; background:#fff7ed; border-color:#fdba74; }
+.o_hrd_icon_zip   { background:#fffbeb; border:1.5px solid #fde68a; color:#d97706; }
+.o_hrd_icon_zip   .o_hrd_doc_icon_ext { color:#d97706; background:#fffbeb; border-color:#fcd34d; }
+.o_hrd_icon_txt   { background:#f8fafc; border:1.5px solid #cbd5e1; color:#64748b; }
+.o_hrd_icon_txt   .o_hrd_doc_icon_ext { color:#64748b; background:#f8fafc; border-color:#94a3b8; }
+.o_hrd_icon_other { background:#f1f5f9; border:1.5px solid #e2e8f0; color:#94a3b8; }
+.o_hrd_icon_other .o_hrd_doc_icon_ext { color:#94a3b8; background:#f1f5f9; border-color:#cbd5e1; }
 
-/* ── Avatar row ──────────────────────────────────────────────── */
-.o_hrd_kanban_avatar_row { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
-.o_hrd_kanban_avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    object-fit: cover; flex-shrink: 0;
-    border: 1.5px solid #e2e8f0; background: #dbeafe;
+/* ── Card header (icon + name + badge) ──────────────────────── */
+.o_hrd_card_header {
+    display: flex; align-items: flex-start;
+    gap: 11px; margin-bottom: 10px;
 }
-.o_hrd_kanban_avatar_name { font-size: 12px; color: #475569; font-weight: 500; }
-.o_hrd_kanban_avatar_name .o_field_widget { font-size: inherit; font-weight: inherit; color: inherit; }
-
-/* ── Date / meta row ─────────────────────────────────────────── */
-.o_hrd_kanban_meta {
-    display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
-    font-size: 11px; color: #94a3b8; margin-top: 4px;
+.o_hrd_card_title {
+    flex: 1; min-width: 0; display: flex;
+    flex-direction: column; gap: 5px;
 }
-.o_hrd_kanban_meta .fa { font-size: 10px; }
-.o_hrd_kanban_meta .o_field_widget { font-size: inherit; color: inherit; }
-.o_hrd_kanban_meta_sep { margin: 0 2px; color: #cbd5e1; }
+.o_hrd_card_name {
+    font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;
+}
+.o_hrd_card_name .o_field_widget { font-size: inherit; font-weight: inherit; color: inherit; }
 
-/* ── Divider ─────────────────────────────────────────────────── */
+/* ── Meta rows (employee / date) ─────────────────────────────── */
+.o_hrd_card_meta { display: flex; flex-direction: column; gap: 4px; margin-bottom: 2px; }
+.o_hrd_card_meta_row {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #64748b; flex-wrap: wrap;
+}
+.o_hrd_card_meta_row .fa { width: 12px; font-size: 11px; color: #94a3b8; flex-shrink: 0; }
+.o_hrd_card_meta_row .o_field_widget { font-size: inherit; color: inherit; }
+.o_hrd_card_meta_sep { color: #cbd5e1; margin: 0 2px; }
+
+/* ── Kanban divider ──────────────────────────────────────────── */
 .o_hrd_kanban_divider { border: none; border-top: 1px solid #f1f5f9; margin: 10px 0; }
 
-/* ── Footer ──────────────────────────────────────────────────── */
-.o_hrd_kanban_footer { display: flex; justify-content: space-between; align-items: center; }
+/* ── Footer — preview / no file ──────────────────────────────── */
+.o_hrd_card_footer { margin-top: 2px; }
 
-.o_hrd_preview_badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: #eff6ff; border: 0.5px solid #bfdbfe;
-    border-radius: 99px; padding: 3px 10px;
-    font-size: 11px; color: #1d4ed8; font-weight: 600;
+.o_hrd_preview_btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%;
+    min-height: 40px;             /* touch-friendly tap target */
+    padding: 8px 12px;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 13px; font-weight: 600; color: #334155;
     text-decoration: none; cursor: pointer;
-    transition: background 0.15s;
+    box-sizing: border-box;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
 }
-.o_hrd_preview_badge:hover { background: #dbeafe; text-decoration: none; color: #1d4ed8; }
-.o_hrd_preview_badge .fa { font-size: 10px; }
+@media (hover: hover) {
+    .o_hrd_preview_btn:hover {
+        background: #eff6ff; border-color: #bfdbfe;
+        color: #1d4ed8; text-decoration: none;
+    }
+    .o_hrd_preview_btn:hover .fa { color: #3b82f6; }
+}
+.o_hrd_preview_btn .fa { font-size: 13px; color: #94a3b8; transition: color 0.15s; }
 
-.o_hrd_nofile_badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: #fef2f2; border: 0.5px solid #fee2e2;
-    border-radius: 99px; padding: 3px 10px;
-    font-size: 11px; color: #991b1b;
+.o_hrd_nofile_btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; min-height: 40px; padding: 8px 12px;
+    background: #fef9f0; border: 1px dashed #fcd34d; border-radius: 8px;
+    font-size: 12px; color: #92400e; box-sizing: border-box;
 }
-.o_hrd_nofile_badge .fa { font-size: 10px; }
+.o_hrd_nofile_btn .fa { font-size: 12px; color: #f59e0b; }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   LIST VIEW — row decorations
-   ═══════════════════════════════════════════════════════════════ */
-.o_hrd_list_filetype {
-    display: inline-flex; align-items: center;
-    background: #1e3a5f; color: #fff;
-    border-radius: 3px; padding: 1px 6px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
-    text-transform: uppercase;
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Tablet portrait & below (≤ 767px) ────────────────────────── */
+@media (max-width: 767px) {
+
+    /* Banners — tighter padding */
+    .o_hrd_banner {
+        padding: 10px 12px;
+        font-size: 12.5px;
+        gap: 8px;
+    }
+
+    /* Ref block — full width, smaller font */
+    .o_hrd_ref_block {
+        max-width: 100%;
+        padding: 9px 14px;
+        gap: 10px;
+    }
+    .o_hrd_ref_icon {
+        width: 32px; height: 32px; font-size: 13px;
+    }
+    .o_hrd_ref_value { font-size: 15px; }
+
+    /* Cards — tighter padding */
+    .o_hrd_info_card,
+    .o_hrd_file_card {
+        padding: 12px 12px;
+    }
+
+    /* Kanban — smaller icon, tighter card */
+    .o_hrd_doc_icon {
+        width: 40px; height: 40px; border-radius: 10px; font-size: 18px;
+    }
+    .o_hrd_card_name { font-size: 13px; }
+    .o_hrd_card_header { gap: 9px; margin-bottom: 8px; }
+
+    /* Preview button — larger tap target */
+    .o_hrd_preview_btn,
+    .o_hrd_nofile_btn {
+        min-height: 44px;
+        font-size: 13px;
+    }
+
+    /* Kanban column scroll on mobile — prevent horizontal overflow */
+    .o_hrd_kanban_view .o_kanban_renderer {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ── Mobile phone (≤ 575px) ───────────────────────────────────── */
+@media (max-width: 575px) {
+
+    /* Banners stack icon above text on very small screens */
+    .o_hrd_banner {
+        flex-direction: row;        /* keep row but reduce gap */
+        padding: 10px 11px;
+        gap: 8px;
+        font-size: 12px;
+        border-radius: 5px;
+    }
+
+    /* Ref block — reduce even further */
+    .o_hrd_ref_block {
+        padding: 8px 12px;
+        gap: 9px;
+        border-radius: 8px;
+    }
+    .o_hrd_ref_icon { width: 30px; height: 30px; font-size: 12px; }
+    .o_hrd_ref_label { font-size: 9px; }
+    .o_hrd_ref_value { font-size: 14px; }
+
+    /* Divider — tighter */
+    .o_hrd_divider { margin: 10px 0 13px; }
+
+    /* Cards — minimal padding */
+    .o_hrd_info_card,
+    .o_hrd_file_card { padding: 10px 11px; border-radius: 7px; }
+
+    /* Section labels */
+    .o_hrd_section_label { font-size: 10px; margin-bottom: 6px; }
+
+    /* Kanban icon smaller */
+    .o_hrd_doc_icon {
+        width: 36px; height: 36px; border-radius: 9px; font-size: 16px;
+    }
+    .o_hrd_doc_icon_ext { font-size: 6px; }
+
+    .o_hrd_card_name { font-size: 13px; -webkit-line-clamp: 3; }
+    .o_hrd_card_meta_row { font-size: 11px; }
+
+    /* Badge in card header — wrap if needed */
+    .o_hrd_card_title { gap: 4px; }
+
+    /* Preview button */
+    .o_hrd_preview_btn,
+    .o_hrd_nofile_btn { min-height: 46px; border-radius: 7px; }
+
+    /* Kanban record — round corners less aggressively */
+    .o_hrd_kanban_view .o_kanban_record { border-radius: 10px; }
+
+    /* On Odoo mobile, kanban renders ungrouped single column — cards fill width */
+    .o_hrd_kanban_view .o_kanban_group { min-width: 0; width: 100%; }
+}
+
+/* ── Medium screens — tablet landscape / small laptop (768–991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+
+    .o_hrd_ref_block { max-width: 480px; }
+    .o_hrd_ref_value { font-size: 17px; }
+
+    .o_hrd_doc_icon { width: 44px; height: 44px; font-size: 20px; }
+    .o_hrd_card_name { font-size: 13.5px; }
+}
+
+/* ── Large desktop (≥ 1280px) — slightly wider ref block cap ─── */
+@media (min-width: 1280px) {
+    .o_hrd_ref_block { max-width: 600px; }
+    .o_hrd_ref_value { font-size: 20px; }
+    .o_hrd_doc_icon { width: 52px; height: 52px; font-size: 24px; }
+}
+
+/* ── Touch devices — active state feedback ───────────────────── */
+@media (hover: none) and (pointer: coarse) {
+    .o_hrd_preview_btn:active {
+        background: #dbeafe; border-color: #93c5fd; color: #1d4ed8;
+    }
+    .o_hrd_kanban_view .o_kanban_record:active {
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+}
+
+/* ── Odoo's own mobile form class (.o_form_mobile) ───────────── */
+.o_form_mobile .o_hrd_ref_block {
+    max-width: 100%;
+    padding: 8px 12px;
+}
+.o_form_mobile .o_hrd_ref_value { font-size: 14px; }
+.o_form_mobile .o_hrd_info_card,
+.o_form_mobile .o_hrd_file_card { padding: 10px 11px; }
+.o_form_mobile .o_hrd_divider { margin: 9px 0 12px; }
+
+/* ── Odoo mobile kanban — single column stacked layout ─────────── */
+.o_is_mobile .o_hrd_kanban_view .o_kanban_record,
+.o_action_manager .o_hrd_kanban_view .o_kanban_record {
+    margin-bottom: 8px;
 }

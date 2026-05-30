@@ -10,6 +10,11 @@
         'views/project_document_views.xml',
         'views/project_project_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_project_document/static/src/css/custom_project_document.css',
+        ],
+    },
     'installable': True,
     'application': False,
 }

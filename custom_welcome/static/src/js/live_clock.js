@@ -41,7 +41,7 @@ class LiveClock extends Component {
 }
 .owc_col {
     position: relative;
-    width: 25px;
+    width: 23px;
     height: 82px;
     overflow: hidden;
     flex-shrink: 0;

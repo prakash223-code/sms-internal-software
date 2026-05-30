@@ -1,0 +1,704 @@
+/* =============================================================
+   custom_project_document — UI Styles  |  Prefix: o_prd_
+   Responsive: mobile-first, tested at 320 / 576 / 768 / 1024 / 1280px
+   ============================================================= */
+
+/* ─────────────────────────────────────────────────────────────
+   BANNERS  (rendered before <sheet>)
+───────────────────────────────────────────────────────────── */
+.o_prd_banner {
+    border-radius: 6px;
+    padding: 11px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.o_prd_banner .fa {
+    margin-top: 2px;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.o_prd_banner_info {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #22c55e;
+    color: #14532d;
+}
+
+.o_prd_banner_success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #16a34a;
+    color: #14532d;
+    font-weight: 600;
+}
+
+.o_prd_banner_danger {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+    font-weight: 600;
+}
+
+.o_prd_banner_pending {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
+    font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   REFERENCE BLOCK  (oe_title area)
+───────────────────────────────────────────────────────────── */
+.o_prd_ref_block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-bottom: 4px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 580px;
+}
+
+.o_prd_ref_icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #15803d;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.o_prd_ref_text_group {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+}
+
+.o_prd_ref_label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #94a3b8;
+}
+
+.o_prd_ref_value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.15;
+    min-width: 0;
+}
+
+.o_prd_ref_value .o_field_widget,
+.o_prd_ref_value .o_field_char {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    font-family: inherit;
+    line-height: inherit;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SECTION LABEL
+───────────────────────────────────────────────────────────── */
+.o_prd_section_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.o_prd_section_label .fa {
+    margin-right: 4px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   DIVIDER
+───────────────────────────────────────────────────────────── */
+.o_prd_divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 12px 0 16px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   INFO CARD  &  FILE CARD
+───────────────────────────────────────────────────────────── */
+.o_prd_info_card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.o_prd_file_card {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   FILE TYPE BADGE  (form)
+───────────────────────────────────────────────────────────── */
+.o_prd_filetype_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #15803d;
+    color: #fff;
+    border-radius: 4px;
+    padding: 3px 8px;
+    margin-top: 4px;
+}
+
+.o_prd_filetype_badge .fa {
+    font-size: 10px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   KANBAN — card shell
+═══════════════════════════════════════════════════════════════ */
+.o_prd_kanban_view .o_kanban_record {
+    border-radius: 14px;
+    border: 1px solid #e8edf2;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: #ffffff;
+    transition: box-shadow 0.18s ease, transform 0.12s ease, border-color 0.18s ease;
+}
+
+@media (hover: hover) {
+    .o_prd_kanban_view .o_kanban_record:hover {
+        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.09);
+        border-color: #a7f3d0;
+        transform: translateY(-2px);
+    }
+}
+
+.o_prd_kanban_view .o_kanban_record:last-child {
+    margin-bottom: 0;
+}
+
+/* ── File-type icon (coloured square) ───────────────────────── */
+.o_prd_doc_icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.o_prd_doc_icon_ext {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    line-height: 1;
+    border-radius: 3px;
+    padding: 1px 4px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Colour variants by file extension */
+.o_prd_icon_pdf {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    color: #dc2626;
+}
+
+.o_prd_icon_pdf .o_prd_doc_icon_ext {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+.o_prd_icon_word {
+    background: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    color: #2563eb;
+}
+
+.o_prd_icon_word .o_prd_doc_icon_ext {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.o_prd_icon_excel {
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+    color: #16a34a;
+}
+
+.o_prd_icon_excel .o_prd_doc_icon_ext {
+    color: #16a34a;
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.o_prd_icon_image {
+    background: #faf5ff;
+    border: 1.5px solid #e9d5ff;
+    color: #9333ea;
+}
+
+.o_prd_icon_image .o_prd_doc_icon_ext {
+    color: #9333ea;
+    background: #faf5ff;
+    border-color: #d8b4fe;
+}
+
+.o_prd_icon_ppt {
+    background: #fff7ed;
+    border: 1.5px solid #fed7aa;
+    color: #ea580c;
+}
+
+.o_prd_icon_ppt .o_prd_doc_icon_ext {
+    color: #ea580c;
+    background: #fff7ed;
+    border-color: #fdba74;
+}
+
+.o_prd_icon_zip {
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    color: #d97706;
+}
+
+.o_prd_icon_zip .o_prd_doc_icon_ext {
+    color: #d97706;
+    background: #fffbeb;
+    border-color: #fcd34d;
+}
+
+.o_prd_icon_txt {
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    color: #64748b;
+}
+
+.o_prd_icon_txt .o_prd_doc_icon_ext {
+    color: #64748b;
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.o_prd_icon_other {
+    background: #f1f5f9;
+    border: 1.5px solid #e2e8f0;
+    color: #94a3b8;
+}
+
+.o_prd_icon_other .o_prd_doc_icon_ext {
+    color: #94a3b8;
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+/* ── Card header (icon + name + badge) ──────────────────────── */
+.o_prd_card_header {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-bottom: 10px;
+}
+
+.o_prd_card_title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.o_prd_card_name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.o_prd_card_name .o_field_widget {
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+/* ── Meta rows (uploader / date) ─────────────────────────────── */
+.o_prd_card_meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+.o_prd_card_meta_row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+    flex-wrap: wrap;
+}
+
+.o_prd_card_meta_row .fa {
+    width: 12px;
+    font-size: 11px;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.o_prd_card_meta_row .o_field_widget {
+    font-size: inherit;
+    color: inherit;
+}
+
+.o_prd_card_meta_sep {
+    color: #cbd5e1;
+    margin: 0 2px;
+}
+
+/* ── Kanban divider ──────────────────────────────────────────── */
+.o_prd_kanban_divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 10px 0;
+}
+
+/* ── Footer — preview / no file ─────────────────────────────── */
+.o_prd_card_footer {
+    margin-top: 2px;
+}
+
+.o_prd_preview_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .o_prd_preview_btn:hover {
+        background: #f0fdf4;
+        border-color: #86efac;
+        color: #15803d;
+        text-decoration: none;
+    }
+
+    .o_prd_preview_btn:hover .fa {
+        color: #22c55e;
+    }
+}
+
+.o_prd_preview_btn .fa {
+    font-size: 13px;
+    color: #94a3b8;
+    transition: color 0.15s;
+}
+
+.o_prd_nofile_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    background: #fef9f0;
+    border: 1px dashed #fcd34d;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #92400e;
+    box-sizing: border-box;
+}
+
+.o_prd_nofile_btn .fa {
+    font-size: 12px;
+    color: #f59e0b;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Tablet portrait & below (≤ 767px) ────────────────────────── */
+@media (max-width: 767px) {
+
+    .o_prd_banner {
+        padding: 10px 12px;
+        font-size: 12.5px;
+        gap: 8px;
+    }
+
+    .o_prd_ref_block {
+        max-width: 100%;
+        padding: 9px 14px;
+        gap: 10px;
+    }
+
+    .o_prd_ref_icon {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+    }
+
+    .o_prd_ref_value {
+        font-size: 15px;
+    }
+
+    .o_prd_info_card,
+    .o_prd_file_card {
+        padding: 12px 12px;
+    }
+
+    .o_prd_doc_icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        font-size: 18px;
+    }
+
+    .o_prd_card_name {
+        font-size: 13px;
+    }
+
+    .o_prd_card_header {
+        gap: 9px;
+        margin-bottom: 8px;
+    }
+
+    .o_prd_preview_btn,
+    .o_prd_nofile_btn {
+        min-height: 44px;
+        font-size: 13px;
+    }
+
+    .o_prd_kanban_view .o_kanban_renderer {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ── Mobile phone (≤ 575px) ───────────────────────────────────── */
+@media (max-width: 575px) {
+
+    .o_prd_banner {
+        padding: 10px 11px;
+        gap: 8px;
+        font-size: 12px;
+        border-radius: 5px;
+    }
+
+    .o_prd_ref_block {
+        padding: 8px 12px;
+        gap: 9px;
+        border-radius: 8px;
+    }
+
+    .o_prd_ref_icon {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .o_prd_ref_label {
+        font-size: 9px;
+    }
+
+    .o_prd_ref_value {
+        font-size: 14px;
+    }
+
+    .o_prd_divider {
+        margin: 10px 0 13px;
+    }
+
+    .o_prd_info_card,
+    .o_prd_file_card {
+        padding: 10px 11px;
+        border-radius: 7px;
+    }
+
+    .o_prd_section_label {
+        font-size: 10px;
+        margin-bottom: 6px;
+    }
+
+    .o_prd_doc_icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        font-size: 16px;
+    }
+
+    .o_prd_doc_icon_ext {
+        font-size: 6px;
+    }
+
+    .o_prd_card_name {
+        font-size: 13px;
+        -webkit-line-clamp: 3;
+    }
+
+    .o_prd_card_meta_row {
+        font-size: 11px;
+    }
+
+    .o_prd_card_title {
+        gap: 4px;
+    }
+
+    .o_prd_preview_btn,
+    .o_prd_nofile_btn {
+        min-height: 46px;
+        border-radius: 7px;
+    }
+
+    .o_prd_kanban_view .o_kanban_record {
+        border-radius: 10px;
+    }
+
+    .o_prd_kanban_view .o_kanban_group {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+/* ── Tablet landscape (768px–991px) ──────────────────────────── */
+@media (min-width: 768px) and (max-width: 991px) {
+    .o_prd_ref_block {
+        max-width: 480px;
+    }
+
+    .o_prd_ref_value {
+        font-size: 17px;
+    }
+
+    .o_prd_doc_icon {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+
+    .o_prd_card_name {
+        font-size: 13.5px;
+    }
+}
+
+/* ── Large desktop (≥ 1280px) ────────────────────────────────── */
+@media (min-width: 1280px) {
+    .o_prd_ref_block {
+        max-width: 620px;
+    }
+
+    .o_prd_ref_value {
+        font-size: 20px;
+    }
+
+    .o_prd_doc_icon {
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
+    }
+}
+
+/* ── Touch devices — active state feedback ───────────────────── */
+@media (hover: none) and (pointer: coarse) {
+    .o_prd_preview_btn:active {
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #15803d;
+    }
+
+    .o_prd_kanban_view .o_kanban_record:active {
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+}
+
+/* ── Odoo's own mobile form class ────────────────────────────── */
+.o_form_mobile .o_prd_ref_block {
+    max-width: 100%;
+    padding: 8px 12px;
+}
+
+.o_form_mobile .o_prd_ref_value {
+    font-size: 14px;
+}
+
+.o_form_mobile .o_prd_info_card,
+.o_form_mobile .o_prd_file_card {
+    padding: 10px 11px;
+}
+
+.o_form_mobile .o_prd_divider {
+    margin: 9px 0 12px;
+}
+
+/* ── Odoo mobile kanban ──────────────────────────────────────── */
+.o_is_mobile .o_prd_kanban_view .o_kanban_record {
+    margin-bottom: 8px;
+}
