@@ -1,0 +1,205 @@
+/* =============================================================
+   custom_hr_document — UI Styles
+   Prefix: o_hrd_
+   ============================================================= */
+
+/* ── Banners (place before <sheet>) ──────────────────────────── */
+.o_hrd_banner {
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.o_hrd_banner .fa { margin-top: 2px; flex-shrink: 0; font-size: 14px; }
+
+.o_hrd_banner_info    { background:#eff6ff; border:1px solid #bfdbfe; border-left:4px solid #3b82f6; color:#1e3a5f; }
+.o_hrd_banner_success { background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #22c55e; color:#14532d; font-weight:600; }
+.o_hrd_banner_danger  { background:#fef2f2; border:1px solid #fee2e2; border-left:4px solid #ef4444; color:#991b1b; font-weight:600; }
+.o_hrd_banner_pending { background:#fffbeb; border:1px solid #fef3c7; border-left:4px solid #f59e0b; color:#78350f; font-weight:600; }
+
+/* ── Reference / ID block ────────────────────────────────────── */
+.o_hrd_ref_block {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-bottom: 4px;
+}
+.o_hrd_ref_icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #1e3a5f; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+}
+.o_hrd_ref_text_group { display: flex; flex-direction: column; gap: 1px; }
+.o_hrd_ref_label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.7px; color: #94a3b8;
+}
+.o_hrd_ref_value {
+    font-size: 20px; font-weight: 700; color: #0f172a; line-height: 1.15;
+}
+.o_hrd_ref_value .o_field_widget,
+.o_hrd_ref_value .o_field_char {
+    font-size: inherit; font-weight: inherit;
+    color: inherit; font-family: inherit; line-height: inherit;
+}
+
+/* ── Section label ───────────────────────────────────────────── */
+.o_hrd_section_label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: #94a3b8; margin-bottom: 8px;
+}
+.o_hrd_section_label .fa { margin-right: 4px; font-size: 10px; opacity: 0.7; }
+
+/* ── Divider ─────────────────────────────────────────────────── */
+.o_hrd_divider { border: none; border-top: 1px solid #f1f5f9; margin: 12px 0 16px; }
+
+/* ── Info card ───────────────────────────────────────────────── */
+.o_hrd_info_card {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+}
+
+/* ── File card (blue tint) ───────────────────────────────────── */
+.o_hrd_file_card {
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+}
+
+/* ── File type badge (inline pill) ──────────────────────────── */
+.o_hrd_filetype_badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #1e3a5f; color: #fff;
+    border-radius: 4px; padding: 3px 8px; margin-top: 4px;
+}
+.o_hrd_filetype_badge .fa { font-size: 10px; }
+
+/* ── Stat card ───────────────────────────────────────────────── */
+.o_hrd_stat_card {
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    border-radius: 10px; padding: 14px 20px;
+    margin-bottom: 12px; display: inline-flex;
+    flex-direction: column; gap: 2px; min-width: 160px;
+}
+.o_hrd_stat_label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: #3b82f6; opacity: 0.85;
+}
+.o_hrd_stat_value {
+    font-size: 22px; font-weight: 700; color: #1d4ed8; line-height: 1.1;
+}
+.o_hrd_stat_value .o_field_widget { font-size: inherit; font-weight: inherit; color: inherit; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   KANBAN STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card shell ──────────────────────────────────────────────── */
+.o_hrd_kanban_view .o_kanban_record {
+    border-radius: 12px;
+    border: 0.5px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 10px;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+.o_hrd_kanban_view .o_kanban_record:hover {
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.10);
+    transform: translateY(-1px);
+}
+.o_hrd_kanban_view .o_kanban_record:last-child { margin-bottom: 0; }
+
+/* ── Document type accent strip (top border per type) ─────────── */
+.o_hrd_kanban_view .o_kanban_record { border-top: 3px solid #e2e8f0; }
+
+/* ── Ref / name line ─────────────────────────────────────────── */
+.o_hrd_kanban_name {
+    font-size: 14px; font-weight: 700; color: #0f172a;
+    line-height: 1.3; flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.o_hrd_kanban_name .o_field_widget { font-size: inherit; font-weight: inherit; color: inherit; }
+
+/* ── File type pill ──────────────────────────────────────────── */
+.o_hrd_kanban_pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #f1f5f9; border: 0.5px solid #e2e8f0;
+    border-radius: 99px; padding: 3px 10px;
+    font-size: 11px; font-weight: 600; color: #475569;
+}
+.o_hrd_kanban_pill .fa { font-size: 10px; color: #94a3b8; flex-shrink: 0; }
+.o_hrd_kanban_pill .o_field_widget { font-size: inherit; color: inherit; font-weight: inherit; }
+
+/* Colored pill variants by file type */
+.o_hrd_pill_pdf    { background:#fef2f2; border-color:#fee2e2; color:#991b1b; }
+.o_hrd_pill_pdf .fa { color:#ef4444; }
+.o_hrd_pill_img    { background:#f0fdf4; border-color:#bbf7d0; color:#166534; }
+.o_hrd_pill_img .fa { color:#4ade80; }
+.o_hrd_pill_doc    { background:#eff6ff; border-color:#bfdbfe; color:#1e40af; }
+.o_hrd_pill_doc .fa { color:#3b82f6; }
+
+/* ── Avatar row ──────────────────────────────────────────────── */
+.o_hrd_kanban_avatar_row { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
+.o_hrd_kanban_avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0;
+    border: 1.5px solid #e2e8f0; background: #dbeafe;
+}
+.o_hrd_kanban_avatar_name { font-size: 12px; color: #475569; font-weight: 500; }
+.o_hrd_kanban_avatar_name .o_field_widget { font-size: inherit; font-weight: inherit; color: inherit; }
+
+/* ── Date / meta row ─────────────────────────────────────────── */
+.o_hrd_kanban_meta {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+    font-size: 11px; color: #94a3b8; margin-top: 4px;
+}
+.o_hrd_kanban_meta .fa { font-size: 10px; }
+.o_hrd_kanban_meta .o_field_widget { font-size: inherit; color: inherit; }
+.o_hrd_kanban_meta_sep { margin: 0 2px; color: #cbd5e1; }
+
+/* ── Divider ─────────────────────────────────────────────────── */
+.o_hrd_kanban_divider { border: none; border-top: 1px solid #f1f5f9; margin: 10px 0; }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+.o_hrd_kanban_footer { display: flex; justify-content: space-between; align-items: center; }
+
+.o_hrd_preview_badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #eff6ff; border: 0.5px solid #bfdbfe;
+    border-radius: 99px; padding: 3px 10px;
+    font-size: 11px; color: #1d4ed8; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    transition: background 0.15s;
+}
+.o_hrd_preview_badge:hover { background: #dbeafe; text-decoration: none; color: #1d4ed8; }
+.o_hrd_preview_badge .fa { font-size: 10px; }
+
+.o_hrd_nofile_badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fef2f2; border: 0.5px solid #fee2e2;
+    border-radius: 99px; padding: 3px 10px;
+    font-size: 11px; color: #991b1b;
+}
+.o_hrd_nofile_badge .fa { font-size: 10px; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   LIST VIEW — row decorations
+   ═══════════════════════════════════════════════════════════════ */
+.o_hrd_list_filetype {
+    display: inline-flex; align-items: center;
+    background: #1e3a5f; color: #fff;
+    border-radius: 3px; padding: 1px 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase;
+}

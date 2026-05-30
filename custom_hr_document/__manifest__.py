@@ -10,6 +10,11 @@
         'views/hr_employee_document_views.xml',
         'views/hr_employee_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_hr_document/static/src/css/custom_hr_document.css',
+        ],
+    },
     'installable': True,
     'application': False,
 }

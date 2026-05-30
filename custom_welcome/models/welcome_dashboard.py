@@ -54,7 +54,8 @@ class WelcomeDashboard(models.TransientModel):
     week_working_days = fields.Integer(
         string='Working Days (Week)',
         readonly=True,
-        help='Total working days from Monday to today (excludes holidays & 2nd/4th Sat).',
+        help='Total working days for the full week Mon–Sat (excludes holidays, '
+             '2nd/4th Saturdays, and Sundays).',
     )
     week_hours = fields.Float(
         string='Hours Logged (Week)',
@@ -198,12 +199,20 @@ class WelcomeDashboard(models.TransientModel):
         Populates week_present_days, week_working_days, week_hours,
         and week_late_count in the result dict.
 
-        Range: Monday 00:00 → today 23:59 (employee local time).
+        Attendance range : Monday 00:00 → today 23:59 (employee local time).
+        Working days     : Full week Monday → Saturday, excluding Sundays,
+                           2nd/4th Saturdays, and declared company holidays.
+                           This gives the correct denominator regardless of
+                           which day of the week it currently is.
         """
         # Monday of the current week
         days_since_monday = today_local.weekday()   # 0 = Monday
         week_start_local  = today_local - timedelta(days=days_since_monday)
 
+        # End of the working week = Saturday (weekday 5)
+        week_end_local = week_start_local + timedelta(days=5)
+
+        # ── Attendance query: Mon → today only ─────────────────────────
         week_start_utc = tz.localize(
             datetime.combine(week_start_local, time(0, 0, 0))
         ).astimezone(pytz.utc).replace(tzinfo=None)
@@ -242,13 +251,22 @@ class WelcomeDashboard(models.TransientModel):
             if att.is_late:
                 late_count += 1
 
-        # Working days Mon → today (excludes holidays, 2nd/4th Saturdays, Sundays)
+        # ── Working days: full week Mon → Sat ──────────────────────────
+        # Uses the same holiday logic as the monthly summary so 2nd/4th
+        # Saturdays and declared holidays are automatically excluded.
         Holiday = self.env['company.holiday'].sudo()
         working_days = 0
         cursor = week_start_local
-        while cursor <= today_local:
-            if cursor.weekday() != 6 and not Holiday.is_holiday(cursor):
-                working_days += 1
+        while cursor <= week_end_local:
+            # Sunday is never a working day
+            if cursor.weekday() == 6:
+                cursor += timedelta(days=1)
+                continue
+            # Skip 2nd/4th Saturdays and declared holidays
+            if Holiday.is_holiday(cursor):
+                cursor += timedelta(days=1)
+                continue
+            working_days += 1
             cursor += timedelta(days=1)
 
         res['week_present_days'] = len(present_dates)

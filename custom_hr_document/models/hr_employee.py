@@ -5,15 +5,10 @@ class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     document_ids = fields.One2many(
-        'hr.employee.document',
-        'employee_id',
-        string='Documents',
+        'hr.employee.document', 'employee_id', string='Documents',
     )
-
     document_count = fields.Integer(
-        string='Document Count',
-        compute='_compute_document_count',
-        compute_sudo=True,
+        string='Document Count', compute='_compute_document_count', compute_sudo=True,
     )
 
     def _compute_document_count(self):
@@ -28,7 +23,7 @@ class HrEmployee(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Employee Documents',
             'res_model': 'hr.employee.document',
-            'view_mode': 'list,form',
-            'domain': [('employee_id', '=', self.id)],   # ← filters to THIS employee only
+            'view_mode': 'list,kanban,form',
+            'domain': [('employee_id', '=', self.id)],
             'context': {'default_employee_id': self.id},
         }

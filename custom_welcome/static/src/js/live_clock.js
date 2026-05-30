@@ -24,7 +24,7 @@ class LiveClock extends Component {
     border-radius: 12px;
     overflow: hidden;
     padding: 0 14px;
-    height: 82px;
+    height: 72px;
     box-shadow: 0 2px 14px rgba(0,0,0,0.07);
     user-select: none;
     box-sizing: border-box;
@@ -41,7 +41,7 @@ class LiveClock extends Component {
 }
 .owc_col {
     position: relative;
-    width: 32px;
+    width: 25px;
     height: 82px;
     overflow: hidden;
     flex-shrink: 0;
@@ -56,9 +56,9 @@ class LiveClock extends Component {
     will-change: transform;
 }
 .owc_digit {
-    /*font-family: ui-monospace, 'Cascadia Code', 'SF Mono', 'Consolas', monospace;*/
-    font-size: 40px;
-    font-weight: 800;
+    /*font-family: 'Montserrat', sans-serif;*/
+    font-size: 35px;
+    font-weight: 565;
     color: #0f172a;
     line-height: 82px;
     height: 82px;
@@ -73,9 +73,9 @@ class LiveClock extends Component {
     font-size: 40px;
     font-weight: 900;
     color: #cbd5e1;
-    line-height: 82px;
+    line-height: 72px;
     height: 82px;
-    width: 12px;
+    width: 10px;
     text-align: center;
     flex-shrink: 0;
     transition: opacity 0.15s ease;

@@ -1,116 +1,206 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-  <!-- ================================================================
-       FORM VIEW
-       ================================================================ -->
-  <record id="view_hr_employee_document_form" model="ir.ui.view">
-    <field name="name">hr.employee.document.form</field>
-    <field name="model">hr.employee.document</field>
-    <field name="arch" type="xml">
-      <form string="Employee Document">
-        <sheet>
-          <group>
-            <group string="Document Details">
-              <field name="name"
-                     string="Document Name"
-                     placeholder="e.g. Aadhar Card, Offer Letter"/>
-              <field name="document_type"/>
-              <field name="employee_id" readonly="1"/>
-            </group>
-            <group string="Upload Info">
-              <field name="file_type" readonly="1"/>
-              <field name="upload_date" readonly="1"/>
-              <field name="uploaded_by" readonly="1"/>
-            </group>
-          </group>
-
-          <group string="File">
-            <field name="file"
-                   filename="filename"
-                   string="Attach File"
-                   widget="binary"/>
-            <field name="filename" invisible="1"/>
-            <field name="file_url"
-                   string="Preview in Browser"
-                   widget="url"
-                   text="Click to Preview"
-                   invisible="not file_url"
-                   readonly="1"/>
-          </group>
-
-          <group string="Notes">
-            <field name="notes"
-                   string=""
-                   placeholder="Optional remarks about this document..."/>
-          </group>
-        </sheet>
-      </form>
-    </field>
-  </record>
-
-  <!-- ================================================================
-       LIST VIEW — standalone (opened via smart button)
-       ================================================================ -->
-  <record id="view_hr_employee_document_list" model="ir.ui.view">
-    <field name="name">hr.employee.document.list</field>
-    <field name="model">hr.employee.document</field>
-    <field name="arch" type="xml">
-      <list string="Documents"
-            create="1"
-            delete="1">
-
-        <field name="name"
-               string="Document Name"/>
-
-        <field name="document_type"
-               string="Category"/>
-
-        <!-- File extension column: PDF, PNG, DOCX etc -->
-        <field name="file_type"
-               string="File Type"
-               readonly="1"/>
-
-        <field name="file"
-               filename="filename"
-               string="File"
-               widget="binary"/>
-
-        <field name="filename"
-               string="File Name"
-               readonly="1"/>
-
-        <field name="file_url"
-               string="Preview"
-               widget="url"
-               text="Preview"
-               invisible="not file_url"
-               readonly="1"/>
-
-        <field name="upload_date"
-               string="Uploaded On"
-               readonly="1"/>
-
-        <field name="uploaded_by"
-               string="Uploaded By"
-               readonly="1"/>
-
-        <field name="notes"
-               string="Notes"
-               optional="show"/>
-
-      </list>
-    </field>
-  </record>
-
-  <!-- ================================================================
-       ACTION
-       ================================================================ -->
-  <record id="action_hr_employee_document" model="ir.actions.act_window">
-    <field name="name">Employee Documents</field>
-    <field name="res_model">hr.employee.document</field>
-    <field name="view_mode">list,form</field>
-    <field name="context">{'default_employee_id': active_id}</field>
-  </record>
-
+    <!--  ================================================================
+           FORM VIEW
+           ================================================================  -->
+    <record id="view_hr_employee_document_form" model="ir.ui.view">
+        <field name="name">hr.employee.document.form</field>
+        <field name="model">hr.employee.document</field>
+        <field name="arch" type="xml">
+            <form string="Employee Document">
+                <!--  ── Banners (before sheet) ────────────────────────────  -->
+                <div class="o_hrd_banner o_hrd_banner_info" invisible="filename">
+                    <i class="fa fa-cloud-upload" title="Upload Required"/>
+                    <div>
+                        <strong>No file yet</strong>
+                        — attach a document file below to complete this record.
+                    </div>
+                </div>
+                <div class="o_hrd_banner o_hrd_banner_success" invisible="not filename">
+                    <i class="fa fa-check-circle" title="File Uploaded"/>
+                    <div>
+                        <strong>File attached</strong>
+                        — use the Preview link below to open it in your browser.
+                    </div>
+                </div>
+                <sheet>
+                    <!--  ── Title / Reference block ─────────────────────────  -->
+                    <div class="oe_title">
+                        <div class="o_hrd_ref_block">
+                            <div class="o_hrd_ref_icon">
+                                <i class="fa fa-file-text" title="Document"/>
+                            </div>
+                            <div class="o_hrd_ref_text_group">
+                                <div class="o_hrd_ref_label">Document Name</div>
+                                <div class="o_hrd_ref_value">
+                                    <field name="name" nolabel="1" placeholder="e.g. Aadhar Card, Offer Letter"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  ── Document Details ─────────────────────────────────  -->
+                    <div class="o_hrd_section_label">
+                        <i class="fa fa-info-circle" title="Details"/>
+                        Document Details
+                    </div>
+                    <div class="o_hrd_info_card">
+                        <group>
+                            <group>
+                                <field name="employee_id" readonly="1"/>
+                                <field name="document_type"/>
+                            </group>
+                            <group>
+                                <field name="upload_date" readonly="1"/>
+                                <field name="uploaded_by" readonly="1"/>
+                            </group>
+                        </group>
+                    </div>
+                    <div class="o_hrd_divider"/>
+                    <!--  ── File ────────────────────────────────────────────  -->
+                    <div class="o_hrd_section_label">
+                        <i class="fa fa-paperclip" title="File"/>
+                        Attached File
+                    </div>
+                    <div class="o_hrd_file_card">
+                        <group>
+                            <field name="file" filename="filename" string="Attach File" widget="binary"/>
+                            <field name="filename" invisible="1"/>
+                            <!--  File type badge (shows after upload)  -->
+                            <div invisible="not file_type or file_type == '—'" style="padding: 2px 0 4px 0;">
+                                <span class="o_hrd_filetype_badge">
+                                    <i class="fa fa-file-o" title="Type"/>
+                                    <field name="file_type" readonly="1" nolabel="1"/>
+                                </span>
+                            </div>
+                            <!--  Preview link  -->
+                            <field name="file_url" string="Preview in Browser" widget="url" text="Click to Preview"
+                                   invisible="not file_url" readonly="1"/>
+                        </group>
+                    </div>
+                    <div class="o_hrd_divider"/>
+                    <!--  ── Notes ───────────────────────────────────────────  -->
+                    <div class="o_hrd_section_label">
+                        <i class="fa fa-sticky-note-o" title="Notes"/>
+                        Notes
+                    </div>
+                    <group>
+                        <field name="notes" string="" nolabel="1"
+                               placeholder="Optional remarks about this document..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--  ================================================================
+           LIST VIEW — standalone (via smart button)
+           ================================================================  -->
+    <record id="view_hr_employee_document_list" model="ir.ui.view">
+        <field name="name">hr.employee.document.list</field>
+        <field name="model">hr.employee.document</field>
+        <field name="arch" type="xml">
+            <list string="Documents" create="1" delete="1" decoration-info="document_type == 'id_proof'"
+                  decoration-success="document_type in ('educational', 'contract')"
+                  decoration-warning="document_type == 'experience'" decoration-danger="document_type == 'medical'">
+                <field name="name" string="Document Name"/>
+                <field name="document_type" string="Category" widget="badge"
+                       decoration-info="document_type == 'id_proof'"
+                       decoration-success="document_type in ('educational', 'contract')"
+                       decoration-warning="document_type == 'experience'"
+                       decoration-danger="document_type == 'medical'"/>
+                <field name="file_type" string="Type" readonly="1"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="file" filename="filename" string="File" widget="binary"/>
+                <field name="filename" string="File Name" readonly="1"/>
+                <field name="file_url" string="Preview" widget="url" text="Preview" invisible="not file_url"
+                       readonly="1"/>
+                <field name="upload_date" string="Uploaded On" readonly="1"/>
+                <field name="uploaded_by" string="Uploaded By" readonly="1"/>
+                <field name="notes" string="Notes" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <!--  ================================================================
+           KANBAN VIEW
+           ================================================================  -->
+    <record id="view_hr_employee_document_kanban" model="ir.ui.view">
+        <field name="name">hr.employee.document.kanban</field>
+        <field name="model">hr.employee.document</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="document_type" quick_create="false" class="o_hrd_kanban_view">
+                <!--  Fields needed in the template  -->
+                <field name="name"/>
+                <field name="document_type"/>
+                <field name="file_type"/>
+                <field name="employee_id"/>
+                <field name="upload_date"/>
+                <field name="uploaded_by"/>
+                <field name="file_url"/>
+                <field name="filename"/>
+                <templates>
+                    <t t-name="card">
+                        <!--  ── Header: name + document_type badge ───────────  -->
+                        <div class="d-flex justify-content-between align-items-start mb-2" style="gap:8px;">
+                            <div class="o_hrd_kanban_name">
+                                <field name="name"/>
+                            </div>
+                            <field name="document_type" widget="badge" decoration-info="document_type == 'id_proof'"
+                                   decoration-success="document_type in ('educational', 'contract')"
+                                   decoration-warning="document_type == 'experience'"
+                                   decoration-danger="document_type == 'medical'"/>
+                        </div>
+                        <!--  ── File type pill ───────────────────────────────  -->
+                        <div class="o_hrd_kanban_pill"
+                             t-if="record.file_type.raw_value and record.file_type.raw_value != '—'"
+                             style="margin-bottom:4px; width:fit-content;">
+                            <i class="fa fa-file-o" title="File Type"/>
+                            <t t-esc="record.file_type.raw_value"/>
+                        </div>
+                        <div class="o_hrd_kanban_divider"/>
+                        <!--  ── Employee avatar row ──────────────────────────  -->
+                        <div class="o_hrd_kanban_avatar_row">
+                            <img t-att-src="'/web/image/hr.employee/' + record.employee_id.raw_value + '/avatar_128'"
+                                 class="o_hrd_kanban_avatar" alt="Employee"/>
+                            <span class="o_hrd_kanban_avatar_name">
+                                <field name="employee_id"/>
+                            </span>
+                        </div>
+                        <!--  ── Upload date ──────────────────────────────────  -->
+                        <div class="o_hrd_kanban_meta">
+                            <i class="fa fa-calendar-o" title="Upload Date"/>
+                            <field name="upload_date"/>
+                            <t t-if="record.uploaded_by.raw_value">
+                                <span class="o_hrd_kanban_meta_sep">·</span>
+                                <field name="uploaded_by"/>
+                            </t>
+                        </div>
+                        <div class="o_hrd_kanban_divider"/>
+                        <!--  ── Footer: preview / no file ───────────────────  -->
+                        <div class="o_hrd_kanban_footer">
+                            <t t-if="record.file_url.raw_value">
+                                <a class="o_hrd_preview_badge" t-att-href="record.file_url.raw_value" target="_blank"
+                                   onclick="event.stopPropagation()">
+                                    <i class="fa fa-eye" title="Preview File"/>
+                                    Preview File
+                                </a>
+                            </t>
+                            <t t-else="">
+                                <span class="o_hrd_nofile_badge">
+                                    <i class="fa fa-cloud-upload" title="No File"/>
+                                    No file yet
+                                </span>
+                            </t>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--  ================================================================
+           ACTION — list + kanban + form
+           ================================================================  -->
+    <record id="action_hr_employee_document" model="ir.actions.act_window">
+        <field name="name">Employee Documents</field>
+        <field name="res_model">hr.employee.document</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'default_employee_id': active_id}</field>
+    </record>
 </odoo>

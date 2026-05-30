@@ -206,7 +206,7 @@
                                                 /&#160;<field name="week_working_days" readonly="1" nolabel="1"/>
                                             </span>
                                         </div>
-                                        <div class="o_welcome_week_sub">working days so far</div>
+                                        <div class="o_welcome_week_sub">working days this week</div>
                                     </div>
 
                                     <div class="o_welcome_week_card o_welcome_week_card_teal">
