@@ -113,6 +113,11 @@
     gap: 4px;
 }
 
+.o_welcome_quote_author_hyphen{
+    display: flex;
+    margin-bottom: 2px;
+}
+
 .o_welcome_quote_author .o_field_widget {
     font-size: 13px;
     color: #0369a1;

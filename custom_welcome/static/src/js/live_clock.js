@@ -24,7 +24,7 @@ class LiveClock extends Component {
     border-radius: 12px;
     overflow: hidden;
     padding: 0 14px;
-    height: 72px;
+    height: 60px;
     box-shadow: 0 2px 14px rgba(0,0,0,0.07);
     user-select: none;
     box-sizing: border-box;
@@ -82,7 +82,7 @@ class LiveClock extends Component {
     position: relative;
     z-index: 1;
 }
-.owc_colon_hidden { opacity: 0; }
+.owc_colon_hidden { opacity: 1; }
 .owc_fade_top,
 .owc_fade_bot {
     position: absolute;

@@ -40,7 +40,7 @@
                             <field name="quote_text" readonly="1" nolabel="1"/>
                         </div>
                         <div class="o_welcome_quote_author">
-                            —
+                            <div class="o_welcome_quote_author_hyphen">—</div>
                             <field name="quote_author" readonly="1" nolabel="1"/>
                         </div>
                     </div>

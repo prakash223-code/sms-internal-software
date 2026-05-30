@@ -6,26 +6,31 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
 
-            <!-- Setup Permissions button in form header (HR+ only) -->
+            <!-- ── Setup Permissions button in form header (HR+ only) ── -->
             <xpath expr="//header" position="inside">
                 <button
-                        name="action_setup_employee_permissions"
-                        string="Setup Permissions"
-                        type="object"
-                        class="btn-secondary"
-                        groups="hr.group_hr_user"
-                        help="Assign permissions based on this employee's System Role"/>
+                    name="action_setup_employee_permissions"
+                    string="Setup Permissions"
+                    type="object"
+                    class="btn-secondary"
+                    groups="hr.group_hr_user"
+                    help="Assign system permissions based on this employee's Role"/>
             </xpath>
 
-            <!-- System Role dropdown placed BEFORE user_id to stay in the same group grid cleanly -->
+            <!-- ── System Role + separator, placed before user_id ─────
+                 The separator creates a visual "System Access" section
+                 inside the HR settings group where user_id lives.
+            ─────────────────────────────────────────────────────────── -->
             <xpath expr="//field[@name='user_id']" position="before">
+                <separator string="System Access" groups="hr.group_hr_user"/>
                 <field
-                        name="employee_role"
-                        string="System Role"
-                        groups="hr.group_hr_user"/>
+                    name="employee_role"
+                    string="System Role"
+                    groups="hr.group_hr_user"
+                    help="Controls which permissions are assigned via the Setup Permissions button."/>
             </xpath>
 
-            <!-- Hide the empty properties field from employee form -->
+            <!-- ── Remove the empty properties field ─────────────────── -->
             <xpath expr="//field[@name='employee_properties']" position="replace"/>
 
         </field>

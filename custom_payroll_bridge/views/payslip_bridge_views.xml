@@ -1,22 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- ══════════════════════════════════════════════════════════════════
+         Main bridge inheritance: state banners + styled attendance section
+         Replaces the plain field-after-credit_note injection with a
+         full-width card block injected before the salary notebook.
+    ══════════════════════════════════════════════════════════════════════ -->
     <record id="view_hr_payslip_bridge_inherit" model="ir.ui.view">
         <field name="name">hr.payslip.bridge.inherit</field>
         <field name="model">hr.payslip</field>
         <field name="inherit_id" ref="bi_hr_payroll.view_hr_payslip_form"/>
         <field name="arch" type="xml">
 
-            <!-- Inject after Credit Note field -->
-            <field name="credit_note" position="after">
-                <field name="attendance_summary_id" readonly="1"/>
-                <field name="unpaid_absent_days" readonly="1"/>
-            </field>
+            <!-- ── 1. State banners (BEFORE <sheet> — required by style guide) ── -->
+            <xpath expr="//sheet" position="before">
+
+                <div class="o_pay_banner o_pay_banner_draft"
+                     invisible="state != 'draft'">
+                    <i class="fa fa-pencil-square-o" title="Draft"/>
+                    <div>
+                        <strong>Draft</strong> — Payslip has not been confirmed yet.
+                        Click <em>Compute Sheet</em> to calculate salary lines and
+                        inject the attendance deduction.
+                    </div>
+                </div>
+
+                <div class="o_pay_banner o_pay_banner_pending"
+                     invisible="state != 'verify'">
+                    <i class="fa fa-clock-o" title="Waiting"/>
+                    <div>
+                        <strong>Waiting for Approval</strong> — Salary lines have been
+                        computed. Review and confirm to finalise.
+                    </div>
+                </div>
+
+                <div class="o_pay_banner o_pay_banner_success"
+                     invisible="state != 'done'">
+                    <i class="fa fa-check-circle" title="Done"/>
+                    <div>
+                        <strong>Confirmed</strong> — Payslip is locked and salary
+                        lines are finalised.
+                    </div>
+                </div>
+
+                <div class="o_pay_banner o_pay_banner_danger"
+                     invisible="state != 'cancel'">
+                    <i class="fa fa-times-circle" title="Cancelled"/>
+                    <div>
+                        <strong>Cancelled</strong> — This payslip has been cancelled
+                        and is no longer valid.
+                    </div>
+                </div>
+
+            </xpath>
+
+            <!-- ── 2. Attendance Bridge section (before the salary notebook) ───
+                 NOTE: bi_hr_payroll's payslip form uses a <notebook> for salary
+                 computation / input lines. This xpath injects a full-width styled
+                 block at the top-level of <sheet>, just before those tabs.
+                 If your bi_hr_payroll version has no <notebook>, change this xpath
+                 to:  expr="//sheet"  position="inside"  and adjust accordingly.
+            ─────────────────────────────────────────────────────────────────── -->
+            <xpath expr="//notebook" position="before">
+
+                <div class="o_pay_section_label">
+                    <i class="fa fa-calendar-check-o" title="Attendance Bridge"/>
+                    Attendance Bridge
+                </div>
+
+                <div class="o_pay_stat_row">
+
+                    <!-- Absent-day KPI card -->
+                    <div class="o_pay_stat_card">
+                        <div class="o_pay_stat_label">
+                            <i class="fa fa-user-times" title="Absent Days"/>
+                            Unpaid Absent Days
+                        </div>
+                        <div class="o_pay_stat_value">
+                            <field name="unpaid_absent_days" readonly="1" nolabel="1"/>
+                        </div>
+                        <div class="o_pay_stat_hint">days deducted at daily rate (wage ÷ 30)</div>
+                    </div>
+
+                    <!-- Attendance summary reference card -->
+                    <div class="o_pay_info_card o_pay_summary_ref">
+                        <div class="o_pay_info_label">
+                            <i class="fa fa-link" title="Source Summary"/>
+                            Attendance Summary
+                        </div>
+                        <div class="o_pay_info_value">
+                            <field name="attendance_summary_id" readonly="1" nolabel="1"/>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="o_pay_divider"/>
+
+            </xpath>
 
         </field>
     </record>
 
-    <!-- Inherit payslip form to show print button for employees -->
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         Print-button injection for regular employees
+         (unchanged from original — kept in same file for cohesion)
+    ══════════════════════════════════════════════════════════════════════ -->
     <record id="view_hr_payslip_employee_print" model="ir.ui.view">
         <field name="name">hr.payslip.employee.print</field>
         <field name="model">hr.payslip</field>

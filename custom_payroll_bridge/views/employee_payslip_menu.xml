@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Employee "My Payslips" action — list, kanban, form -->
     <record id="action_employee_own_payslips" model="ir.actions.act_window">
         <field name="name">My Payslips</field>
         <field name="res_model">hr.payslip</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="domain">[('employee_id.user_id', '=', uid)]</field>
+        <field name="context">{'search_default_group_state': 1}</field>
     </record>
 
     <menuitem

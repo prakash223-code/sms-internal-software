@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         Custom payslip kanban card
+         Groups by state by default; shows employee avatar, pay period,
+         and a danger pill when absent days are present.
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_hr_payslip_kanban_bridge" model="ir.ui.view">
+        <field name="name">hr.payslip.kanban.bridge</field>
+        <field name="model">hr.payslip</field>
+        <field name="arch" type="xml">
+
+            <kanban default_group_by="state" class="o_pay_kanban_view">
+
+                <!-- Declare all fields needed in the card template -->
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="state"/>
+                <field name="unpaid_absent_days"/>
+                <field name="attendance_summary_id"/>
+
+                <templates>
+                    <t t-name="card">
+
+                        <!-- ── Row 1: Reference + state badge ────────── -->
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div class="o_pay_kanban_ref">
+                                <i class="fa fa-file-text-o" title="Payslip"/>
+                                <field name="name"/>
+                            </div>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'done'"
+                                   decoration-warning="state == 'verify'"
+                                   decoration-danger="state == 'cancel'"/>
+                        </div>
+
+                        <div class="o_pay_kanban_divider"/>
+
+                        <!-- ── Row 2: Employee avatar + name ─────────── -->
+                        <div class="o_pay_kanban_avatar_row">
+                            <t t-if="record.employee_id.raw_value">
+                                <img t-att-src="'/web/image/hr.employee/' + record.employee_id.raw_value + '/avatar_128'"
+                                     class="o_pay_kanban_avatar" alt="Avatar"/>
+                            </t>
+                            <t t-else="">
+                                <div class="o_pay_kanban_avatar_placeholder">
+                                    <i class="fa fa-user" title="No Employee"/>
+                                </div>
+                            </t>
+                            <span class="o_pay_kanban_avatar_name">
+                                <field name="employee_id"/>
+                            </span>
+                        </div>
+
+                        <!-- ── Row 3: Pay period pill ─────────────────── -->
+                        <div class="o_pay_kanban_pill_row">
+                            <div class="o_pay_kanban_pill">
+                                <i class="fa fa-calendar" title="Pay Period"/>
+                                <field name="date_from"/>
+                                <span>–</span>
+                                <field name="date_to"/>
+                            </div>
+                        </div>
+
+                        <!-- ── Row 4: Absent-day warning (hidden when 0) -->
+                        <div t-if="record.unpaid_absent_days.raw_value > 0"
+                             class="o_pay_kanban_pill_row">
+                            <div class="o_pay_kanban_pill o_pay_kanban_pill_danger">
+                                <i class="fa fa-user-times" title="Unpaid Absent Days"/>
+                                <field name="unpaid_absent_days"/>
+                                absent day(s)
+                            </div>
+                        </div>
+
+                    </t>
+                </templates>
+
+            </kanban>
+
+        </field>
+    </record>
+
+</odoo>
