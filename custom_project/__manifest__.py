@@ -8,6 +8,11 @@
     'data': [
         'views/hr_employee_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_project/static/src/css/custom_project.css',
+        ],
+    },
     'installable': True,
     'application': False,
 }

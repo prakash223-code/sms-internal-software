@@ -13,7 +13,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-        'data/welcome_quotes.xml',
+        'data/welcome.quote.csv',
         'views/welcome_views.xml',
         'views/announcement_views.xml',
         'views/welcome_menu.xml',

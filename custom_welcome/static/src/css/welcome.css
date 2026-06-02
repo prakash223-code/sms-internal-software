@@ -8,6 +8,22 @@
    o_form_renderer breaks Odoo's native overflow/scroll.
    Fix: let the renderer stay block; center via margin:auto.
    ──────────────────────────────────────────────────────────── */
+@font-face {
+    font-family: 'Noto Sans Tamil';
+    src: url('/custom_welcome/static/src/fonts/NotoSansTamil-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Tamil';
+    src: url('/custom_welcome/static/src/fonts/NotoSansTamil-SemiBold.woff2') format('woff2');
+    font-weight: 600 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 .o_welcome_form .o_form_sheet_bg {
     background: #f8fafc;
     min-height: 100%;
@@ -99,6 +115,7 @@
     color: #0c4a6e;
     line-height: 1.65;
     display: block;
+    font-family: 'Noto Sans Tamil', sans-serif;
 }
 
 .o_welcome_quote_author {
@@ -113,16 +130,12 @@
     gap: 4px;
 }
 
-.o_welcome_quote_author_hyphen{
-    display: flex;
-    margin-bottom: 2px;
-}
-
 .o_welcome_quote_author .o_field_widget {
     font-size: 13px;
     color: #0369a1;
     font-weight: 600;
     display: inline;
+    font-family: 'Noto Sans Tamil', sans-serif;
 }
 
 /* ── 5. TWO-COLUMN CONTENT GRID ──────────────────────────── */

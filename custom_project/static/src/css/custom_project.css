@@ -1,0 +1,191 @@
+/* =============================================================
+   custom_project — UI Styles  |  Prefix: o_cp_
+   Scope: Team Lead toggle + permission panel on hr.employee form
+   Responsive: 320 / 576 / 768 / 1024 / 1280px
+   ============================================================= */
+
+/* ─────────────────────────────────────────────────────────────
+   BANNERS  (before <sheet>)
+───────────────────────────────────────────────────────────── */
+.o_cp_banner {
+    border-radius: 6px;
+    padding: 11px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.o_cp_banner .fa { margin-top: 2px; flex-shrink: 0; font-size: 14px; }
+
+.o_cp_banner_lead {
+    background: #f0fdfa;
+    border: 1px solid #99f6e4;
+    border-left: 4px solid #0d9488;
+    color: #134e4a;
+    font-weight: 600;
+}
+.o_cp_banner_plain {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #94a3b8;
+    color: #475569;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SECTION LABEL
+───────────────────────────────────────────────────────────── */
+.o_cp_section_label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #94a3b8;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.o_cp_section_label .fa { font-size: 10px; opacity: 0.7; }
+
+/* ─────────────────────────────────────────────────────────────
+   PERMISSION INFO PANEL
+   Sits below the boolean_toggle field as a pure display card.
+   Two variants: active (teal) and inactive (slate).
+───────────────────────────────────────────────────────────── */
+.o_cp_perm_panel {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border-radius: 8px;
+    padding: 11px 14px;
+    margin-top: 6px;
+    margin-bottom: 4px;
+    box-sizing: border-box;
+    /* Breaks free of Odoo's label column by using negative margin trick */
+    width: 100%;
+}
+
+/* Inactive — neutral */
+.o_cp_perm_panel_off {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+/* Active — teal */
+.o_cp_perm_panel_on {
+    background: #f0fdfa;
+    border: 1px solid #99f6e4;
+}
+
+/* ── Left icon ───────────────────────────────────────────────── */
+.o_cp_perm_icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+.o_cp_perm_panel_off .o_cp_perm_icon {
+    background: #e2e8f0;
+    color: #64748b;
+}
+.o_cp_perm_panel_on .o_cp_perm_icon {
+    background: #0d9488;
+    color: #fff;
+}
+
+/* ── Right text ──────────────────────────────────────────────── */
+.o_cp_perm_body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.o_cp_perm_title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.o_cp_perm_panel_off .o_cp_perm_title { color: #475569; }
+.o_cp_perm_panel_on  .o_cp_perm_title { color: #0f766e; }
+
+.o_cp_perm_desc {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #64748b;
+}
+.o_cp_perm_panel_on .o_cp_perm_desc { color: #134e4a; }
+
+/* ── Bullet list inside panel ───────────────────────────────── */
+.o_cp_perm_list {
+    list-style: none;
+    margin: 5px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.o_cp_perm_list li {
+    font-size: 11.5px;
+    color: #64748b;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+.o_cp_perm_panel_on .o_cp_perm_list li { color: #134e4a; }
+.o_cp_perm_list li .fa {
+    font-size: 9px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.o_cp_perm_panel_off .o_cp_perm_list li .fa { color: #94a3b8; }
+.o_cp_perm_panel_on  .o_cp_perm_list li .fa { color: #0d9488; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+    .o_cp_banner      { padding: 10px 12px; font-size: 12.5px; gap: 8px; }
+    .o_cp_perm_panel  { padding: 10px 12px; gap: 10px; border-radius: 7px; }
+    .o_cp_perm_icon   { width: 30px; height: 30px; font-size: 13px; border-radius: 7px; }
+    .o_cp_perm_title  { font-size: 12.5px; }
+    .o_cp_perm_desc   { font-size: 11.5px; }
+    .o_cp_perm_list li { font-size: 11px; }
+}
+
+@media (max-width: 575px) {
+    .o_cp_banner      { padding: 10px 11px; font-size: 12px; border-radius: 5px; }
+    .o_cp_perm_panel  { padding: 9px 11px; gap: 9px; border-radius: 6px; margin-top: 4px; }
+    .o_cp_perm_icon   { width: 28px; height: 28px; font-size: 12px; border-radius: 6px; }
+    .o_cp_perm_title  { font-size: 12px; }
+    .o_cp_perm_desc   { font-size: 11px; }
+    .o_cp_perm_list   { gap: 1px; }
+    .o_cp_perm_list li { font-size: 10.5px; }
+    .o_cp_section_label { font-size: 10px; }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .o_cp_perm_panel  { padding: 11px 13px; }
+    .o_cp_perm_icon   { width: 32px; height: 32px; font-size: 14px; }
+}
+
+@media (min-width: 1280px) {
+    .o_cp_perm_panel  { padding: 13px 16px; gap: 14px; }
+    .o_cp_perm_icon   { width: 38px; height: 38px; font-size: 16px; border-radius: 9px; }
+    .o_cp_perm_title  { font-size: 13.5px; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .o_cp_perm_panel:active { opacity: 0.96; }
+}
+
+.o_form_mobile .o_cp_perm_panel { padding: 9px 11px; }
+.o_form_mobile .o_cp_perm_icon  { width: 28px; height: 28px; font-size: 12px; }

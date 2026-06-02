@@ -91,9 +91,10 @@ class WelcomeDashboard(models.TransientModel):
         quotes = self.env['welcome.quote'].search([('active', '=', True)])
         if quotes:
             idx = date.today().toordinal() % len(quotes)
-            q   = quotes[idx]
-            res['quote_text']   = q.text
-            res['quote_author'] = q.author
+            q = quotes[idx]
+            res['quote_text'] = q.text
+            # Show  "குறள் #42"  in the author slot
+            res['quote_author'] = f'"குறள் #{q.kural_number}'
 
         # ── 2. Greeting ────────────────────────────────────────────────
         ist      = pytz.timezone('Asia/Kolkata')

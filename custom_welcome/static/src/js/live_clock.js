@@ -24,7 +24,7 @@ class LiveClock extends Component {
     border-radius: 12px;
     overflow: hidden;
     padding: 0 14px;
-    height: 60px;
+    height: 68px;
     box-shadow: 0 2px 14px rgba(0,0,0,0.07);
     user-select: none;
     box-sizing: border-box;
