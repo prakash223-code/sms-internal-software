@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            ══ task.assignment.request record rules ══════════════════════════
+
+            Employee rule:
+              An employee can see a request when EITHER:
+                • they raised it  (requested_by.user_id = uid)
+                • they are the target (target_employee_id.user_id = uid)
+
+            Manager rule:
+              Managers can see ALL requests (no domain filter).
+              Because group_team_manager implies group_team_lead implies
+              group_team_employee, we must mark the employee rule as
+              applying only to group_team_employee (not team leads / managers)
+              by creating a separate, wider rule for managers that overrides
+              the narrower employee rule via Odoo's rule-ORing logic within
+              a group.
+
+              The cleanest Odoo-idiomatic approach for hierarchical visibility:
+              - Employee rule: narrow domain, group = group_team_employee
+              - Manager rule:  domain = [], group = group_team_manager
+              Since a manager user is in BOTH groups, Odoo ORs the two rules
+              → manager domain becomes (narrow_domain) OR (1=1) = all records.
+        -->
+
+        <!-- ── Employee: see requests they raised or are targeted in ──────── -->
+        <record id="rule_assignment_request_employee" model="ir.rule">
+            <field name="name">Assignment Request: own records only</field>
+            <field name="model_id" ref="model_task_assignment_request"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_team_employee'))]"/>
+            <field name="domain_force">[
+                '|',
+                ('requested_by.user_id', '=', user.id),
+                ('target_employee_id.user_id', '=', user.id)
+            ]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ── Manager: all records ──────────────────────────────────────── -->
+        <record id="rule_assignment_request_manager" model="ir.rule">
+            <field name="name">Assignment Request: manager sees all</field>
+            <field name="model_id" ref="model_task_assignment_request"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

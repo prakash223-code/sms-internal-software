@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ── Level 1: Employee ─────────────────────────────────────────── -->
+        <!--
+            Inherits project.group_project_user so employees can access
+            the project app and see their own tasks.
+            NOTE: category_id was removed from res.groups in Odoo 19.
+        -->
+        <record id="group_team_employee" model="res.groups">
+            <field name="name">Team Project / Employee</field>
+            <field name="implied_ids" eval="[(4, ref('project.group_project_user'))]"/>
+        </record>
+
+        <!-- ── Level 2: Team Lead ────────────────────────────────────────── -->
+        <!--
+            Implies Employee, so team leads automatically get all employee permissions.
+        -->
+        <record id="group_team_lead" model="res.groups">
+            <field name="name">Team Project / Team Lead</field>
+            <field name="implied_ids" eval="[(4, ref('group_team_employee'))]"/>
+        </record>
+
+        <!-- ── Level 3: Manager ──────────────────────────────────────────── -->
+        <!--
+            Full access + can approve/reject cross-team assignment requests.
+            Also implies project.group_project_manager for full project access.
+        -->
+        <record id="group_team_manager" model="res.groups">
+            <field name="name">Team Project / Manager</field>
+            <field name="implied_ids" eval="[
+                (4, ref('group_team_lead')),
+                (4, ref('project.group_project_manager'))
+            ]"/>
+        </record>
+
+    </data>
+</odoo>

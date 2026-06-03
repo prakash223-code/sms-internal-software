@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Root menu ══════════════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_root"
+              name="Team Management"
+              sequence="50"
+              groups="custom_project.group_team_employee"/>
+
+    <!-- ══ Teams ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_teams"
+              name="Teams"
+              parent="menu_team_management_root"
+              sequence="10"
+              action="action_team_team"
+              groups="custom_project.group_team_employee"/>
+
+    <!-- ══ Tasks ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_tasks"
+              name="Tasks"
+              parent="menu_team_management_root"
+              sequence="20"
+              groups="custom_project.group_team_employee"/>
+
+    <!-- My Tasks — all employees -->
+    <menuitem id="menu_team_management_my_tasks"
+              name="My Tasks"
+              parent="menu_team_management_tasks"
+              sequence="10"
+              action="action_my_tasks"
+              groups="custom_project.group_team_employee"/>
+
+    <!-- All Tasks — team leads and managers -->
+    <menuitem id="menu_team_management_all_tasks"
+              name="All Tasks"
+              parent="menu_team_management_tasks"
+              sequence="20"
+              action="action_all_tasks"
+              groups="custom_project.group_team_lead"/>
+
+    <!-- ══ Assignment Requests ════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_requests"
+              name="Assignment Requests"
+              parent="menu_team_management_root"
+              sequence="30"
+              groups="custom_project.group_team_employee"/>
+
+    <!-- My Requests — all employees -->
+    <menuitem id="menu_team_management_my_requests"
+              name="My Requests"
+              parent="menu_team_management_requests"
+              sequence="10"
+              action="action_my_assignment_requests"
+              groups="custom_project.group_team_employee"/>
+
+    <!-- All Requests — managers only -->
+    <menuitem id="menu_team_management_all_requests"
+              name="All Requests"
+              parent="menu_team_management_requests"
+              sequence="20"
+              action="action_all_assignment_requests"
+              groups="custom_project.group_team_manager"/>
+
+</odoo>

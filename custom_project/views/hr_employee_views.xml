@@ -1,95 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <record id="view_hr_employee_form_team_lead" model="ir.ui.view">
-    <field name="name">hr.employee.form.team.lead</field>
-    <field name="model">hr.employee</field>
-    <field name="inherit_id" ref="hr.view_employee_form"/>
-    <field name="arch" type="xml">
+    <record id="view_hr_employee_form_team_lead" model="ir.ui.view">
+        <field name="name">hr.employee.form.team.lead</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
 
-      <!-- ── Banners — before <sheet>, full viewport width ────────
-           Two mutually exclusive strips: teal when Team Lead is on,
-           neutral slate when off. Visible to everyone who opens form.
-      ──────────────────────────────────────────────────────────── -->
-      <xpath expr="//sheet" position="before">
+            <!-- ── Smart buttons ─────────────────────────────────────── -->
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
 
-        <div class="o_cp_banner o_cp_banner_lead" invisible="not is_team_lead">
-          <i class="fa fa-star" title="Team Lead Active"/>
-          <div>
-            <strong>Team Lead</strong> —
-            This employee can create tasks and assign work in projects.
-          </div>
-        </div>
+                <!-- Teams button -->
+                <button name="action_view_teams"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-users"
+                        invisible="team_count == 0">
+                    <field name="team_count" widget="statinfo" string="Teams"/>
+                </button>
 
-        <div class="o_cp_banner o_cp_banner_plain" invisible="is_team_lead">
-          <i class="fa fa-user-o" title="Standard Employee"/>
-          <div>
-            <strong>Standard Employee</strong> —
-            Can view and complete tasks assigned to them.
-            Enable <em>Team Lead</em> in the Work tab to grant task creation rights.
-          </div>
-        </div>
+                <!-- Tasks button -->
+                <button name="action_view_my_tasks"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-tasks">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Tasks</span>
+                    </div>
+                </button>
 
-      </xpath>
+            </xpath>
 
-      <!-- ── Team Lead toggle + permission panel ──────────────────
-           The toggle stays as a plain Odoo field so it renders
-           correctly inside the group column grid. The permission
-           panel below is a pure display div — no field widget
-           embedded, no duplicate field references.
-      ──────────────────────────────────────────────────────────── -->
-      <xpath expr="//field[@name='job_id']" position="after">
+            <!-- ── Team Lead badge — shown below job title when applicable ── -->
+            <xpath expr="//field[@name='job_id']" position="after">
 
-        <!-- Section label — HR only -->
-        <div class="o_cp_section_label" groups="hr.group_hr_user">
-          <i class="fa fa-shield" title="Permissions"/> Permissions
-        </div>
+                <!-- Team Lead badge — visible to HR only -->
+                <div class="o_cp_badge_team_lead"
+                     invisible="not is_team_lead_of_any"
+                     groups="hr.group_hr_user">
+                    <i class="fa fa-star o_cp_lead_star_badge"/>
+                    Team Lead
+                </div>
 
-        <!-- Toggle — single occurrence, normal field rendering -->
-        <field name="is_team_lead"
-               string="Team Lead"
-               widget="boolean_toggle"
-               groups="hr.group_hr_user"/>
+                <!-- Teams info section — HR only -->
+                <div groups="hr.group_hr_user"
+                     invisible="team_count == 0">
+                    <div class="o_cp_section_label">
+                        <i class="fa fa-users"/> My Teams
+                    </div>
+                    <field name="team_ids"
+                           widget="many2many_tags"
+                           readonly="1"
+                           nolabel="1"
+                           options="{'color_field': 'color'}"/>
+                </div>
 
-        <!-- ── Permission panel: INACTIVE state ───────────────── -->
-        <div class="o_cp_perm_panel o_cp_perm_panel_off"
-             invisible="is_team_lead"
-             groups="hr.group_hr_user">
-          <div class="o_cp_perm_icon">
-            <i class="fa fa-lock" title="Standard Access"/>
-          </div>
-          <div class="o_cp_perm_body">
-            <div class="o_cp_perm_title">Standard Access</div>
-            <div class="o_cp_perm_desc">This employee has read-only access to their own tasks.</div>
-            <ul class="o_cp_perm_list">
-              <li><i class="fa fa-check" title="Allowed"/> View tasks assigned to them</li>
-              <li><i class="fa fa-check" title="Allowed"/> Log time and update task status</li>
-              <li><i class="fa fa-times" title="Not allowed"/> Cannot create or assign tasks</li>
-              <li><i class="fa fa-times" title="Not allowed"/> Cannot upload project documents</li>
-            </ul>
-          </div>
-        </div>
+                <!-- Hidden computed fields needed for conditional rendering -->
+                <field name="team_count"           invisible="1"/>
+                <field name="is_team_lead_of_any"  invisible="1"/>
 
-        <!-- ── Permission panel: ACTIVE (Team Lead) state ────────── -->
-        <div class="o_cp_perm_panel o_cp_perm_panel_on"
-             invisible="not is_team_lead"
-             groups="hr.group_hr_user">
-          <div class="o_cp_perm_icon">
-            <i class="fa fa-star" title="Team Lead Active"/>
-          </div>
-          <div class="o_cp_perm_body">
-            <div class="o_cp_perm_title">Team Lead Access</div>
-            <div class="o_cp_perm_desc">This employee has elevated project permissions.</div>
-            <ul class="o_cp_perm_list">
-              <li><i class="fa fa-check" title="Allowed"/> Create and assign tasks to team members</li>
-              <li><i class="fa fa-check" title="Allowed"/> Upload and manage project documents</li>
-              <li><i class="fa fa-check" title="Allowed"/> View all tasks within assigned projects</li>
-              <li><i class="fa fa-check" title="Allowed"/> Duplicate existing tasks</li>
-            </ul>
-          </div>
-        </div>
+            </xpath>
 
-      </xpath>
-
-    </field>
-  </record>
+        </field>
+    </record>
 </odoo>

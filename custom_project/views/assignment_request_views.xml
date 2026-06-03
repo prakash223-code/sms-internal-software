@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Form view ══════════════════════════════════════════════════════ -->
+    <record id="view_assignment_request_form" model="ir.ui.view">
+        <field name="name">task.assignment.request.form</field>
+        <field name="model">task.assignment.request</field>
+        <field name="arch" type="xml">
+            <form string="Assignment Request">
+
+                <header>
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="pending,approved,rejected"/>
+
+                    <!-- Manager actions -->
+                    <button name="action_approve"
+                            string="Approve"
+                            type="object"
+                            class="btn-success"
+                            groups="custom_project.group_team_manager"
+                            invisible="state != 'pending'"
+                            confirm="Approve this cross-team assignment request?"/>
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            class="btn-danger"
+                            groups="custom_project.group_team_manager"
+                            invisible="state != 'pending'"/>
+                </header>
+
+                <sheet>
+
+                    <!-- Status banners -->
+                    <div class="o_cp_req_banner o_cp_req_banner_pending"
+                         invisible="state != 'pending'">
+                        <i class="fa fa-clock-o" title="Pending"/>
+                        Awaiting manager approval before the task is assigned.
+                    </div>
+                    <div class="o_cp_req_banner o_cp_req_banner_approved"
+                         invisible="state != 'approved'">
+                        <i class="fa fa-check-circle" title="Approved"/>
+                        Approved — task has been assigned to the target employee.
+                    </div>
+                    <div class="o_cp_req_banner o_cp_req_banner_rejected"
+                         invisible="state != 'rejected'">
+                        <i class="fa fa-times-circle" title="Rejected"/>
+                        Rejected — the task remains unassigned.
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name" string="Reference"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+
+                        <group string="Task">
+                            <field name="task_id" readonly="1"/>
+                            <field name="task_state"
+                                   widget="badge"
+                                   decoration-warning="task_state == 'draft'"
+                                   decoration-primary="task_state == 'assigned'"
+                                   decoration-info="task_state == 'in_progress'"
+                                   decoration-success="task_state in ('verified','closed')"/>
+                        </group>
+
+                        <group string="Request Details">
+                            <field name="requested_by"
+                                   widget="many2one_avatar_employee"
+                                   readonly="1"/>
+                            <field name="requesting_team_id" readonly="1"/>
+                        </group>
+
+                    </group>
+
+                    <group>
+
+                        <group string="Assignment Target">
+                            <field name="target_employee_id"
+                                   widget="many2one_avatar_employee"
+                                   readonly="1"/>
+                            <field name="target_team_id" readonly="1"/>
+                        </group>
+
+                        <group string="Decision"
+                               invisible="state == 'pending'">
+                            <field name="approved_by"
+                                   widget="many2one_avatar_employee"
+                                   readonly="1"
+                                   string="Decided By"/>
+                            <field name="decision_date" readonly="1"/>
+                        </group>
+
+                    </group>
+
+                    <group string="Reason">
+                        <field name="reason"
+                               nolabel="1"
+                               placeholder="Explain why this task should be assigned to a member of a different team…"
+                               colspan="2"
+                               readonly="state != 'pending'"/>
+                    </group>
+
+                    <group string="Manager Comment"
+                           groups="custom_project.group_team_manager">
+                        <field name="manager_comment"
+                               nolabel="1"
+                               placeholder="Optional comment for the requester…"
+                               colspan="2"/>
+                    </group>
+
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ List view ══════════════════════════════════════════════════════ -->
+    <record id="view_assignment_request_list" model="ir.ui.view">
+        <field name="name">task.assignment.request.list</field>
+        <field name="model">task.assignment.request</field>
+        <field name="arch" type="xml">
+            <list string="Assignment Requests"
+                  decoration-success="state == 'approved'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-warning="state == 'pending'">
+                <field name="name"               string="Reference"/>
+                <field name="task_id"            string="Task"/>
+                <field name="requested_by"       string="Requested By"
+                       widget="many2one_avatar_employee"/>
+                <field name="requesting_team_id" string="From Team"/>
+                <field name="target_employee_id" string="To Employee"
+                       widget="many2one_avatar_employee"/>
+                <field name="target_team_id"     string="To Team"/>
+                <field name="state"              string="Status"
+                       widget="badge"
+                       decoration-warning="state == 'pending'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="create_date"        string="Requested On" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Kanban view ════════════════════════════════════════════════════ -->
+    <record id="view_assignment_request_kanban" model="ir.ui.view">
+        <field name="name">task.assignment.request.kanban</field>
+        <field name="model">task.assignment.request</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="task_id"/>
+                <field name="requested_by"/>
+                <field name="target_employee_id"/>
+                <field name="target_team_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_cp_req_card">
+                            <div class="o_cp_req_card_ref">
+                                <strong><field name="name"/></strong>
+                            </div>
+                            <div class="o_cp_req_card_task">
+                                <i class="fa fa-tasks o_cp_req_icon" title="Task"/>
+                                <field name="task_id"/>
+                            </div>
+                            <div class="o_cp_req_card_row">
+                                <span class="o_cp_req_label">From</span>
+                                <field name="requested_by" widget="many2one_avatar_employee"/>
+                            </div>
+                            <div class="o_cp_req_card_row">
+                                <span class="o_cp_req_label">To</span>
+                                <field name="target_employee_id" widget="many2one_avatar_employee"/>
+                                <span class="o_cp_req_team" t-if="record.target_team_id.value">
+                                    (<t t-esc="record.target_team_id.value"/>)
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ══ Search view ════════════════════════════════════════════════════ -->
+    <record id="view_assignment_request_search" model="ir.ui.view">
+        <field name="name">task.assignment.request.search</field>
+        <field name="model">task.assignment.request</field>
+        <field name="arch" type="xml">
+            <search string="Search Assignment Requests">
+                <field name="name"               string="Reference"/>
+                <field name="task_id"            string="Task"/>
+                <field name="requested_by"       string="Requested By"/>
+                <field name="target_employee_id" string="Target Employee"/>
+                <separator/>
+                <filter string="Pending"  name="pending"
+                        domain="[('state','=','pending')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state','=','approved')]"/>
+                <filter string="Rejected" name="rejected"
+                        domain="[('state','=','rejected')]"/>
+                <separator/>
+                <filter string="My Requests" name="my_requests"
+                        domain="[('requested_by.user_id','=',uid)]"/>
+                <separator/>
+                <filter string="Group by Status" name="grp_state"
+                        context="{'group_by': 'state'}"/>
+                <filter string="Group by Requesting Team" name="grp_from_team"
+                        context="{'group_by': 'requesting_team_id'}"/>
+                <filter string="Group by Target Team" name="grp_to_team"
+                        context="{'group_by': 'target_team_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Actions ════════════════════════════════════════════════════════ -->
+
+    <!-- My requests — visible to all employees -->
+    <record id="action_my_assignment_requests" model="ir.actions.act_window">
+        <field name="name">My Requests</field>
+        <field name="res_model">task.assignment.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('requested_by.user_id','=',uid)]</field>
+        <field name="search_view_id" ref="view_assignment_request_search"/>
+        <field name="context">{'search_default_my_requests': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No cross-team assignment requests yet.
+            </p>
+            <p>
+                When you assign a task to an employee in a different team,
+                a request is created automatically and sent to the manager.
+            </p>
+        </field>
+    </record>
+
+    <!-- All requests — manager only -->
+    <record id="action_all_assignment_requests" model="ir.actions.act_window">
+        <field name="name">All Requests</field>
+        <field name="res_model">task.assignment.request</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_assignment_request_kanban')}),
+            (0, 0, {'view_mode': 'list',   'view_id': ref('view_assignment_request_list')}),
+        ]"/>
+        <field name="search_view_id" ref="view_assignment_request_search"/>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No pending cross-team assignment requests.
+            </p>
+        </field>
+    </record>
+
+</odoo>

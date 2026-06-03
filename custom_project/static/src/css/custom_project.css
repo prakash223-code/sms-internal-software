@@ -1,191 +1,440 @@
 /* =============================================================
-   custom_project — UI Styles  |  Prefix: o_cp_
-   Scope: Team Lead toggle + permission panel on hr.employee form
-   Responsive: 320 / 576 / 768 / 1024 / 1280px
+   custom_project v2 — Team Task Management UI
+   Prefix: o_cp_
+   Covers: team cards, task kanban, assignment request cards,
+           priority badges, state colours, banners, employee view
+   Responsive: 320 / 576 / 768 / 1024 / 1280 px
    ============================================================= */
 
 /* ─────────────────────────────────────────────────────────────
-   BANNERS  (before <sheet>)
+   CSS VARIABLES (light + dark aware)
 ───────────────────────────────────────────────────────────── */
-.o_cp_banner {
-    border-radius: 6px;
-    padding: 11px 14px;
-    font-size: 13px;
-    line-height: 1.6;
-    margin-bottom: 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-.o_cp_banner .fa { margin-top: 2px; flex-shrink: 0; font-size: 14px; }
+:root {
+    --o-cp-teal-50:  #f0fdfa;
+    --o-cp-teal-100: #ccfbf1;
+    --o-cp-teal-400: #2dd4bf;
+    --o-cp-teal-600: #0d9488;
+    --o-cp-teal-700: #0f766e;
+    --o-cp-teal-900: #134e4a;
 
-.o_cp_banner_lead {
-    background: #f0fdfa;
-    border: 1px solid #99f6e4;
-    border-left: 4px solid #0d9488;
-    color: #134e4a;
-    font-weight: 600;
-}
-.o_cp_banner_plain {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #94a3b8;
-    color: #475569;
+    --o-cp-slate-50:  #f8fafc;
+    --o-cp-slate-100: #f1f5f9;
+    --o-cp-slate-200: #e2e8f0;
+    --o-cp-slate-400: #94a3b8;
+    --o-cp-slate-500: #64748b;
+    --o-cp-slate-700: #334155;
+    --o-cp-slate-900: #0f172a;
+
+    --o-cp-amber-50:  #fffbeb;
+    --o-cp-amber-100: #fef3c7;
+    --o-cp-amber-600: #d97706;
+    --o-cp-amber-900: #78350f;
+
+    --o-cp-red-50:  #fef2f2;
+    --o-cp-red-100: #fee2e2;
+    --o-cp-red-600: #dc2626;
+    --o-cp-red-900: #7f1d1d;
+
+    --o-cp-blue-50:  #eff6ff;
+    --o-cp-blue-100: #dbeafe;
+    --o-cp-blue-600: #2563eb;
+    --o-cp-blue-900: #1e3a8a;
+
+    --o-cp-green-50:  #f0fdf4;
+    --o-cp-green-100: #dcfce7;
+    --o-cp-green-600: #16a34a;
+    --o-cp-green-900: #14532d;
+
+    --o-cp-radius-sm: 6px;
+    --o-cp-radius:    8px;
+    --o-cp-radius-lg: 12px;
+    --o-cp-shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --o-cp-shadow-md: 0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -2px rgba(0,0,0,.05);
 }
 
 /* ─────────────────────────────────────────────────────────────
-   SECTION LABEL
+   SECTION LABEL  (shared across all views)
 ───────────────────────────────────────────────────────────── */
 .o_cp_section_label {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: #94a3b8;
-    margin-top: 10px;
-    margin-bottom: 4px;
+    letter-spacing: 0.7px;
+    color: var(--o-cp-slate-400);
+    margin: 10px 0 6px;
     display: flex;
     align-items: center;
     gap: 5px;
 }
-.o_cp_section_label .fa { font-size: 10px; opacity: 0.7; }
+.o_cp_section_label .fa {
+    font-size: 10px;
+    opacity: 0.75;
+}
 
 /* ─────────────────────────────────────────────────────────────
-   PERMISSION INFO PANEL
-   Sits below the boolean_toggle field as a pure display card.
-   Two variants: active (teal) and inactive (slate).
+   BANNERS  (generic — before <sheet>)
 ───────────────────────────────────────────────────────────── */
-.o_cp_perm_panel {
+.o_cp_banner {
+    border-radius: var(--o-cp-radius-sm);
+    padding: 11px 16px;
+    font-size: 13px;
+    line-height: 1.6;
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    border-radius: 8px;
-    padding: 11px 14px;
-    margin-top: 6px;
-    margin-bottom: 4px;
-    box-sizing: border-box;
-    /* Breaks free of Odoo's label column by using negative margin trick */
-    width: 100%;
+    gap: 10px;
+    margin-bottom: 0;
+}
+.o_cp_banner .fa { margin-top: 2px; flex-shrink: 0; font-size: 14px; }
+
+/* ── Request-specific banners ─────────────────────────────── */
+.o_cp_req_banner {
+    border-radius: var(--o-cp-radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+.o_cp_req_banner .fa { flex-shrink: 0; }
+
+.o_cp_req_banner_pending {
+    background: var(--o-cp-amber-50);
+    border: 1px solid var(--o-cp-amber-100);
+    border-left: 4px solid var(--o-cp-amber-600);
+    color: var(--o-cp-amber-900);
+}
+.o_cp_req_banner_approved {
+    background: var(--o-cp-green-50);
+    border: 1px solid var(--o-cp-green-100);
+    border-left: 4px solid var(--o-cp-green-600);
+    color: var(--o-cp-green-900);
+}
+.o_cp_req_banner_rejected {
+    background: var(--o-cp-red-50);
+    border: 1px solid var(--o-cp-red-100);
+    border-left: 4px solid var(--o-cp-red-600);
+    color: var(--o-cp-red-900);
 }
 
-/* Inactive — neutral */
-.o_cp_perm_panel_off {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+/* ─────────────────────────────────────────────────────────────
+   TEAM KANBAN CARD  (.o_cp_team_card)
+───────────────────────────────────────────────────────────── */
+.o_cp_team_card {
+    background: #fff;
+    border: 1px solid var(--o-cp-slate-200);
+    border-radius: var(--o-cp-radius);
+    padding: 14px 16px;
+    box-shadow: var(--o-cp-shadow);
+    transition: box-shadow .15s ease, border-color .15s ease;
+}
+.o_cp_team_card:hover {
+    box-shadow: var(--o-cp-shadow-md);
+    border-color: var(--o-cp-teal-400);
 }
 
-/* Active — teal */
-.o_cp_perm_panel_on {
-    background: #f0fdfa;
-    border: 1px solid #99f6e4;
+.o_cp_team_card_header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
-/* ── Left icon ───────────────────────────────────────────────── */
-.o_cp_perm_icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
+.o_cp_team_icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--o-cp-radius-sm);
+    background: var(--o-cp-teal-50);
+    border: 1px solid var(--o-cp-teal-100);
+    color: var(--o-cp-teal-600);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 16px;
     flex-shrink: 0;
 }
-.o_cp_perm_panel_off .o_cp_perm_icon {
-    background: #e2e8f0;
-    color: #64748b;
-}
-.o_cp_perm_panel_on .o_cp_perm_icon {
-    background: #0d9488;
-    color: #fff;
-}
 
-/* ── Right text ──────────────────────────────────────────────── */
-.o_cp_perm_body {
+.o_cp_team_title {
     flex: 1;
     min-width: 0;
+}
+.o_cp_team_title strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--o-cp-slate-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_cp_team_lead {
+    font-size: 12px;
+    color: var(--o-cp-slate-500);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.o_cp_lead_star {
+    color: var(--o-cp-amber-600);
+    font-size: 10px;
+}
+
+.o_cp_team_card_footer {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* stat badges on team card */
+.o_cp_stat_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+}
+.o_cp_badge_members {
+    background: var(--o-cp-blue-50);
+    color: var(--o-cp-blue-600);
+    border: 1px solid var(--o-cp-blue-100);
+}
+.o_cp_badge_tasks {
+    background: var(--o-cp-teal-50);
+    color: var(--o-cp-teal-700);
+    border: 1px solid var(--o-cp-teal-100);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TASK KANBAN CARD  (.o_cp_task_card)
+───────────────────────────────────────────────────────────── */
+.o_cp_task_card {
+    background: #fff;
+    border: 1px solid var(--o-cp-slate-200);
+    border-radius: var(--o-cp-radius);
+    padding: 12px 14px;
+    box-shadow: var(--o-cp-shadow);
+    transition: box-shadow .15s ease, border-color .15s ease;
+}
+.o_cp_task_card:hover {
+    box-shadow: var(--o-cp-shadow-md);
+    border-color: var(--o-cp-teal-400);
+}
+
+.o_cp_task_card_top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.o_cp_task_name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--o-cp-slate-900);
+    line-height: 1.3;
+    flex: 1;
+    min-width: 0;
+}
+
+.o_cp_task_card_meta {
     display: flex;
     flex-direction: column;
     gap: 3px;
+    margin-bottom: 10px;
 }
-.o_cp_perm_title {
-    font-size: 13px;
+.o_cp_task_meta_item {
+    font-size: 11.5px;
+    color: var(--o-cp-slate-500);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.o_cp_task_meta_item .fa {
+    font-size: 10px;
+    color: var(--o-cp-slate-400);
+    flex-shrink: 0;
+}
+
+.o_cp_task_card_footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-top: 1px solid var(--o-cp-slate-100);
+    padding-top: 8px;
+    margin-top: 2px;
+}
+
+/* ── Priority badges ───────────────────────────────────────── */
+.o_cp_priority_badge {
+    display: inline-block;
+    font-size: 10px;
     font-weight: 700;
-    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
-.o_cp_perm_panel_off .o_cp_perm_title { color: #475569; }
-.o_cp_perm_panel_on  .o_cp_perm_title { color: #0f766e; }
-
-.o_cp_perm_desc {
-    font-size: 12px;
-    line-height: 1.5;
-    color: #64748b;
+.o_cp_priority_low {
+    background: var(--o-cp-slate-100);
+    color: var(--o-cp-slate-500);
+    border: 1px solid var(--o-cp-slate-200);
 }
-.o_cp_perm_panel_on .o_cp_perm_desc { color: #134e4a; }
+.o_cp_priority_normal {
+    background: var(--o-cp-blue-50);
+    color: var(--o-cp-blue-600);
+    border: 1px solid var(--o-cp-blue-100);
+}
+.o_cp_priority_high {
+    background: var(--o-cp-amber-50);
+    color: var(--o-cp-amber-600);
+    border: 1px solid var(--o-cp-amber-100);
+}
+.o_cp_priority_critical {
+    background: var(--o-cp-red-50);
+    color: var(--o-cp-red-600);
+    border: 1px solid var(--o-cp-red-100);
+    font-weight: 800;
+}
 
-/* ── Bullet list inside panel ───────────────────────────────── */
-.o_cp_perm_list {
-    list-style: none;
-    margin: 5px 0 0;
-    padding: 0;
+/* ─────────────────────────────────────────────────────────────
+   ASSIGNMENT REQUEST KANBAN CARD  (.o_cp_req_card)
+───────────────────────────────────────────────────────────── */
+.o_cp_req_card {
+    background: #fff;
+    border: 1px solid var(--o-cp-slate-200);
+    border-radius: var(--o-cp-radius);
+    padding: 12px 14px;
+    box-shadow: var(--o-cp-shadow);
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 6px;
+    transition: box-shadow .15s ease;
 }
-.o_cp_perm_list li {
-    font-size: 11.5px;
-    color: #64748b;
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
+.o_cp_req_card:hover {
+    box-shadow: var(--o-cp-shadow-md);
 }
-.o_cp_perm_panel_on .o_cp_perm_list li { color: #134e4a; }
-.o_cp_perm_list li .fa {
-    font-size: 9px;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-.o_cp_perm_panel_off .o_cp_perm_list li .fa { color: #94a3b8; }
-.o_cp_perm_panel_on  .o_cp_perm_list li .fa { color: #0d9488; }
 
+.o_cp_req_card_ref {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--o-cp-teal-700);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.o_cp_req_card_task {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--o-cp-slate-900);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.o_cp_req_icon {
+    color: var(--o-cp-slate-400);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.o_cp_req_card_row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--o-cp-slate-700);
+}
+
+.o_cp_req_label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--o-cp-slate-400);
+    min-width: 22px;
+}
+
+.o_cp_req_team {
+    font-size: 11px;
+    color: var(--o-cp-slate-500);
+}
+
+/* Kanban column colour coding by state group header */
+.o_kanban_group[data-id="pending"]  > .o_column_title { border-top: 3px solid var(--o-cp-amber-600); }
+.o_kanban_group[data-id="approved"] > .o_column_title { border-top: 3px solid var(--o-cp-green-600); }
+.o_kanban_group[data-id="rejected"] > .o_column_title { border-top: 3px solid var(--o-cp-red-600);   }
+
+/* ─────────────────────────────────────────────────────────────
+   EMPLOYEE FORM — Team Lead badge
+───────────────────────────────────────────────────────────── */
+.o_cp_badge_team_lead {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--o-cp-amber-50);
+    border: 1px solid var(--o-cp-amber-100);
+    color: var(--o-cp-amber-900);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin: 4px 0 8px;
+}
+.o_cp_lead_star_badge {
+    color: var(--o-cp-amber-600);
+    font-size: 11px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TASK KANBAN STATE COLUMN HEADERS
+───────────────────────────────────────────────────────────── */
+.o_kanban_group[data-id="draft"]       > .o_column_title { border-top: 3px solid var(--o-cp-slate-400);  }
+.o_kanban_group[data-id="assigned"]    > .o_column_title { border-top: 3px solid var(--o-cp-blue-600);   }
+.o_kanban_group[data-id="in_progress"] > .o_column_title { border-top: 3px solid var(--o-cp-teal-600);   }
+.o_kanban_group[data-id="completed"]   > .o_column_title { border-top: 3px solid var(--o-cp-amber-600);  }
+.o_kanban_group[data-id="verified"]    > .o_column_title { border-top: 3px solid var(--o-cp-green-600);  }
+.o_kanban_group[data-id="closed"]      > .o_column_title { border-top: 3px solid var(--o-cp-slate-700);  }
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
-    .o_cp_banner      { padding: 10px 12px; font-size: 12.5px; gap: 8px; }
-    .o_cp_perm_panel  { padding: 10px 12px; gap: 10px; border-radius: 7px; }
-    .o_cp_perm_icon   { width: 30px; height: 30px; font-size: 13px; border-radius: 7px; }
-    .o_cp_perm_title  { font-size: 12.5px; }
-    .o_cp_perm_desc   { font-size: 11.5px; }
-    .o_cp_perm_list li { font-size: 11px; }
-}
-
-@media (max-width: 575px) {
-    .o_cp_banner      { padding: 10px 11px; font-size: 12px; border-radius: 5px; }
-    .o_cp_perm_panel  { padding: 9px 11px; gap: 9px; border-radius: 6px; margin-top: 4px; }
-    .o_cp_perm_icon   { width: 28px; height: 28px; font-size: 12px; border-radius: 6px; }
-    .o_cp_perm_title  { font-size: 12px; }
-    .o_cp_perm_desc   { font-size: 11px; }
-    .o_cp_perm_list   { gap: 1px; }
-    .o_cp_perm_list li { font-size: 10.5px; }
+    .o_cp_team_card     { padding: 11px 13px; }
+    .o_cp_team_icon     { width: 32px; height: 32px; font-size: 14px; }
+    .o_cp_task_card     { padding: 10px 12px; }
+    .o_cp_req_card      { padding: 10px 12px; }
+    .o_cp_req_banner    { padding: 9px 12px; font-size: 12.5px; }
+    .o_cp_priority_badge { font-size: 9px; padding: 2px 6px; }
     .o_cp_section_label { font-size: 10px; }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
-    .o_cp_perm_panel  { padding: 11px 13px; }
-    .o_cp_perm_icon   { width: 32px; height: 32px; font-size: 14px; }
+@media (max-width: 575px) {
+    .o_cp_team_card_footer  { flex-direction: column; gap: 5px; }
+    .o_cp_task_card_top     { flex-direction: column; gap: 5px; }
+    .o_cp_badge_team_lead   { font-size: 11px; padding: 2px 8px; }
 }
 
 @media (min-width: 1280px) {
-    .o_cp_perm_panel  { padding: 13px 16px; gap: 14px; }
-    .o_cp_perm_icon   { width: 38px; height: 38px; font-size: 16px; border-radius: 9px; }
-    .o_cp_perm_title  { font-size: 13.5px; }
+    .o_cp_team_card  { padding: 16px 18px; }
+    .o_cp_team_icon  { width: 42px; height: 42px; font-size: 18px; border-radius: 9px; }
+    .o_cp_task_card  { padding: 14px 16px; }
+    .o_cp_req_card   { padding: 13px 15px; }
 }
 
 @media (hover: none) and (pointer: coarse) {
-    .o_cp_perm_panel:active { opacity: 0.96; }
+    .o_cp_team_card:active,
+    .o_cp_task_card:active,
+    .o_cp_req_card:active { opacity: 0.95; }
 }
-
-.o_form_mobile .o_cp_perm_panel { padding: 9px 11px; }
-.o_form_mobile .o_cp_perm_icon  { width: 28px; height: 28px; font-size: 12px; }

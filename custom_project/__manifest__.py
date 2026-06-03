@@ -1,12 +1,24 @@
 {
-    'name': 'Custom Project',
-    'version': '19.0.1.0.0',
-    'summary': 'Team Lead role + task creation restrictions for project management',
+    'name': 'Custom Project – Team Task Management',
+    'version': '19.0.2.0.0',
+    'summary': 'Team-based task assignment with cross-team manager approval workflow',
     'author': 'Your Company',
-    'depends': ['hr', 'project', 'custom_employee_id'],
     'license': 'LGPL-3',
+    'depends': ['hr', 'project', 'mail', 'custom_employee_id'],
     'data': [
+        # 1. Security (must load first)
+        'security/security_groups.xml',
+        'security/ir.model.access.csv',
+        'security/record_rules.xml',
+        # 2. Sequences
+        'data/sequences.xml',
+        # 3. Views
+        'views/team_views.xml',
+        'views/task_views.xml',
+        'views/assignment_request_views.xml',
         'views/hr_employee_views.xml',
+        # 4. Menus (last — reference actions defined in views)
+        'views/menu.xml',
     ],
     'assets': {
         'web.assets_backend': [
