@@ -70,7 +70,7 @@
                         <field name="assigned_to"
                                widget="many2one_avatar_employee"
                                options="{'no_create_edit': True}"/>
-                        <field name="task_priority" widget="priority"/>
+                        <field name="task_priority" widget="badge"/>
                     </group>
                 </group>
 
@@ -96,7 +96,7 @@
                 <field name="team_id"/>
                 <field name="project_id"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_global_click o_cp_task_card">
                             <div class="o_cp_task_card_top">
                                 <span class="o_cp_task_name">
@@ -137,26 +137,24 @@
                   decoration-success="task_state == 'closed'"
                   decoration-info="task_state == 'in_progress'"
                   decoration-warning="task_state == 'draft'">
-                <field name="name"            string="Task"/>
-                <field name="team_id"         string="Team"/>
-                <field name="project_id"      string="Project" optional="show"/>
-                <field name="assigned_by"     string="Assigned By"
+                <field name="name" string="Task"/>
+                <field name="team_id" string="Team"/>
+                <field name="project_id" string="Project" optional="show"/>
+                <field name="assigned_by" string="Assigned By"
                        widget="many2one_avatar_employee" optional="show"/>
-                <field name="assigned_to"     string="Assigned To"
+                <field name="assigned_to" string="Assigned To"
                        widget="many2one_avatar_employee"/>
-                <field name="task_priority"   string="Priority"
+                <field name="task_priority" string="Priority"
                        widget="badge"
                        decoration-danger="task_priority == 'critical'"
                        decoration-warning="task_priority == 'high'"
-                       decoration-info="task_priority == 'normal'"
-                       decoration-secondary="task_priority == 'low'"/>
-                <field name="task_state"      string="State"
+                       decoration-info="task_priority == 'normal'"/>
+                <field name="task_state" string="State"
                        widget="badge"
                        decoration-success="task_state in ('verified','closed')"
                        decoration-info="task_state == 'in_progress'"
                        decoration-warning="task_state == 'draft'"
-                       decoration-primary="task_state == 'assigned'"
-                       decoration-muted="task_state == 'completed'"/>
+                       decoration-primary="task_state == 'assigned'"/>
             </list>
         </field>
     </record>
@@ -167,29 +165,29 @@
         <field name="model">project.task</field>
         <field name="arch" type="xml">
             <search string="Search Tasks">
-                <field name="name"        string="Task Name"/>
+                <field name="name" string="Task Name"/>
                 <field name="assigned_to" string="Assigned To"/>
-                <field name="team_id"     string="Team"/>
-                <field name="project_id"  string="Project"/>
+                <field name="team_id" string="Team"/>
+                <field name="project_id" string="Project"/>
                 <separator/>
                 <!-- State filters -->
-                <filter string="Draft"       name="draft"
+                <filter string="Draft" name="draft"
                         domain="[('task_state','=','draft')]"/>
-                <filter string="Assigned"    name="assigned"
+                <filter string="Assigned" name="assigned"
                         domain="[('task_state','=','assigned')]"/>
                 <filter string="In Progress" name="in_progress"
                         domain="[('task_state','=','in_progress')]"/>
-                <filter string="Completed"   name="completed"
+                <filter string="Completed" name="completed"
                         domain="[('task_state','=','completed')]"/>
-                <filter string="Closed"      name="closed"
+                <filter string="Closed" name="closed"
                         domain="[('task_state','=','closed')]"/>
                 <separator/>
                 <!-- My tasks -->
                 <filter string="My Tasks" name="my_tasks"
                         domain="[('assigned_to.user_id','=',uid)]"/>
                 <separator/>
-                <filter string="Group by Team"     name="grp_team"
-                            context="{'group_by': 'team_id'}"/>
+                <filter string="Group by Team" name="grp_team"
+                        context="{'group_by': 'team_id'}"/>
                 <filter string="Group by State" name="grp_state"
                         context="{'group_by': 'task_state'}"/>
                 <filter string="Group by Priority" name="grp_priority"

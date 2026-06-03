@@ -162,7 +162,7 @@
                 <field name="target_employee_id"/>
                 <field name="target_team_id"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_global_click o_cp_req_card">
                             <div class="o_cp_req_card_ref">
                                 <strong><field name="name"/></strong>

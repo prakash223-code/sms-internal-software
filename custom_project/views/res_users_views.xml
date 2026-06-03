@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_users_form_team_group" model="ir.ui.view">
+        <field name="name">res.users.form.team.group</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='access_rights']" position="inside">
+                <separator string="Team Management"/>
+                <group>
+                    <field name="group_ids"
+                           widget="many2many_checkboxes"
+                           domain="[('name', 'like', 'Team Project')]"
+                           string="Team Role"
+                           nolabel="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

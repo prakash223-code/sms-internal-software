@@ -111,7 +111,7 @@
 .o_welcome_quote_body .o_field_widget,
 .o_welcome_quote_body {
     font-size: 15px;
-    font-style: italic;
+    /*font-style: italic;*/
     color: #0c4a6e;
     line-height: 1.65;
     display: block;

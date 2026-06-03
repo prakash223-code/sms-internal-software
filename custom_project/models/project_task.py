@@ -70,10 +70,10 @@ class ProjectTask(models.Model):
         for task in self:
             task.assignment_request_count = self.env[
                 'task.assignment.request'
-            ].search_count([('task_id', '=', task.id)])
+            ].sudo().search_count([('task_id', '=', task.id)])
 
     @api.model
-    def _group_expand_states(self, states, domain, order):
+    def _group_expand_states(self, states, domain):
         """Always show all state columns in the Kanban even if empty."""
         return [key for key, _label in self._fields['task_state'].selection]
 

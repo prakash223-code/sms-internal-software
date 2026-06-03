@@ -106,7 +106,7 @@
                 <field name="member_count"/>
                 <field name="task_count"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_global_click o_cp_team_card">
                             <div class="o_cp_team_card_header">
                                 <div class="o_cp_team_icon">

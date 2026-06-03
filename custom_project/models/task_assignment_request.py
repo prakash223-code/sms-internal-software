@@ -23,22 +23,12 @@ class TaskAssignmentRequest(models.Model):
         string='Task',
         required=True,
         ondelete='cascade',
-        readonly=True,
     )
-
-    task_state = fields.Selection(
-        related='task_id.task_state',
-        string='Task State',
-        store=False,
-    )
-
-    # ── Requester side ────────────────────────────────────────────────────────
 
     requested_by = fields.Many2one(
         'hr.employee',
         string='Requested By',
         required=True,
-        readonly=True,
         default=lambda self: self.env['hr.employee'].search(
             [('user_id', '=', self.env.uid)], limit=1
         ),
@@ -47,22 +37,17 @@ class TaskAssignmentRequest(models.Model):
     requesting_team_id = fields.Many2one(
         'team.team',
         string='Requesting Team',
-        readonly=True,
     )
-
-    # ── Target side ───────────────────────────────────────────────────────────
 
     target_employee_id = fields.Many2one(
         'hr.employee',
         string='Target Employee',
         required=True,
-        readonly=True,
     )
 
     target_team_id = fields.Many2one(
         'team.team',
         string='Target Team',
-        readonly=True,
     )
 
     # ── Request details ───────────────────────────────────────────────────────
@@ -206,5 +191,5 @@ class TaskAssignmentRequest(models.Model):
     # ── Kanban group expander ─────────────────────────────────────────────────
 
     @api.model
-    def _group_expand_states(self, states, domain, order):
+    def _group_expand_states(self, states, domain):
         return [key for key, _label in self._fields['state'].selection]
