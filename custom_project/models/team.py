@@ -50,7 +50,13 @@ class Team(models.Model):
     @api.depends('member_ids')
     def _compute_member_count(self):
         for team in self:
-            team.member_count = len(team.member_ids)
+            # sudo() is required: Odoo 19's hr.employee._check_private_fields()
+            # raises AccessError for non-HR users even when the ORM only needs
+            # the 'active' field (used internally by filtered(active) during
+            # Many2many resolution). sudo() propagates to the resulting
+            # hr.employee recordset, bypassing the private-field check while
+            # still correctly excluding archived employees.
+            team.member_count = len(team.sudo().member_ids)
 
     def _compute_task_count(self):
         Task = self.env['project.task']
@@ -75,12 +81,16 @@ class Team(models.Model):
 
     def action_view_members(self):
         self.ensure_one()
+        # sudo() required for the same reason as _compute_member_count:
+        # accessing .member_ids on a non-HR user context triggers
+        # hr.employee._check_private_fields() via filtered(active).
+        member_ids = self.sudo().member_ids.ids
         return {
             'type': 'ir.actions.act_window',
             'name': _('%s – Members') % self.name,
             'res_model': 'hr.employee',
             'view_mode': 'list,form',
-            'domain': [('id', 'in', self.member_ids.ids)],
+            'domain': [('id', 'in', member_ids)],
         }
 
     # ── Unique name constraint ────────────────────────────────────────────────

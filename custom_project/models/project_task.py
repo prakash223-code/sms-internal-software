@@ -1,5 +1,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.osv import expression
 
 
 class ProjectTask(models.Model):
@@ -13,7 +14,6 @@ class ProjectTask(models.Model):
         copy=False,
         tracking=True,
         readonly=True,
-        help='The employee who created / assigned this task.',
     )
 
     assigned_to = fields.Many2one(
@@ -21,14 +21,13 @@ class ProjectTask(models.Model):
         string='Assigned To',
         copy=False,
         tracking=True,
-        help='The employee responsible for completing this task.',
     )
 
     team_id = fields.Many2one(
         'team.team',
         string='Team',
         tracking=True,
-        help='The team this task belongs to.',
+        help='Auto-populated from the project team.',
     )
 
     task_priority = fields.Selection(
@@ -74,22 +73,25 @@ class ProjectTask(models.Model):
 
     @api.model
     def _group_expand_states(self, states, domain):
-        """Always show all state columns in the Kanban even if empty."""
         return [key for key, _label in self._fields['task_state'].selection]
+
+    # ── Onchange ──────────────────────────────────────────────────────────────
+
+    @api.onchange('project_id')
+    def _onchange_project_id_team(self):
+        if self.project_id and self.project_id.team_id:
+            self.team_id = self.project_id.team_id
+        elif not self.project_id:
+            self.team_id = False
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _get_current_employee(self):
-        """Return the hr.employee record linked to the current user, or False."""
         return self.env['hr.employee'].search(
             [('user_id', '=', self.env.uid)], limit=1
         )
 
     def _get_employee_teams(self, employee):
-        """
-        Return all teams the employee belongs to — either as a member
-        or as the designated Team Lead.
-        """
         return self.env['team.team'].search([
             '|',
             ('member_ids', 'in', employee.id),
@@ -102,71 +104,164 @@ class ProjectTask(models.Model):
             or self.env.user.has_group('project.group_project_manager')
         )
 
-    # ── ORM override: business rule on create ─────────────────────────────────
+    def _is_privileged(self):
+        """Managers and HR bypass all team restrictions."""
+        return (
+            self.env.user.has_group('custom_project.group_team_manager')
+            or self.env.user.has_group('hr.group_hr_user')
+        )
+
+    # ── Visibility: Python-level filter ───────────────────────────────────────
+
+    @api.model
+    def _search(self, domain, offset=0, limit=None, order=None):
+        """
+        Enforce team-based task visibility at the ORM level.
+
+        Employees see:
+          - Tasks with no team assigned
+          - Tasks in their team
+          - Tasks assigned TO them (cross-team approved tasks)
+          - Tasks they created/assigned (assigned_by)
+
+        Managers and HR see everything.
+        sudo() calls are never restricted.
+        """
+        if not self.env.su and not self._is_privileged():
+            employee = self.env['hr.employee'].search(
+                [('user_id', '=', self.env.uid)], limit=1
+            )
+            if employee:
+                team_domain = [
+                    '|', ('team_id', '=', False),
+                    '|', ('team_id.member_ids', 'in', [employee.id]),
+                    '|', ('team_id.team_lead_id', '=', employee.id),
+                    '|', ('assigned_to', '=', employee.id),
+                         ('assigned_by', '=', employee.id),
+                ]
+                domain = expression.AND([list(domain), team_domain])
+        return super()._search(domain, offset=offset, limit=limit, order=order)
+
+    # ── Resolve team from project ─────────────────────────────────────────────
+
+    def _resolve_task_team(self, vals):
+        if vals.get('team_id'):
+            return self.env['team.team'].browse(vals['team_id'])
+        project_id = vals.get('project_id') or (self.project_id.id if self else False)
+        if project_id:
+            project = self.env['project.project'].browse(project_id)
+            if project.team_id:
+                return project.team_id
+        if self and self.team_id:
+            return self.team_id
+        return False
+
+    def _handle_cross_team_assignment(self, vals, current_employee):
+        assigned_to_id = vals.get('assigned_to')
+        if not assigned_to_id:
+            return vals, None
+
+        if self._is_manager():
+            if 'task_state' not in vals:
+                vals['task_state'] = 'assigned'
+            return vals, None
+
+        if not current_employee:
+            return vals, None
+
+        target_emp    = self.env['hr.employee'].browse(assigned_to_id)
+        task_team     = self._resolve_task_team(vals)
+        assignee_teams = self._get_employee_teams(target_emp)
+
+        vals['assigned_by'] = current_employee.id
+
+        if task_team and not vals.get('team_id'):
+            vals['team_id'] = task_team.id
+
+        if task_team and task_team in assignee_teams:
+            vals['task_state'] = 'assigned'
+            return vals, None
+        else:
+            assigner_teams = self._get_employee_teams(current_employee)
+            pending_info = {
+                'target_employee_id': assigned_to_id,
+                'assigner_teams':     assigner_teams,
+                'assignee_teams':     assignee_teams,
+                'task_team':          task_team,
+            }
+            vals['assigned_to'] = False
+            vals['task_state']  = 'draft'
+            return vals, pending_info
+
+    def _create_assignment_request(self, task, pending_info, current_employee):
+        assigner_teams = pending_info['assigner_teams']
+        assignee_teams = pending_info['assignee_teams']
+        task_team      = pending_info.get('task_team')
+        self.env['task.assignment.request'].sudo().create({
+            'task_id':            task.id,
+            'requested_by':       current_employee.id,
+            'requesting_team_id': task_team.id if task_team
+                                  else (assigner_teams[0].id if assigner_teams else False),
+            'target_employee_id': pending_info['target_employee_id'],
+            'target_team_id':     assignee_teams[0].id if assignee_teams else False,
+        })
+
+    # ── ORM: create ───────────────────────────────────────────────────────────
 
     @api.model_create_multi
     def create(self, vals_list):
-        """
-        Enforce team-based assignment rules on task creation.
-
-        • Same-team assignment  → task created with state = Assigned
-        • Cross-team assignment → task created in Draft (assigned_to cleared),
-                                   a TaskAssignmentRequest is auto-created
-        • Manager / no employee → no restriction, state left as-is
-        """
         current_employee = self._get_current_employee()
-        is_manager = self._is_manager()
+        pending_requests = []
 
-        pending_requests = []   # list of (index_in_vals, request_info_dict)
+        for i, vals in enumerate(vals_list):
+            if not vals.get('team_id') and vals.get('project_id'):
+                project = self.env['project.project'].browse(vals['project_id'])
+                if project.team_id:
+                    vals['team_id'] = project.team_id.id
 
-        if not is_manager and current_employee:
-            for i, vals in enumerate(vals_list):
-                assigned_to_id = vals.get('assigned_to')
-                if not assigned_to_id:
-                    continue
-
-                target_emp = self.env['hr.employee'].browse(assigned_to_id)
-                assigner_teams = self._get_employee_teams(current_employee)
-                assignee_teams = self._get_employee_teams(target_emp)
-                common_teams   = assigner_teams & assignee_teams
-
-                # Always record who is assigning
-                vals['assigned_by'] = current_employee.id
-
-                if common_teams:
-                    # ── Same-team: assign directly ───────────────────────────
-                    vals['task_state'] = 'assigned'
-                    vals.setdefault('team_id', common_teams[0].id)
-                else:
-                    # ── Cross-team: hold for manager approval ────────────────
-                    vals['task_state'] = 'draft'
-                    # Remove the direct assignment — will be set after approval
-                    vals['assigned_to'] = False
-
-                    pending_requests.append((i, {
-                        'target_employee_id': assigned_to_id,
-                        'assigner_teams':     assigner_teams,
-                        'assignee_teams':     assignee_teams,
-                    }))
+            if 'assigned_to' in vals:
+                vals, pending_info = self._handle_cross_team_assignment(
+                    vals, current_employee
+                )
+                if pending_info:
+                    pending_requests.append((i, pending_info))
 
         tasks = super().create(vals_list)
 
-        # Create assignment requests AFTER the task records exist
-        for task_idx, req_info in pending_requests:
-            task = tasks[task_idx]
-            assigner_teams = req_info['assigner_teams']
-            assignee_teams = req_info['assignee_teams']
-            self.env['task.assignment.request'].create({
-                'task_id':            task.id,
-                'requested_by':       current_employee.id,
-                'requesting_team_id': assigner_teams[0].id if assigner_teams else False,
-                'target_employee_id': req_info['target_employee_id'],
-                'target_team_id':     assignee_teams[0].id if assignee_teams else False,
-            })
+        for task_idx, pending_info in pending_requests:
+            self._create_assignment_request(
+                tasks[task_idx], pending_info, current_employee
+            )
 
         return tasks
 
-    # ── State-transition actions ───────────────────────────────────────────────
+    # ── ORM: write ────────────────────────────────────────────────────────────
+
+    def write(self, vals):
+        if 'project_id' in vals and not vals.get('team_id'):
+            project = self.env['project.project'].browse(vals['project_id'])
+            if project.team_id:
+                vals['team_id'] = project.team_id.id
+
+        if 'assigned_to' not in vals:
+            return super().write(vals)
+
+        current_employee = self._get_current_employee()
+        vals, pending_info = self._handle_cross_team_assignment(
+            vals, current_employee
+        )
+
+        result = super().write(vals)
+
+        if pending_info:
+            for task in self:
+                self._create_assignment_request(
+                    task, pending_info, current_employee
+                )
+
+        return result
+
+    # ── State transitions ─────────────────────────────────────────────────────
 
     def action_start_progress(self):
         for task in self:
@@ -189,13 +284,10 @@ class ProjectTask(models.Model):
                 task.task_state = 'closed'
 
     def action_reset_to_draft(self):
-        """Allow manager to reset a task back to Draft."""
         if not self._is_manager():
             raise UserError(_('Only managers can reset a task to Draft.'))
         for task in self:
             task.task_state = 'draft'
-
-    # ── Smart-button action ───────────────────────────────────────────────────
 
     def action_view_assignment_requests(self):
         self.ensure_one()

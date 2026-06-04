@@ -4,10 +4,6 @@ from odoo import _, api, fields, models
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    # ── Bidirectional Many2many to team.team ──────────────────────────────────
-    # Uses the SAME relation table defined in team.team (team_member_rel)
-    # so adding a member on the team form is reflected here automatically.
-
     team_ids = fields.Many2many(
         'team.team',
         'team_member_rel',
@@ -30,8 +26,6 @@ class HrEmployee(models.Model):
         help='True when this employee is the Team Lead of at least one team.',
     )
 
-    # ── Computes ──────────────────────────────────────────────────────────────
-
     @api.depends('team_ids')
     def _compute_team_count(self):
         for emp in self:
@@ -43,8 +37,6 @@ class HrEmployee(models.Model):
             emp.is_team_lead_of_any = any(
                 t.team_lead_id == emp for t in emp.team_ids
             )
-
-    # ── Task smart-button ─────────────────────────────────────────────────────
 
     def action_view_my_tasks(self):
         self.ensure_one()
@@ -60,8 +52,6 @@ class HrEmployee(models.Model):
             ],
         }
 
-    # ── Teams smart-button ───────────────────────────────────────────────────
-
     def action_view_teams(self):
         self.ensure_one()
         return {
@@ -71,3 +61,24 @@ class HrEmployee(models.Model):
             'view_mode': 'list,form',
             'domain': [('member_ids', 'in', self.id)],
         }
+
+
+class HrEmployeePublic(models.Model):
+    """
+    Mirror team_ids onto hr.employee.public so that domain filters
+    using team_ids work correctly when many2one_avatar_employee widgets
+    run their name_search against the public model.
+    Uses the identical relation table (team_member_rel) so no extra
+    DB columns are created — it's just a second ORM-level declaration
+    over the same join table.
+    """
+    _inherit = 'hr.employee.public'
+
+    team_ids = fields.Many2many(
+        'team.team',
+        'team_member_rel',
+        'employee_id',
+        'team_id',
+        string='Teams',
+        readonly=True,
+    )

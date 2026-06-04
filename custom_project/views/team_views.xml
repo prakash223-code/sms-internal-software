@@ -37,9 +37,10 @@
                     <div class="oe_title">
                         <label for="name" string="Team Name"/>
                         <h1>
+                            <!-- No inline style — full-width handled by
+                                 Odoo's oe_title h1 base styles -->
                             <field name="name"
-                                   placeholder="e.g. Backend Engineering"
-                                   style="width: 100%;"/>
+                                   placeholder="e.g. Backend Engineering"/>
                         </h1>
                     </div>
 

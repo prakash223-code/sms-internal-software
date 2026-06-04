@@ -3,34 +3,42 @@
     <data>
 
         <!--
-            ══ task.assignment.request record rules ══════════════════════════
+            Deactivate Odoo's built-in task visibility rules.
 
-            Employee rule:
-              An employee can see a request when EITHER:
-                • they raised it  (requested_by.user_id = uid)
-                • they are the target (target_employee_id.user_id = uid)
+            project.task_visibility_rule:
+              Allows ALL employees to see tasks inside projects with
+              privacy_visibility='employees' — i.e. all tasks everywhere.
 
-            Manager rule:
-              Managers can see ALL requests (no domain filter).
-              Because group_team_manager implies group_team_lead implies
-              group_team_employee, we must mark the employee rule as
-              applying only to group_team_employee (not team leads / managers)
-              by creating a separate, wider rule for managers that overrides
-              the narrower employee rule via Odoo's rule-ORing logic within
-              a group.
+            project.task_visibility_rule_project_user:
+              Same as above, scoped to group_project_user.
 
-              The cleanest Odoo-idiomatic approach for hierarchical visibility:
-              - Employee rule: narrow domain, group = group_team_employee
-              - Manager rule:  domain = [], group = group_team_manager
-              Since a manager user is in BOTH groups, Odoo ORs the two rules
-              → manager domain becomes (narrow_domain) OR (1=1) = all records.
+            project.ir_rule_private_task:
+              Allows employees to see tasks in employees/portal projects.
+
+            project.project_manager_all_project_tasks_rule:
+              Allows project managers to see all tasks linked to any project.
+              Our group_team_manager implies project.group_project_manager
+              so this fires for our managers — replaced by our own rule below.
         -->
+        <record id="project.task_visibility_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+        <record id="project.task_visibility_rule_project_user" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+        <record id="project.ir_rule_private_task" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+        <record id="project.project_manager_all_project_tasks_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
 
-        <!-- ── Employee: see requests they raised or are targeted in ──────── -->
+        <!-- ══ task.assignment.request rules ══════════════════════════ -->
+
         <record id="rule_assignment_request_employee" model="ir.rule">
             <field name="name">Assignment Request: own records only</field>
             <field name="model_id" ref="model_task_assignment_request"/>
-            <field name="groups" eval="[(4, ref('custom_project.group_team_employee'))]"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="domain_force">[
                 '|',
                 ('requested_by.user_id', '=', user.id),
@@ -42,11 +50,62 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- ── Manager: all records ──────────────────────────────────────── -->
         <record id="rule_assignment_request_manager" model="ir.rule">
             <field name="name">Assignment Request: manager sees all</field>
             <field name="model_id" ref="model_task_assignment_request"/>
             <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- ══ project.task rules ═════════════════════════════════════ -->
+
+        <!--
+            Employee: own team's tasks only.
+            Extra OR branches ensure a cross-team approved employee can
+            still see the task assigned to them, and the assigner can
+            see what they created.
+        -->
+        <record id="rule_project_task_employee" model="ir.rule">
+            <field name="name">Task: team members see own team tasks only</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',
+                ('team_id', '=', False),
+                '|',
+                ('team_id.member_ids.user_id', '=', user.id),
+                '|',
+                ('team_id.team_lead_id.user_id', '=', user.id),
+                '|',
+                ('assigned_to.user_id', '=', user.id),
+                ('assigned_by.user_id', '=', user.id)
+            ]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: all tasks -->
+        <record id="rule_project_task_manager" model="ir.rule">
+            <field name="name">Task: manager sees all</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- HR: all tasks -->
+        <record id="rule_project_task_hr" model="ir.rule">
+            <field name="name">Task: HR sees all</field>
+            <field name="model_id" ref="project.model_project_task"/>
+            <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="perm_read"   eval="True"/>
             <field name="perm_write"  eval="True"/>

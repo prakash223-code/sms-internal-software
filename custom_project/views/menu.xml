@@ -1,60 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-   <!-- ══ Root menu ══ -->
-<menuitem id="menu_team_management_root"
-          name="Team Management"
-          sequence="50"
-          groups="base.group_user"/>
+    <!--
+        All items hang off project.menu_main_pm (the "Project" app root).
+        No custom root menu is created — our entries appear as extra
+        sections inside the existing Project sidebar.
 
-<!-- ══ Teams ══ -->
-<menuitem id="menu_team_management_teams"
-          name="Teams"
-          parent="menu_team_management_root"
-          sequence="10"
-          action="action_team_team"
-          groups="base.group_user"/>
+        project.menu_project_management is the core "Tasks" parent menu
+        (confirmed from DB: also hides My Tasks + All Tasks children).
 
-<!-- ══ Tasks ══ -->
-<menuitem id="menu_team_management_tasks"
-          name="Tasks"
-          parent="menu_team_management_root"
-          sequence="20"
-          groups="base.group_user"/>
+        Sequence guide (Project core uses ~10-40):
+            50  Teams
+            60  Tasks  (our replacement)
+            70  Assignment Requests  (submenu)
+    -->
 
-<menuitem id="menu_team_management_my_tasks"
-          name="My Tasks"
-          parent="menu_team_management_tasks"
-          sequence="10"
-          action="action_my_tasks"
-          groups="base.group_user"/>
+    <!-- ══ Deactivate core Tasks menu (cascades to My Tasks + All Tasks) ══ -->
+    <record id="project.menu_project_management" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
 
-<menuitem id="menu_team_management_all_tasks"
-          name="All Tasks"
-          parent="menu_team_management_tasks"
-          sequence="20"
-          action="action_all_tasks"
-          groups="custom_project.group_team_lead"/>
+    <!-- ══ Teams ══════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_teams"
+              name="Teams"
+              parent="project.menu_main_pm"
+              sequence="50"
+              action="action_team_team"
+              groups="base.group_user"/>
 
-<!-- ══ Assignment Requests ══ -->
-<menuitem id="menu_team_management_requests"
-          name="Assignment Requests"
-          parent="menu_team_management_root"
-          sequence="30"
-          groups="base.group_user"/>
+    <!-- ══ Tasks ═════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_tasks"
+              name="Tasks"
+              parent="project.menu_main_pm"
+              sequence="60"
+              groups="base.group_user"/>
 
-<menuitem id="menu_team_management_my_requests"
-          name="My Requests"
-          parent="menu_team_management_requests"
-          sequence="10"
-          action="action_my_assignment_requests"
-          groups="base.group_user"/>
+    <menuitem id="menu_team_management_my_tasks"
+              name="My Tasks"
+              parent="menu_team_management_tasks"
+              sequence="10"
+              action="action_my_tasks"
+              groups="base.group_user"/>
 
-<menuitem id="menu_team_management_all_requests"
-          name="All Requests"
-          parent="menu_team_management_requests"
-          sequence="20"
-          action="action_all_assignment_requests"
-          groups="custom_project.group_team_manager"/>
+    <menuitem id="menu_team_management_all_tasks"
+              name="All Tasks"
+              parent="menu_team_management_tasks"
+              sequence="20"
+              action="action_all_tasks"
+              groups="custom_project.group_team_lead"/>
+
+    <!-- ══ Assignment Requests ════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_requests"
+              name="Assignment Requests"
+              parent="project.menu_main_pm"
+              sequence="70"
+              groups="base.group_user"/>
+
+    <menuitem id="menu_team_management_my_requests"
+              name="My Requests"
+              parent="menu_team_management_requests"
+              sequence="10"
+              action="action_my_assignment_requests"
+              groups="base.group_user"/>
+
+    <menuitem id="menu_team_management_all_requests"
+              name="All Requests"
+              parent="menu_team_management_requests"
+              sequence="20"
+              action="action_all_assignment_requests"
+              groups="custom_project.group_team_manager"/>
 
 </odoo>

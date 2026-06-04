@@ -37,7 +37,7 @@
                 <div class="o_cp_badge_team_lead"
                      invisible="not is_team_lead_of_any"
                      groups="hr.group_hr_user">
-                    <i class="fa fa-star o_cp_lead_star_badge"/>
+                    <i class="fa fa-star o_cp_lead_star_badge" title="Team Lead"/>
                     Team Lead
                 </div>
 
@@ -45,13 +45,12 @@
                 <div groups="hr.group_hr_user"
                      invisible="team_count == 0">
                     <div class="o_cp_section_label">
-                        <i class="fa fa-users"/> My Teams
+                        <i class="fa fa-users" title="Teams"/> My Teams
                     </div>
                     <field name="team_ids"
                            widget="many2many_tags"
                            readonly="1"
-                           nolabel="1"
-                           options="{'color_field': 'color'}"/>
+                           nolabel="1"/>
                 </div>
 
                 <!-- Hidden computed fields needed for conditional rendering -->

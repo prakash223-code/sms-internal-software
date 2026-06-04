@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            Deactivate Odoo's built-in project visibility rules.
+
+            project.project_public_members_rule:
+              Grants ALL group_project_user members access to every project
+              with privacy_visibility='employees' (the default). Since our
+              group_team_employee implies group_project_user, this ORs with
+              our team rule and makes ALL projects visible to everyone.
+
+            project.project_project_manager_rule:
+              Grants ALL project managers unrestricted access. Our
+              group_team_manager implies project.group_project_manager,
+              so this rule fires for our managers too — but we replace it
+              with our own manager rule below.
+        -->
+        <record id="project.project_public_members_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+        <record id="project.project_project_manager_rule" model="ir.rule">
+            <field name="active" eval="False"/>
+        </record>
+
+        <!-- ══ Replacement project.project rules ══════════════════════ -->
+
+        <!-- Employee: own team's projects + unassigned projects -->
+        <record id="rule_project_project_employee" model="ir.rule">
+            <field name="name">Project: team members see own team only</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|',
+                ('team_id', '=', False),
+                '|',
+                ('team_id.member_ids.user_id', '=', user.id),
+                ('team_id.team_lead_id.user_id', '=', user.id)
+            ]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: all projects -->
+        <record id="rule_project_project_manager" model="ir.rule">
+            <field name="name">Project: manager sees all</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- HR: all projects -->
+        <record id="rule_project_project_hr" model="ir.rule">
+            <field name="name">Project: HR sees all</field>
+            <field name="model_id" ref="project.model_project_project"/>
+            <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

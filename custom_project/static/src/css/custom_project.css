@@ -189,6 +189,10 @@
     flex-wrap: wrap;
 }
 
+.o_cp_team_name_field {
+    width: 100%;
+}
+
 /* stat badges on team card */
 .o_cp_stat_badge {
     display: inline-flex;

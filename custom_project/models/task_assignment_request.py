@@ -25,6 +25,13 @@ class TaskAssignmentRequest(models.Model):
         ondelete='cascade',
     )
 
+    task_state = fields.Selection(
+        related='task_id.task_state',
+        string='Task State',
+        readonly=True,
+        store=False,
+    )
+
     requested_by = fields.Many2one(
         'hr.employee',
         string='Requested By',

@@ -9,12 +9,11 @@
 
             <!-- 1. Hidden fields -->
             <xpath expr="//field[@name='name']" position="before">
-                <field name="crm_lead_id" invisible="1"/>
+                <field name="crm_lead_id"    invisible="1"/>
                 <field name="project_number" invisible="1"/>
             </xpath>
 
-            <!-- 2. Reference cards — FIX: target oe_title div, not the field inside it
-                 position="after" now places cards BELOW the title, not beside it -->
+            <!-- 2. Reference cards — below the title -->
             <xpath expr="//div[hasclass('oe_title')]" position="after">
                 <div invisible="not project_number">
                     <div class="o_crm_section_label">Project Reference</div>
@@ -50,7 +49,14 @@
                 </div>
             </xpath>
 
-            <!-- 3. Smart button -->
+            <!-- 3. Team field — inserted after partner_id in the main form -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="team_id"
+                       options="{'no_create_edit': True}"
+                       domain="[('active','=',True)]"/>
+            </xpath>
+
+            <!-- 4. Smart buttons -->
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button
                     name="action_open_source_query"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ══ 1. Inherit project.task form — add custom fields ═══════════════ -->
+    <!-- ══ 1. Inherit project.task form ═══════════════════════════════════ -->
     <record id="view_task_form_team_fields" model="ir.ui.view">
         <field name="name">project.task.form.team.fields</field>
         <field name="model">project.task</field>
@@ -54,14 +54,11 @@
                         invisible="task_state == 'draft'"/>
             </xpath>
 
-            <!-- Custom fields group — inserted before description/notes -->
+            <!-- Assignment fields — no team_id, just assigned_by and assigned_to -->
             <xpath expr="//field[@name='description']" position="before">
-                <separator string="Team Assignment"/>
+                <separator string="Assignment"/>
                 <group>
                     <group>
-                        <field name="team_id"
-                               options="{'no_create_edit': True}"
-                               domain="[('active','=',True)]"/>
                         <field name="assigned_by"
                                widget="many2one_avatar_employee"
                                readonly="1"/>
@@ -69,19 +66,26 @@
                     <group>
                         <field name="assigned_to"
                                widget="many2one_avatar_employee"
-                               options="{'no_create_edit': True}"/>
+                               options="{'no_create_edit': True}"
+                               domain="[('active', '=', True)]"/>
                         <field name="task_priority" widget="badge"/>
                     </group>
                 </group>
 
-                <!-- Hidden field needed for conditional rendering -->
+                <!-- Hidden fields needed for smart button / logic -->
+                <field name="team_id"                  invisible="1"/>
                 <field name="assignment_request_count" invisible="1"/>
+            </xpath>
+
+            <!-- Hide native Assignees field -->
+            <xpath expr="//field[@name='user_ids']" position="attributes">
+                <attribute name="invisible">1</attribute>
             </xpath>
 
         </field>
     </record>
 
-    <!-- ══ 2. Standalone Kanban — grouped by task_state ═══════════════════ -->
+    <!-- ══ 2. Kanban ══════════════════════════════════════════════════════ -->
     <record id="view_task_kanban_team" model="ir.ui.view">
         <field name="name">project.task.kanban.team</field>
         <field name="model">project.task</field>
@@ -93,7 +97,6 @@
                 <field name="task_state"/>
                 <field name="task_priority"/>
                 <field name="assigned_to"/>
-                <field name="team_id"/>
                 <field name="project_id"/>
                 <templates>
                     <t t-name="card">
@@ -111,10 +114,6 @@
                                     <i class="fa fa-folder-o" title="Project"/>
                                     <t t-esc="record.project_id.value"/>
                                 </span>
-                                <span t-if="record.team_id.value" class="o_cp_task_meta_item">
-                                    <i class="fa fa-users" title="Team"/>
-                                    <t t-esc="record.team_id.value"/>
-                                </span>
                             </div>
                             <div class="o_cp_task_card_footer">
                                 <field name="assigned_to"
@@ -128,7 +127,7 @@
         </field>
     </record>
 
-    <!-- ══ 3. Standalone List ═════════════════════════════════════════════ -->
+    <!-- ══ 3. List ════════════════════════════════════════════════════════ -->
     <record id="view_task_list_team" model="ir.ui.view">
         <field name="name">project.task.list.team</field>
         <field name="model">project.task</field>
@@ -137,19 +136,18 @@
                   decoration-success="task_state == 'closed'"
                   decoration-info="task_state == 'in_progress'"
                   decoration-warning="task_state == 'draft'">
-                <field name="name" string="Task"/>
-                <field name="team_id" string="Team"/>
-                <field name="project_id" string="Project" optional="show"/>
-                <field name="assigned_by" string="Assigned By"
+                <field name="name"         string="Task"/>
+                <field name="project_id"   string="Project" optional="show"/>
+                <field name="assigned_by"  string="Assigned By"
                        widget="many2one_avatar_employee" optional="show"/>
-                <field name="assigned_to" string="Assigned To"
+                <field name="assigned_to"  string="Assigned To"
                        widget="many2one_avatar_employee"/>
                 <field name="task_priority" string="Priority"
                        widget="badge"
                        decoration-danger="task_priority == 'critical'"
                        decoration-warning="task_priority == 'high'"
                        decoration-info="task_priority == 'normal'"/>
-                <field name="task_state" string="State"
+                <field name="task_state"   string="State"
                        widget="badge"
                        decoration-success="task_state in ('verified','closed')"
                        decoration-info="task_state == 'in_progress'"
@@ -159,46 +157,41 @@
         </field>
     </record>
 
-    <!-- ══ 4. Search view ════════════════════════════════════════════════ -->
+    <!-- ══ 4. Search ══════════════════════════════════════════════════════ -->
     <record id="view_task_search_team" model="ir.ui.view">
         <field name="name">project.task.search.team</field>
         <field name="model">project.task</field>
         <field name="arch" type="xml">
             <search string="Search Tasks">
-                <field name="name" string="Task Name"/>
+                <field name="name"        string="Task Name"/>
                 <field name="assigned_to" string="Assigned To"/>
-                <field name="team_id" string="Team"/>
-                <field name="project_id" string="Project"/>
+                <field name="project_id"  string="Project"/>
                 <separator/>
-                <!-- State filters -->
-                <filter string="Draft" name="draft"
+                <filter string="Draft"       name="draft"
                         domain="[('task_state','=','draft')]"/>
-                <filter string="Assigned" name="assigned"
+                <filter string="Assigned"    name="assigned"
                         domain="[('task_state','=','assigned')]"/>
                 <filter string="In Progress" name="in_progress"
                         domain="[('task_state','=','in_progress')]"/>
-                <filter string="Completed" name="completed"
+                <filter string="Completed"   name="completed"
                         domain="[('task_state','=','completed')]"/>
-                <filter string="Closed" name="closed"
+                <filter string="Closed"      name="closed"
                         domain="[('task_state','=','closed')]"/>
                 <separator/>
-                <!-- My tasks -->
                 <filter string="My Tasks" name="my_tasks"
                         domain="[('assigned_to.user_id','=',uid)]"/>
                 <separator/>
-                <filter string="Group by Team" name="grp_team"
-                        context="{'group_by': 'team_id'}"/>
-                <filter string="Group by State" name="grp_state"
+                <filter string="Group by State"    name="grp_state"
                         context="{'group_by': 'task_state'}"/>
                 <filter string="Group by Priority" name="grp_priority"
                         context="{'group_by': 'task_priority'}"/>
-                <filter string="Group by Project" name="grp_project"
+                <filter string="Group by Project"  name="grp_project"
                         context="{'group_by': 'project_id'}"/>
             </search>
         </field>
     </record>
 
-    <!-- ══ 5. Action — My Tasks (all roles) ════════════════════════════════ -->
+    <!-- ══ 5. Action — My Tasks ══════════════════════════════════════════ -->
     <record id="action_my_tasks" model="ir.actions.act_window">
         <field name="name">My Tasks</field>
         <field name="res_model">project.task</field>
@@ -212,13 +205,11 @@
         <field name="search_view_id" ref="view_task_search_team"/>
         <field name="context">{'search_default_my_tasks': 1}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No tasks assigned to you yet.
-            </p>
+            <p class="o_view_nocontent_smiling_face">No tasks assigned to you yet.</p>
         </field>
     </record>
 
-    <!-- ══ 6. Action — All Tasks (manager / team lead) ═════════════════════ -->
+    <!-- ══ 6. Action — All Tasks ════════════════════════════════════════= -->
     <record id="action_all_tasks" model="ir.actions.act_window">
         <field name="name">All Tasks</field>
         <field name="res_model">project.task</field>
@@ -230,9 +221,7 @@
         ]"/>
         <field name="search_view_id" ref="view_task_search_team"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No tasks found.
-            </p>
+            <p class="o_view_nocontent_smiling_face">No tasks found.</p>
         </field>
     </record>
 
