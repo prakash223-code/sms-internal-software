@@ -13,19 +13,26 @@
                            widget="statusbar"
                            statusbar_visible="pending,approved,rejected"/>
 
-                    <!-- Manager actions -->
+                    <!--
+                        Approve / Reject buttons are visible to:
+                          • custom_project.group_team_manager  (team managers)
+                          • hr.group_hr_user                   (HR officers)
+                        Both groups also pass _check_manager() in Python.
+                        Comma-separated groups in the `groups` attribute are
+                        evaluated with OR by Odoo's view rendering engine.
+                    -->
                     <button name="action_approve"
                             string="Approve"
                             type="object"
                             class="btn-success"
-                            groups="custom_project.group_team_manager"
+                            groups="custom_project.group_team_manager,hr.group_hr_user"
                             invisible="state != 'pending'"
                             confirm="Approve this cross-team assignment request?"/>
                     <button name="action_reject"
                             string="Reject"
                             type="object"
                             class="btn-danger"
-                            groups="custom_project.group_team_manager"
+                            groups="custom_project.group_team_manager,hr.group_hr_user"
                             invisible="state != 'pending'"/>
                 </header>
 
@@ -102,8 +109,12 @@
                                readonly="state != 'pending'"/>
                     </group>
 
+                    <!--
+                        Manager Comment is shown to both team managers and HR.
+                        Comma-separated groups are ORed by Odoo.
+                    -->
                     <group string="Manager Comment"
-                           groups="custom_project.group_team_manager">
+                           groups="custom_project.group_team_manager,hr.group_hr_user">
                         <field name="manager_comment"
                                nolabel="1"
                                placeholder="Optional comment for the requester…"
@@ -241,7 +252,7 @@
         </field>
     </record>
 
-    <!-- All requests — manager only -->
+    <!-- All requests — manager and HR only -->
     <record id="action_all_assignment_requests" model="ir.actions.act_window">
         <field name="name">All Requests</field>
         <field name="res_model">task.assignment.request</field>

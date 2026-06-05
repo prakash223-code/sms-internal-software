@@ -5,3 +5,4 @@ access_team_team_lead,team.team lead,model_team_team,custom_project.group_team_l
 access_team_team_manager,team.team manager,model_team_team,custom_project.group_team_manager,1,1,1,1
 access_assignment_request_user,task.assignment.request user,model_task_assignment_request,base.group_user,1,1,0,0
 access_assignment_request_manager,task.assignment.request manager,model_task_assignment_request,custom_project.group_team_manager,1,1,1,1
+access_assignment_request_hr,task.assignment.request hr,model_task_assignment_request,hr.group_hr_user,1,1,1,1

@@ -63,11 +63,15 @@
               action="action_my_assignment_requests"
               groups="base.group_user"/>
 
+    <!--
+        All Requests: visible to team managers AND HR users.
+        Odoo evaluates comma-separated groups with OR.
+    -->
     <menuitem id="menu_team_management_all_requests"
               name="All Requests"
               parent="menu_team_management_requests"
               sequence="20"
               action="action_all_assignment_requests"
-              groups="custom_project.group_team_manager"/>
+              groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
 </odoo>

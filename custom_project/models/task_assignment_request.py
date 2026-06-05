@@ -111,18 +111,30 @@ class TaskAssignmentRequest(models.Model):
 
     # ── Business actions ──────────────────────────────────────────────────────
 
-    def _check_manager(self):
-        if not (
+    def _is_approver(self):
+        """
+        Returns True when the current user is allowed to approve / reject
+        assignment requests.  Three groups qualify:
+          • custom_project.group_team_manager  — team managers
+          • project.group_project_manager      — base Odoo project managers
+          • hr.group_hr_user                   — HR officers / administrators
+        """
+        return (
             self.env.user.has_group('custom_project.group_team_manager')
             or self.env.user.has_group('project.group_project_manager')
-        ):
+            or self.env.user.has_group('hr.group_hr_user')
+        )
+
+    def _check_manager(self):
+        if not self._is_approver():
             raise UserError(
-                _('Only Managers can approve or reject assignment requests.')
+                _('Only Managers or HR users can approve or reject '
+                  'assignment requests.')
             )
 
     def action_approve(self):
         """
-        Manager approves the cross-team request:
+        Manager / HR approves the cross-team request:
         • Assign the task to the target employee
         • Set the task state to Assigned
         • Move the request to Approved
@@ -143,7 +155,9 @@ class TaskAssignmentRequest(models.Model):
             'task_state':  'assigned',
         })
 
-        self.write({
+        # sudo() ensures the write succeeds regardless of which approver
+        # group the user belongs to (manager, project manager, or HR).
+        self.sudo().write({
             'state':         'approved',
             'approved_by':   deciding_employee.id if deciding_employee else False,
             'decision_date': fields.Datetime.now(),
@@ -164,7 +178,7 @@ class TaskAssignmentRequest(models.Model):
 
     def action_reject(self):
         """
-        Manager rejects the request:
+        Manager / HR rejects the request:
         • Task remains unassigned (state stays Draft)
         • Request moves to Rejected
         """
@@ -178,7 +192,9 @@ class TaskAssignmentRequest(models.Model):
             [('user_id', '=', self.env.uid)], limit=1
         )
 
-        self.write({
+        # sudo() ensures the write succeeds regardless of which approver
+        # group the user belongs to (manager, project manager, or HR).
+        self.sudo().write({
             'state':         'rejected',
             'approved_by':   deciding_employee.id if deciding_employee else False,
             'decision_date': fields.Datetime.now(),

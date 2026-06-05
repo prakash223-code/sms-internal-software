@@ -35,6 +35,10 @@
 
         <!-- ══ task.assignment.request rules ══════════════════════════ -->
 
+        <!--
+            Regular employees: own records only
+            (records where they are the requester OR the target).
+        -->
         <record id="rule_assignment_request_employee" model="ir.rule">
             <field name="name">Assignment Request: own records only</field>
             <field name="model_id" ref="model_task_assignment_request"/>
@@ -50,10 +54,28 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
+        <!-- Manager: all assignment requests -->
         <record id="rule_assignment_request_manager" model="ir.rule">
             <field name="name">Assignment Request: manager sees all</field>
             <field name="model_id" ref="model_task_assignment_request"/>
             <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!--
+            HR: all assignment requests.
+            HR users are not in group_team_manager, so without this rule
+            they fall back to the base.group_user rule and can only see
+            their own records — preventing them from approving / rejecting.
+        -->
+        <record id="rule_assignment_request_hr" model="ir.rule">
+            <field name="name">Assignment Request: HR sees all</field>
+            <field name="model_id" ref="model_task_assignment_request"/>
+            <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="perm_read"   eval="True"/>
             <field name="perm_write"  eval="True"/>

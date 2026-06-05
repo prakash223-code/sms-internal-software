@@ -41,7 +41,7 @@ class HrEmployee(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        # Records start in Draft — NO sequence consumed yet.
+        # Records start in Draft — no sequence consumed yet.
         # HR can freely review and correct all fields before confirming.
         return super().create(vals_list)
 
@@ -96,16 +96,27 @@ class HrEmployee(models.Model):
           the same Employee ID is restored. No new sequence number is consumed.
         - If the department changed, a new ID is generated. The old reserved
           code is discarded (that sequence slot is permanently retired).
+
+        sudo() rationale for draft_reserved_code:
+          The field carries groups='base.group_system' so it is invisible to
+          normal HR users in the UI.  However, action_confirm is the one
+          legitimate business operation that must READ and then CLEAR it — the
+          field-level group check would block both operations for a non-admin.
+          sudo() is used only for this field; the rest of the write is still
+          executed under the caller's identity via the custom write() guard.
         """
         for emp in self:
             if emp.state != 'draft':
                 raise UserError(f'"{emp.name}" is already confirmed.')
 
-            # Validate all required fields before touching the sequence
+            # Validate all required fields before touching the sequence.
             emp._validate_before_confirm()
 
             current_dept_code = emp.department_id.dept_code.upper().strip()
-            reserved = emp.draft_reserved_code
+
+            # READ: sudo() bypasses the field-level group check for
+            # draft_reserved_code (groups='base.group_system').
+            reserved = emp.sudo().draft_reserved_code
 
             # Check if we can reuse the previously reserved code.
             # The reserved code encodes the dept code (e.g. 25CFD001),
@@ -113,10 +124,14 @@ class HrEmployee(models.Model):
             if reserved and current_dept_code in reserved:
                 code = reserved
             else:
-                # Department changed or first-time confirmation — generate new ID
+                # Department changed or first-time confirmation — generate new ID.
                 code = emp._generate_employee_code()
 
-            emp.with_context(_system_assign_emp_code=True).write({
+            # WRITE: sudo() is required to clear draft_reserved_code
+            # (groups='base.group_system' restricts writes as well as reads).
+            # with_context passes the flag our custom write() guard expects so
+            # that setting employee_code here is not treated as a manual edit.
+            emp.sudo().with_context(_system_assign_emp_code=True).write({
                 'employee_code': code,
                 'draft_reserved_code': False,   # clear reservation
                 'state': 'confirmed',
@@ -125,17 +140,26 @@ class HrEmployee(models.Model):
     def action_reset_to_draft(self):
         """
         Resets a confirmed employee back to Draft.
-        Restricted to Managers only.
+        Restricted to HR Managers only.
         Blocked if the employee already has payroll, attendance, or leave data.
 
         The current Employee ID is saved to draft_reserved_code so it can be
         restored if the same department is kept on re-confirmation.
+
+        sudo() rationale: same as action_confirm — draft_reserved_code is
+        groups='base.group_system', so writing it requires sudo() even though
+        the caller has already passed the HR Manager group check above.
         """
         self._check_manager_access('reset an employee to Draft')
         for emp in self:
             emp._check_no_business_data()
-            emp.with_context(_system_assign_emp_code=True).write({
-                'draft_reserved_code': emp.employee_code,  # save for potential reuse
+
+            # WRITE: sudo() is required to write draft_reserved_code
+            # (groups='base.group_system' blocks the write for HR managers).
+            # with_context passes the flag our custom write() guard expects so
+            # that clearing employee_code here is not treated as a manual edit.
+            emp.sudo().with_context(_system_assign_emp_code=True).write({
+                'draft_reserved_code': emp.employee_code,   # save for potential reuse
                 'employee_code': False,
                 'state': 'draft',
             })
