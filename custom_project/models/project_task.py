@@ -1,6 +1,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class ProjectTask(models.Model):
@@ -32,9 +32,9 @@ class ProjectTask(models.Model):
 
     task_priority = fields.Selection(
         selection=[
-            ('low',      'Low'),
-            ('normal',   'Normal'),
-            ('high',     'High'),
+            ('low', 'Low'),
+            ('normal', 'Normal'),
+            ('high', 'High'),
             ('critical', 'Critical'),
         ],
         string='Task Priority',
@@ -44,12 +44,12 @@ class ProjectTask(models.Model):
 
     task_state = fields.Selection(
         selection=[
-            ('draft',       'Draft'),
-            ('assigned',    'Assigned'),
+            ('draft', 'Draft'),
+            ('assigned', 'Assigned'),
             ('in_progress', 'In Progress'),
-            ('completed',   'Completed'),
-            ('verified',    'Verified'),
-            ('closed',      'Closed'),
+            ('completed', 'Completed'),
+            ('verified', 'Verified'),
+            ('closed', 'Closed'),
         ],
         string='Task State',
         default='draft',
@@ -100,33 +100,21 @@ class ProjectTask(models.Model):
 
     def _is_manager(self):
         return (
-            self.env.user.has_group('custom_project.group_team_manager')
-            or self.env.user.has_group('project.group_project_manager')
+                self.env.user.has_group('custom_project.group_team_manager')
+                or self.env.user.has_group('project.group_project_manager')
         )
 
     def _is_privileged(self):
         """Managers and HR bypass all team restrictions."""
         return (
-            self.env.user.has_group('custom_project.group_team_manager')
-            or self.env.user.has_group('hr.group_hr_user')
+                self.env.user.has_group('custom_project.group_team_manager')
+                or self.env.user.has_group('hr.group_hr_user')
         )
 
     # ── Visibility: Python-level filter ───────────────────────────────────────
 
     @api.model
-    def _search(self, domain, offset=0, limit=None, order=None):
-        """
-        Enforce team-based task visibility at the ORM level.
-
-        Employees see:
-          - Tasks with no team assigned
-          - Tasks in their team
-          - Tasks assigned TO them (cross-team approved tasks)
-          - Tasks they created/assigned (assigned_by)
-
-        Managers and HR see everything.
-        sudo() calls are never restricted.
-        """
+    def _search(self, domain, offset=0, limit=None, order=None, **kwargs):
         if not self.env.su and not self._is_privileged():
             employee = self.env['hr.employee'].search(
                 [('user_id', '=', self.env.uid)], limit=1
@@ -137,10 +125,10 @@ class ProjectTask(models.Model):
                     '|', ('team_id.member_ids', 'in', [employee.id]),
                     '|', ('team_id.team_lead_id', '=', employee.id),
                     '|', ('assigned_to', '=', employee.id),
-                         ('assigned_by', '=', employee.id),
+                    ('assigned_by', '=', employee.id),
                 ]
-                domain = expression.AND([list(domain), team_domain])
-        return super()._search(domain, offset=offset, limit=limit, order=order)
+                domain = Domain(list(domain)) & Domain(team_domain)
+        return super()._search(domain, offset=offset, limit=limit, order=order, **kwargs)
 
     # ── Resolve team from project ─────────────────────────────────────────────
 
@@ -169,8 +157,8 @@ class ProjectTask(models.Model):
         if not current_employee:
             return vals, None
 
-        target_emp    = self.env['hr.employee'].browse(assigned_to_id)
-        task_team     = self._resolve_task_team(vals)
+        target_emp = self.env['hr.employee'].browse(assigned_to_id)
+        task_team = self._resolve_task_team(vals)
         assignee_teams = self._get_employee_teams(target_emp)
 
         vals['assigned_by'] = current_employee.id
@@ -185,25 +173,25 @@ class ProjectTask(models.Model):
             assigner_teams = self._get_employee_teams(current_employee)
             pending_info = {
                 'target_employee_id': assigned_to_id,
-                'assigner_teams':     assigner_teams,
-                'assignee_teams':     assignee_teams,
-                'task_team':          task_team,
+                'assigner_teams': assigner_teams,
+                'assignee_teams': assignee_teams,
+                'task_team': task_team,
             }
             vals['assigned_to'] = False
-            vals['task_state']  = 'draft'
+            vals['task_state'] = 'draft'
             return vals, pending_info
 
     def _create_assignment_request(self, task, pending_info, current_employee):
         assigner_teams = pending_info['assigner_teams']
         assignee_teams = pending_info['assignee_teams']
-        task_team      = pending_info.get('task_team')
+        task_team = pending_info.get('task_team')
         self.env['task.assignment.request'].sudo().create({
-            'task_id':            task.id,
-            'requested_by':       current_employee.id,
+            'task_id': task.id,
+            'requested_by': current_employee.id,
             'requesting_team_id': task_team.id if task_team
-                                  else (assigner_teams[0].id if assigner_teams else False),
+            else (assigner_teams[0].id if assigner_teams else False),
             'target_employee_id': pending_info['target_employee_id'],
-            'target_team_id':     assignee_teams[0].id if assignee_teams else False,
+            'target_team_id': assignee_teams[0].id if assignee_teams else False,
         })
 
     # ── ORM: create ───────────────────────────────────────────────────────────

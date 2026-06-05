@@ -1,6 +1,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class ProjectProject(models.Model):
@@ -40,20 +40,7 @@ class ProjectProject(models.Model):
         )
 
     @api.model
-    def _search(self, domain, offset=0, limit=None, order=None):
-        """
-        Enforce team-based project visibility at the ORM level.
-        This fires on every search (list, kanban, Many2one dropdowns, etc.)
-        and is immune to record rule noupdate issues.
-
-        Employees see:
-          - Projects with no team assigned (visible to everyone)
-          - Projects where they are a member of the assigned team
-          - Projects where they are the team lead of the assigned team
-
-        Managers and HR see everything.
-        sudo() calls (self.env.su) are never restricted.
-        """
+    def _search(self, domain, offset=0, limit=None, order=None, **kwargs):
         if not self.env.su and not self._is_privileged():
             employee = self.env['hr.employee'].search(
                 [('user_id', '=', self.env.uid)], limit=1
@@ -62,10 +49,10 @@ class ProjectProject(models.Model):
                 team_domain = [
                     '|', ('team_id', '=', False),
                     '|', ('team_id.member_ids', 'in', [employee.id]),
-                         ('team_id.team_lead_id', '=', employee.id),
+                    ('team_id.team_lead_id', '=', employee.id),
                 ]
-                domain = expression.AND([list(domain), team_domain])
-        return super()._search(domain, offset=offset, limit=limit, order=order)
+                domain = Domain(list(domain)) & Domain(team_domain)
+        return super()._search(domain, offset=offset, limit=limit, order=order, **kwargs)
 
     # ── ORM override: auto-assign project number on every create ────────────
 
