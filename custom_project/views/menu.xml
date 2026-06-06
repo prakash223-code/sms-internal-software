@@ -6,13 +6,11 @@
         No custom root menu is created — our entries appear as extra
         sections inside the existing Project sidebar.
 
-        project.menu_project_management is the core "Tasks" parent menu
-        (confirmed from DB: also hides My Tasks + All Tasks children).
-
         Sequence guide (Project core uses ~10-40):
             50  Teams
             60  Tasks  (our replacement)
             70  Assignment Requests  (submenu)
+            90  Configuration        (submenu — managers only)
     -->
 
     <!-- ══ Deactivate core Tasks menu (cascades to My Tasks + All Tasks) ══ -->
@@ -73,5 +71,21 @@
               sequence="20"
               action="action_all_assignment_requests"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
+
+    <!-- ══ Configuration ══════════════════════════════════════════════════
+         Managers-only section for system-wide setup (stages, etc.).
+    ════════════════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_team_management_config"
+              name="Configuration"
+              parent="project.menu_main_pm"
+              sequence="90"
+              groups="custom_project.group_team_manager"/>
+
+    <menuitem id="menu_team_management_stages"
+              name="Project Stages"
+              parent="menu_team_management_config"
+              sequence="10"
+              action="action_project_stage_management"
+              groups="custom_project.group_team_manager"/>
 
 </odoo>

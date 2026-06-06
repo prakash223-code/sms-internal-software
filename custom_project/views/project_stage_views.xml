@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Standalone form view (no inherit — project.view_task_type_form  ══
+         does not exist in Odoo 19, so we own the full form here)          ══ -->
+    <record id="view_task_type_form_custom" model="ir.ui.view">
+        <field name="name">project.task.type.form.custom</field>
+        <field name="model">project.task.type</field>
+        <field name="arch" type="xml">
+            <form string="Project Stage">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Stage Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Development / Execution"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Settings">
+                            <field name="sequence"/>
+                            <field name="fold"             widget="boolean_toggle"/>
+                            <field name="is_default_stage" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ List view for stage management ════════════════════════════════ -->
+    <record id="view_task_type_list_manage" model="ir.ui.view">
+        <field name="name">project.task.type.list.manage</field>
+        <field name="model">project.task.type</field>
+        <field name="arch" type="xml">
+            <list string="Project Stages" editable="top" multi_edit="1">
+                <field name="sequence"        widget="handle"/>
+                <field name="name"            string="Stage Name"/>
+                <field name="fold"            string="Folded by Default"        widget="boolean_toggle"/>
+                <field name="is_default_stage" string="Auto-add to New Projects" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Window action ══════════════════════════════════════════════════ -->
+    <record id="action_project_stage_management" model="ir.actions.act_window">
+        <field name="name">Project Stages</field>
+        <field name="res_model">project.task.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_task_type_list_manage')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_task_type_form_custom')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No project stages defined yet.
+            </p>
+            <p>
+                Create stages here and manage them as a shared library.
+                Enable <b>Auto-add to New Projects</b> on any stage to have it
+                linked automatically whenever a new project is created.
+                You can always add or remove stages per project afterwards.
+            </p>
+        </field>
+    </record>
+
+</odoo>
