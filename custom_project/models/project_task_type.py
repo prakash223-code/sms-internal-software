@@ -48,8 +48,13 @@ class ProjectTaskType(models.Model):
         self._check_stage_access()
         return super().create(vals_list)
 
+    _STAGE_PROPERTY_FIELDS = {'name', 'sequence', 'fold', 'is_default_stage', 'active', 'description'}
+
     def write(self, vals):
-        self._check_stage_access()
+        # Only guard when actual stage properties are being changed,
+        # not when M2M relationships (project_ids) are being maintained.
+        if self._STAGE_PROPERTY_FIELDS & set(vals):
+            self._check_stage_access()
         return super().write(vals)
 
     def unlink(self):

@@ -15,10 +15,20 @@ class ProjectProject(models.Model):
         if default_stages:
             stage_ids = default_stages.ids
             for vals in vals_list:
-                # (6, 0, [IDs]) is the absolute command to set a Many2many field.
-                # It guarantees Odoo creates the project with these stages already linked.
-                if 'type_ids' not in vals:
+                existing = vals.get('type_ids') or []
+                has_real_stages = any(
+                    isinstance(cmd, (list, tuple)) and cmd[0] == 6 and cmd[2]  # (6, 0, [non-empty ids])
+                    or isinstance(cmd, (list, tuple)) and cmd[0] == 4  # (4, id) link
+                    for cmd in existing
+                )
+                if not has_real_stages:
                     vals['type_ids'] = [(6, 0, stage_ids)]
 
         # 3. Proceed with standard creation using our modified payload
         return super().create(vals_list)
+
+    def write(self, vals):
+        if default_stages and not vals.get('type_ids'):
+            # same injection logic
+            vals['type_ids'] = [(6, 0, stage_ids)]
+        return super().write(vals)
