@@ -6,48 +6,56 @@
             <field name="name">Requirement</field>
             <field name="sequence">1</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_analysis" model="project.task.type">
             <field name="name">Analysis &amp; Planning</field>
             <field name="sequence">2</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_design" model="project.task.type">
             <field name="name">Design / Layout</field>
             <field name="sequence">3</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_dev" model="project.task.type">
             <field name="name">Development / Execution</field>
             <field name="sequence">4</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_test" model="project.task.type">
             <field name="name">Internal Testing</field>
             <field name="sequence">5</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_review" model="project.task.type">
             <field name="name">Client Review / Approval</field>
             <field name="sequence">6</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_deploy" model="project.task.type">
             <field name="name">Implementation</field>
             <field name="sequence">7</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_support" model="project.task.type">
             <field name="name">Maintenance / Support</field>
             <field name="sequence">8</field>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
         <record id="stage_done" model="project.task.type">
@@ -55,6 +63,7 @@
             <field name="sequence">9</field>
             <field name="fold" eval="True"/>
             <field name="is_default_stage" eval="True"/>
+            <field name="user_id" eval="False"/>
         </record>
 
     </data>
