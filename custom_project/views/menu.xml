@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!--
-        All items hang off project.menu_main_pm (the "Project" app root).
-        No custom root menu is created — our entries appear as extra
-        sections inside the existing Project sidebar.
-
-        Sequence guide (Project core uses ~10-40):
-            50  Teams
-            60  Tasks  (our replacement)
-            70  Assignment Requests  (submenu)
-            90  Configuration        (submenu — managers only)
-    -->
-
-    <!-- ══ Deactivate core Tasks menu (cascades to My Tasks + All Tasks) ══ -->
+    <!-- Deactivate core Tasks menu -->
     <record id="project.menu_project_management" model="ir.ui.menu">
         <field name="active" eval="False"/>
     </record>
 
-    <!-- ══ Teams ══════════════════════════════════════════════════════════ -->
+    <!-- Teams -->
     <menuitem id="menu_team_management_teams"
               name="Teams"
               parent="project.menu_main_pm"
@@ -26,7 +13,7 @@
               action="action_team_team"
               groups="base.group_user"/>
 
-    <!-- ══ Tasks ═════════════════════════════════════════════════════════ -->
+    <!-- Tasks -->
     <menuitem id="menu_team_management_tasks"
               name="Tasks"
               parent="project.menu_main_pm"
@@ -47,7 +34,7 @@
               action="action_all_tasks"
               groups="custom_project.group_team_lead"/>
 
-    <!-- ══ Assignment Requests ════════════════════════════════════════════ -->
+    <!-- Assignment Requests -->
     <menuitem id="menu_team_management_requests"
               name="Assignment Requests"
               parent="project.menu_main_pm"
@@ -61,10 +48,6 @@
               action="action_my_assignment_requests"
               groups="base.group_user"/>
 
-    <!--
-        All Requests: visible to team managers AND HR users.
-        Odoo evaluates comma-separated groups with OR.
-    -->
     <menuitem id="menu_team_management_all_requests"
               name="All Requests"
               parent="menu_team_management_requests"
@@ -72,20 +55,15 @@
               action="action_all_assignment_requests"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
-    <!-- ══ Configuration ══════════════════════════════════════════════════
-         Managers-only section for system-wide setup (stages, etc.).
-    ════════════════════════════════════════════════════════════════════════ -->
-    <menuitem id="menu_team_management_config"
-              name="Configuration"
-              parent="project.menu_main_pm"
-              sequence="90"
-              groups="custom_project.group_team_manager"/>
-
-    <menuitem id="menu_team_management_stages"
-              name="Project Stages"
-              parent="menu_team_management_config"
+    <!--
+         Task Stages
+         We place this directly under Odoo's native Configuration menu
+         to prevent duplicates in the navigation bar.
+    -->
+    <menuitem id="menu_task_stage_config"
+              name="Task Stages"
+              parent="project.menu_project_config"
               sequence="10"
-              action="action_project_stage_management"
-              groups="custom_project.group_team_manager"/>
-
+              action="action_task_stage_config"
+              groups="custom_project.group_team_manager,hr.group_hr_user"/>
 </odoo>

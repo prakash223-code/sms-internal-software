@@ -4,21 +4,6 @@
 
         <!--
             Deactivate Odoo's built-in task visibility rules.
-
-            project.task_visibility_rule:
-              Allows ALL employees to see tasks inside projects with
-              privacy_visibility='employees' — i.e. all tasks everywhere.
-
-            project.task_visibility_rule_project_user:
-              Same as above, scoped to group_project_user.
-
-            project.ir_rule_private_task:
-              Allows employees to see tasks in employees/portal projects.
-
-            project.project_manager_all_project_tasks_rule:
-              Allows project managers to see all tasks linked to any project.
-              Our group_team_manager implies project.group_project_manager
-              so this fires for our managers — replaced by our own rule below.
         -->
         <record id="project.task_visibility_rule" model="ir.rule">
             <field name="active" eval="False"/>
@@ -35,10 +20,6 @@
 
         <!-- ══ task.assignment.request rules ══════════════════════════ -->
 
-        <!--
-            Regular employees: own records only
-            (records where they are the requester OR the target).
-        -->
         <record id="rule_assignment_request_employee" model="ir.rule">
             <field name="name">Assignment Request: own records only</field>
             <field name="model_id" ref="model_task_assignment_request"/>
@@ -54,7 +35,6 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: all assignment requests -->
         <record id="rule_assignment_request_manager" model="ir.rule">
             <field name="name">Assignment Request: manager sees all</field>
             <field name="model_id" ref="model_task_assignment_request"/>
@@ -66,12 +46,6 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
-        <!--
-            HR: all assignment requests.
-            HR users are not in group_team_manager, so without this rule
-            they fall back to the base.group_user rule and can only see
-            their own records — preventing them from approving / rejecting.
-        -->
         <record id="rule_assignment_request_hr" model="ir.rule">
             <field name="name">Assignment Request: HR sees all</field>
             <field name="model_id" ref="model_task_assignment_request"/>
@@ -87,9 +61,20 @@
 
         <!--
             Employee: own team's tasks only.
-            Extra OR branches ensure a cross-team approved employee can
-            still see the task assigned to them, and the assigner can
-            see what they created.
+
+            FIX: added ('create_uid', '=', user.id) as the final OR branch.
+
+            Without it, a task quick-created from the project kanban (where
+            only the name and stage_id are written — no assigned_to/by yet,
+            and team_id is set from the project) immediately vanishes after
+            save because none of the earlier OR branches match for the
+            creator.  This made it look like "Enter does nothing" and the
+            stage was never applied.
+
+            The ('assigned_by.user_id', '=', user.id) branch covers tasks
+            created via the full form (assigned_by is now always stamped in
+            project_task.py create()); create_uid is the safety net for any
+            path that skips the stamping (e.g. automated actions, imports).
         -->
         <record id="rule_project_task_employee" model="ir.rule">
             <field name="name">Task: team members see own team tasks only</field>
@@ -103,7 +88,9 @@
                 ('team_id.team_lead_id.user_id', '=', user.id),
                 '|',
                 ('assigned_to.user_id', '=', user.id),
-                ('assigned_by.user_id', '=', user.id)
+                '|',
+                ('assigned_by.user_id', '=', user.id),
+                ('create_uid', '=', user.id)
             ]</field>
             <field name="perm_read"   eval="True"/>
             <field name="perm_write"  eval="True"/>

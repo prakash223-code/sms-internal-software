@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List view -->
+    <record id="view_task_type_list" model="ir.ui.view">
+        <field name="name">project.task.type.list.team</field>
+        <field name="model">project.task.type</field>
+        <field name="arch" type="xml">
+            <list string="Task Stages"
+                  editable="bottom"
+                  decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="name" string="Stage Name"/>
+                <!-- NEW: Expose the Auto-add switch -->
+                <field name="is_default_stage" widget="boolean_toggle"/>
+                <field name="fold" string="Folded by default" optional="show"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_task_type_form" model="ir.ui.view">
+        <field name="name">project.task.type.form.team</field>
+        <field name="model">project.task.type</field>
+        <field name="arch" type="xml">
+            <form string="Task Stage">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Stage Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. In Review, QA, Blocked"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sequence" help="Lower number = leftmost column in kanban."/>
+                            <!-- NEW: Expose the Auto-add switch -->
+                            <field name="is_default_stage" widget="boolean_toggle"/>
+                            <field name="fold" widget="boolean_toggle" string="Folded in kanban by default"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_task_stage_config" model="ir.actions.act_window">
+        <field name="name">Task Stages</field>
+        <field name="res_model">project.task.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('user_id', '=', False)]</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_task_type_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_task_type_form')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No task stages defined yet.</p>
+            <p>
+                Create all stages here first. Projects can only use these
+                pre-defined stages — adding new columns on the fly is blocked
+                for non-manager users.
+            </p>
+        </field>
+    </record>
+</odoo>

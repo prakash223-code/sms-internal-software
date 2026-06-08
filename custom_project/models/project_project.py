@@ -6,18 +6,19 @@ class ProjectProject(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        projects = super().create(vals_list)
+        # 1. Fetch default stages BEFORE creating the project
+        default_stages = self.env['project.task.type'].sudo().search([
+            ('is_default_stage', '=', True)
+        ])
 
-        default_stages = self.env['project.task.type'].sudo().search(
-            [('is_default_stage', '=', True)],
-            order='sequence',
-        )
-
+        # 2. Inject them directly into the creation values
         if default_stages:
-            link_cmds = [(4, stage.id) for stage in default_stages]
-            for project in projects:
-                # (4, id) is a no-op if the stage is already linked,
-                # so this is safe even when vals contained type_ids.
-                project.sudo().write({'type_ids': link_cmds})
+            stage_ids = default_stages.ids
+            for vals in vals_list:
+                # (6, 0, [IDs]) is the absolute command to set a Many2many field.
+                # It guarantees Odoo creates the project with these stages already linked.
+                if 'type_ids' not in vals:
+                    vals['type_ids'] = [(6, 0, stage_ids)]
 
-        return projects
+        # 3. Proceed with standard creation using our modified payload
+        return super().create(vals_list)

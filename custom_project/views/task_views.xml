@@ -54,7 +54,7 @@
                         invisible="task_state == 'draft'"/>
             </xpath>
 
-            <!-- Assignment fields — no team_id, just assigned_by and assigned_to -->
+            <!-- Assignment fields -->
             <xpath expr="//field[@name='description']" position="before">
                 <separator string="Assignment"/>
                 <group>
@@ -72,7 +72,6 @@
                     </group>
                 </group>
 
-                <!-- Hidden fields needed for smart button / logic -->
                 <field name="team_id"                  invisible="1"/>
                 <field name="assignment_request_count" invisible="1"/>
             </xpath>
@@ -85,14 +84,18 @@
         </field>
     </record>
 
-    <!-- ══ 2. Kanban ══════════════════════════════════════════════════════ -->
+    <!-- ══ 2. Kanban ══════════════════════════════════════════════════════
+         on_create is intentionally omitted (defaults to opening the full
+         form).  This removes the entire quick-create-card mechanism and
+         all its dropdown-dismissal problems.  Users click New → full form
+         opens → no stray dropdowns, no silent failures.
+    ══════════════════════════════════════════════════════════════════════ -->
     <record id="view_task_kanban_team" model="ir.ui.view">
         <field name="name">project.task.kanban.team</field>
         <field name="model">project.task</field>
         <field name="arch" type="xml">
             <kanban default_group_by="task_state"
-                    class="o_kanban_small_column"
-                    on_create="quick_create">
+                    class="o_kanban_small_column">
                 <field name="name"/>
                 <field name="task_state"/>
                 <field name="task_priority"/>

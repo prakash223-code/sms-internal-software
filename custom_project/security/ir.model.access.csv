@@ -6,3 +6,5 @@ access_team_team_manager,team.team manager,model_team_team,custom_project.group_
 access_assignment_request_user,task.assignment.request user,model_task_assignment_request,base.group_user,1,1,0,0
 access_assignment_request_manager,task.assignment.request manager,model_task_assignment_request,custom_project.group_team_manager,1,1,1,1
 access_assignment_request_hr,task.assignment.request hr,model_task_assignment_request,hr.group_hr_user,1,1,1,1
+access_task_type_team_manager,project.task.type team manager,project.model_project_task_type,custom_project.group_team_manager,1,1,1,1
+access_task_type_hr,project.task.type hr,project.model_project_task_type,hr.group_hr_user,1,1,1,1

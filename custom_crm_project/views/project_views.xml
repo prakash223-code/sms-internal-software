@@ -1,77 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="project_form_view_crm_link" model="ir.ui.view">
-        <field name="name">project.project.form.crm.link</field>
-        <field name="model">project.project</field>
-        <field name="inherit_id" ref="project.edit_project"/>
-        <field name="arch" type="xml">
+<!--    <record id="project_form_view_crm_link" model="ir.ui.view">-->
+<!--        <field name="name">project.project.form.crm.link</field>-->
+<!--        <field name="model">project.project</field>-->
+<!--        <field name="inherit_id" ref="project.edit_project"/>-->
+<!--        <field name="arch" type="xml">-->
 
-            <!-- 1. Hidden fields -->
-            <xpath expr="//field[@name='name']" position="before">
-                <field name="crm_lead_id"    invisible="1"/>
-                <field name="project_number" invisible="1"/>
-            </xpath>
+<!--            &lt;!&ndash; 1. Hidden fields &ndash;&gt;-->
+<!--            <xpath expr="//field[@name='name']" position="before">-->
+<!--                <field name="crm_lead_id"    invisible="1"/>-->
+<!--                <field name="project_number" invisible="1"/>-->
+<!--            </xpath>-->
 
-            <!-- 2. Reference cards — below the title -->
-            <xpath expr="//div[hasclass('oe_title')]" position="after">
-                <div invisible="not project_number">
-                    <div class="o_crm_section_label">Project Reference</div>
-                    <div class="d-flex gap-3 mb-3">
+<!--            &lt;!&ndash; 2. Reference cards — below the title &ndash;&gt;-->
+<!--            <xpath expr="//div[hasclass('oe_title')]" position="after">-->
+<!--                <div invisible="not project_number">-->
+<!--                    <div class="o_crm_section_label">Project Reference</div>-->
+<!--                    <div class="d-flex gap-3 mb-3">-->
 
-                        <div class="o_crm_time_card flex-fill">
-                            <div class="o_crm_time_sublabel">
-                                <i class="fa fa-hashtag" title="Project Number"/>
-                                Project Number
-                            </div>
-                            <div class="o_crm_time_value">
-                                <field name="project_number"
-                                       readonly="1"
-                                       nolabel="1"/>
-                            </div>
-                        </div>
+<!--                        <div class="o_crm_time_card flex-fill">-->
+<!--                            <div class="o_crm_time_sublabel">-->
+<!--                                <i class="fa fa-hashtag" title="Project Number"/>-->
+<!--                                Project Number-->
+<!--                            </div>-->
+<!--                            <div class="o_crm_time_value">-->
+<!--                                <field name="project_number"-->
+<!--                                       readonly="1"-->
+<!--                                       nolabel="1"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
 
-                        <div class="o_crm_time_card flex-fill"
-                             invisible="not crm_lead_id">
-                            <div class="o_crm_time_sublabel">
-                                <i class="fa fa-commenting" title="Source Query"/>
-                                Source Query
-                            </div>
-                            <div class="o_crm_time_value">
-                                <field name="crm_lead_id"
-                                       readonly="1"
-                                       nolabel="1"/>
-                            </div>
-                        </div>
+<!--                        <div class="o_crm_time_card flex-fill"-->
+<!--                             invisible="not crm_lead_id">-->
+<!--                            <div class="o_crm_time_sublabel">-->
+<!--                                <i class="fa fa-commenting" title="Source Query"/>-->
+<!--                                Source Query-->
+<!--                            </div>-->
+<!--                            <div class="o_crm_time_value">-->
+<!--                                <field name="crm_lead_id"-->
+<!--                                       readonly="1"-->
+<!--                                       nolabel="1"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
 
-                    </div>
-                    <div class="o_crm_divider"/>
-                </div>
-            </xpath>
+<!--                    </div>-->
+<!--                    <div class="o_crm_divider"/>-->
+<!--                </div>-->
+<!--            </xpath>-->
 
-            <!-- 3. Team field — inserted after partner_id in the main form -->
-            <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="team_id"
-                       options="{'no_create_edit': True}"
-                       domain="[('active','=',True)]"/>
-            </xpath>
+<!--            &lt;!&ndash; 3. Team field — inserted after partner_id in the main form &ndash;&gt;-->
+<!--            <xpath expr="//field[@name='partner_id']" position="after">-->
+<!--                <field name="team_id"-->
+<!--                       options="{'no_create_edit': True}"-->
+<!--                       domain="[('active','=',True)]"/>-->
+<!--            </xpath>-->
 
-            <!-- 4. Smart buttons -->
-            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
-                <button
-                    name="action_open_source_query"
-                    type="object"
-                    class="oe_stat_button"
-                    icon="fa-commenting"
-                    invisible="not crm_lead_id">
-                    <div class="o_field_widget o_stat_info">
-                        <div class="o_stat_value">1</div>
-                        <div class="o_stat_text">Source Query</div>
-                    </div>
-                </button>
-            </xpath>
+<!--            &lt;!&ndash; 4. Smart buttons &ndash;&gt;-->
+<!--            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">-->
+<!--                <button-->
+<!--                    name="action_open_source_query"-->
+<!--                    type="object"-->
+<!--                    class="oe_stat_button"-->
+<!--                    icon="fa-commenting"-->
+<!--                    invisible="not crm_lead_id">-->
+<!--                    <div class="o_field_widget o_stat_info">-->
+<!--                        <div class="o_stat_value">1</div>-->
+<!--                        <div class="o_stat_text">Source Query</div>-->
+<!--                    </div>-->
+<!--                </button>-->
+<!--            </xpath>-->
 
-        </field>
-    </record>
+<!--        </field>-->
+<!--    </record>-->
 
 </odoo>

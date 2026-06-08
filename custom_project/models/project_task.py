@@ -125,7 +125,12 @@ class ProjectTask(models.Model):
                     '|', ('team_id.member_ids', 'in', [employee.id]),
                     '|', ('team_id.team_lead_id', '=', employee.id),
                     '|', ('assigned_to', '=', employee.id),
-                    ('assigned_by', '=', employee.id),
+                    '|', ('assigned_by', '=', employee.id),
+                    # ── FIX: always show tasks created by the current user ──
+                    # Without this, a quick-created task (no assigned_to/by,
+                    # team set from project) vanishes immediately after save
+                    # because none of the earlier OR branches match yet.
+                    ('create_uid', '=', self.env.uid),
                 ]
                 domain = Domain(list(domain)) & Domain(team_domain)
         return super()._search(domain, offset=offset, limit=limit, order=order, **kwargs)
@@ -138,8 +143,10 @@ class ProjectTask(models.Model):
         project_id = vals.get('project_id') or (self.project_id.id if self else False)
         if project_id:
             project = self.env['project.project'].browse(project_id)
-            if project.team_id:
-                return project.team_id
+            # team_id may not exist on project.project in all configurations
+            team = getattr(project, 'team_id', False)
+            if team:
+                return team
         if self and self.team_id:
             return self.team_id
         return False
@@ -202,10 +209,21 @@ class ProjectTask(models.Model):
         pending_requests = []
 
         for i, vals in enumerate(vals_list):
+            # ── FIX: always stamp assigned_by on creation ──────────────────
+            # This is the primary visibility anchor.  The record rule and
+            # _search domain both include ('assigned_by.user_id', '=', user.id)
+            # so without this stamp a quick-created task (no assigned_to)
+            # becomes invisible the instant the kanban refreshes — which looks
+            # like "Enter does nothing" and the stage is never applied.
+            if current_employee and not vals.get('assigned_by'):
+                vals['assigned_by'] = current_employee.id
+
             if not vals.get('team_id') and vals.get('project_id'):
                 project = self.env['project.project'].browse(vals['project_id'])
-                if project.team_id:
-                    vals['team_id'] = project.team_id.id
+                # team_id may not exist on project.project in all configs
+                project_team = getattr(project, 'team_id', False)
+                if project_team:
+                    vals['team_id'] = project_team.id
 
             if 'assigned_to' in vals:
                 vals, pending_info = self._handle_cross_team_assignment(
@@ -228,8 +246,9 @@ class ProjectTask(models.Model):
     def write(self, vals):
         if 'project_id' in vals and not vals.get('team_id'):
             project = self.env['project.project'].browse(vals['project_id'])
-            if project.team_id:
-                vals['team_id'] = project.team_id.id
+            project_team = getattr(project, 'team_id', False)
+            if project_team:
+                vals['team_id'] = project_team.id
 
         if 'assigned_to' not in vals:
             return super().write(vals)

@@ -52,10 +52,11 @@ patch(KanbanColumnQuickCreate.prototype, {
     },
 
     /** Called by the <select t-on-change> in the template override. */
-    onStageSelect(ev) {
+    async onStageSelect(ev) {
         this.stageDropdown.selectedId = ev.target.value;
+        // NEW: Auto-submit the moment the user selects an option
+        await this.validateQuickCreate();
     },
-
     async validateQuickCreate() {
         if (!this.isTaskTypeGroup) {
             return super.validateQuickCreate(...arguments);
