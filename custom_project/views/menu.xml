@@ -5,6 +5,11 @@
         <field name="active" eval="False"/>
     </record>
 
+
+    <record id="project.menu_project_config_project" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
     <!-- Teams -->
     <menuitem id="menu_team_management_teams"
               name="Teams"
@@ -64,6 +69,7 @@
               name="Task Stages"
               parent="project.menu_project_config"
               sequence="10"
-              action="action_task_stage_config"
+              action="action_project_stage_management"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
+
 </odoo>

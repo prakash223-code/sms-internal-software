@@ -20,7 +20,6 @@
         'views/assignment_request_views.xml',
         'views/hr_employee_views.xml',
         'views/project_project_views.xml',  # ← ADD THIS
-        'views/stage_config_views.xml',
         'views/project_stage_views.xml',  # ← ADD THIS (if used)
         'views/res_users_views.xml',  # ← ADD THIS (also missing)
         # 5. Menus

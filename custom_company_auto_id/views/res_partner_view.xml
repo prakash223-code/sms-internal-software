@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_company_id_form" model="ir.ui.view">
+        <field name="name">res.partner.company.id.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <field name="name" position="after">
+                <field name="company_type_selection"
+                       string="Company Type"
+                       invisible="not is_company"
+                       required="is_company"
+                       widget="radio"
+                       options="{'horizontal': true}"/>
+                <field name="company_custom_id"
+                       string="Company ID"
+                       readonly="1"
+                       invisible="not is_company"/>
+            </field>
+
+            <field name="parent_id" position="after">
+                <field name="contact_company_id_display"
+                       string="Company ID"
+                       readonly="1"
+                       invisible="is_company or not parent_id"/>
+            </field>
+
+        </field>
+    </record>
+
+    <record id="view_partner_company_id_search" model="ir.ui.view">
+        <field name="name">res.partner.company.id.search</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="company_custom_id" string="Company ID"/>
+            </field>
+        </field>
+    </record>
+</odoo>

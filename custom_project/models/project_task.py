@@ -63,6 +63,19 @@ class ProjectTask(models.Model):
         string='Assignment Requests',
     )
 
+    can_change_state = fields.Boolean(
+        compute='_compute_can_change_state',
+        store=False,
+    )
+
+    @api.depends('assigned_to')
+    @api.depends_context('uid')
+    def _compute_can_change_state(self):
+        is_priv = self._is_privileged()
+        employee = self._get_current_employee()
+        for task in self:
+            task.can_change_state = is_priv or (task.assigned_to == employee)
+
     # ── Computes ──────────────────────────────────────────────────────────────
 
     def _compute_assignment_request_count(self):
@@ -110,6 +123,59 @@ class ProjectTask(models.Model):
                 self.env.user.has_group('custom_project.group_team_manager')
                 or self.env.user.has_group('hr.group_hr_user')
         )
+
+    def _check_state_transition_access(self):
+        """
+        Only the employee assigned to a task may advance its state.
+        Managers and HR are exempt.
+        Raises UserError on the first task that fails the check so the
+        message always names the specific task.
+        """
+        if self._is_privileged():
+            return
+        current_employee = self._get_current_employee()
+        for task in self:
+            if task.assigned_to != current_employee:
+                raise UserError(
+                    _('Only the assigned employee (%s) can change '
+                      'the state of task "%s".')
+                    % (
+                        task.assigned_to.name if task.assigned_to else _('nobody'),
+                        task.name,
+                    )
+                )
+
+    # ── State transitions ─────────────────────────────────────────────────────────
+
+    def action_start_progress(self):
+        self._check_state_transition_access()
+        for task in self:
+            if task.task_state == 'assigned':
+                task.task_state = 'in_progress'
+
+    def action_mark_completed(self):
+        self._check_state_transition_access()
+        for task in self:
+            if task.task_state == 'in_progress':
+                task.task_state = 'completed'
+
+    def action_verify(self):
+        self._check_state_transition_access()
+        for task in self:
+            if task.task_state == 'completed':
+                task.task_state = 'verified'
+
+    def action_close(self):
+        self._check_state_transition_access()
+        for task in self:
+            if task.task_state == 'verified':
+                task.task_state = 'closed'
+
+    def action_reset_to_draft(self):
+        if not self._is_manager():
+            raise UserError(_('Only managers can reset a task to Draft.'))
+        for task in self:
+            task.task_state = 'draft'
 
     # ── Visibility: Python-level filter ───────────────────────────────────────
 
