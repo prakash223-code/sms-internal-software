@@ -7,24 +7,6 @@ import { useService } from "@web/core/utils/hooks";
 
 const TASK_TYPE_MODEL = "project.task.type";
 
-/**
- * Patch KanbanColumnQuickCreate so that, when the kanban is grouped by
- * project.task.type (project task stages), the column quick-create widget
- * shows a <select> of existing stages instead of a free-text input.
- *
- * The patch works in three parts:
- *   1. setup()           – detect whether we're in a stage-grouped kanban,
- *                          load all configured stages via ORM.
- *   2. onStageSelect()   – keep track of which stage the user chose.
- *   3. validateQuickCreate() – pass the chosen stage name to the parent's
- *                          onValidate, which calls name_create on the server.
- *                          The model-level name_create override converts the
- *                          name lookup into an existing-record link rather
- *                          than a creation.
- *
- * The companion template override (project_stage_selector.xml) replaces
- * the <input> element with the <select> when isTaskTypeGroup is true.
- */
 patch(KanbanColumnQuickCreate.prototype, {
     setup() {
         super.setup();
@@ -32,13 +14,14 @@ patch(KanbanColumnQuickCreate.prototype, {
         const relation = this.props.groupByField?.relation;
         this.isTaskTypeGroup = relation === TASK_TYPE_MODEL;
 
+        // Always initialise — OWL resolves reactive state references at
+        // setup time regardless of t-if branches. Leaving it undefined
+        // when isTaskTypeGroup=false causes crashes in other kanbans.
+        this.stageDropdown = useState({ stages: [], selectedId: "" });
+
         if (!this.isTaskTypeGroup) return;
 
         this.orm = useService("orm");
-        this.stageDropdown = useState({
-            stages: [],
-            selectedId: "",
-        });
 
         onWillStart(async () => {
             const rows = await this.orm.searchRead(
@@ -51,15 +34,23 @@ patch(KanbanColumnQuickCreate.prototype, {
         });
     },
 
-    /** Called by the <select t-on-change> in the template override. */
+    /** Auto-submit as soon as the user picks a stage from the dropdown. */
     async onStageSelect(ev) {
         this.stageDropdown.selectedId = ev.target.value;
-        // NEW: Auto-submit the moment the user selects an option
-        await this.validateQuickCreate();
+        await this.validate();
     },
-    async validateQuickCreate() {
+
+    /**
+     * Override `validate` — the method Odoo 19 calls both from the
+     * "Add" button (t-on-click="validate") and from onInputKeydown (Enter).
+     *
+     * When isTaskTypeGroup: read from our select and call props.onValidate
+     * directly (which is props.list.createGroup in the kanban renderer).
+     * Otherwise: fall through to the original implementation unchanged.
+     */
+    async validate() {
         if (!this.isTaskTypeGroup) {
-            return super.validateQuickCreate(...arguments);
+            return super.validate(...arguments);
         }
 
         const selectedId = parseInt(this.stageDropdown.selectedId, 10);
@@ -68,8 +59,6 @@ patch(KanbanColumnQuickCreate.prototype, {
         const stage = this.stageDropdown.stages.find((s) => s.id === selectedId);
         if (!stage) return;
 
-        // props.onValidate(name) calls name_create on the server.
-        // Our model override converts the name → existing record id.
         if (this.props.onValidate) {
             await this.props.onValidate(stage.name);
         }

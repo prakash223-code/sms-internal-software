@@ -1,49 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates xml:space="preserve">
 
-    <!--
-        Inherit the KanbanColumnQuickCreate OWL template.
-
-        When isTaskTypeGroup is true (we are in the project task kanban
-        grouped by stage), replace the free-text <input> with a <select>
-        that lists every stage from the configuration library.
-
-        The xpath targets the wrapping <div class="o_kanban_header"> so we
-        can swap only the input element while leaving the confirm / cancel
-        buttons untouched.
-    -->
     <t t-name="custom_project.KanbanColumnQuickCreate"
        t-inherit="web.KanbanColumnQuickCreate"
        t-inherit-mode="extension">
 
-        <xpath expr="//div[hasclass('o_kanban_header')]" position="replace">
-            <div class="o_kanban_header">
+        <!-- Inject select BEFORE the native input -->
+        <xpath expr="//input[@t-ref='autofocus']" position="before">
+            <t t-if="isTaskTypeGroup">
+                <select class="form-select form-select-sm o_cp_stage_select"
+                        t-on-change="onStageSelect">
+                    <option value="">— select a stage —</option>
+                    <t t-foreach="stageDropdown.stages" t-as="s" t-key="s.id">
+                        <option t-att-value="s.id">
+                            <t t-esc="s.name"/>
+                        </option>
+                    </t>
+                </select>
+            </t>
+        </xpath>
 
-                <!-- ── Stage dropdown (project task kanban only) ──────── -->
-                <t t-if="isTaskTypeGroup">
-                    <select class="form-select form-select-sm o_cp_stage_select"
-                            t-on-change="onStageSelect">
-                        <option value="">— select a stage —</option>
-                        <t t-foreach="stageDropdown.stages" t-as="s" t-key="s.id">
-                            <option t-att-value="s.id">
-                                <t t-esc="s.name"/>
-                            </option>
-                        </t>
-                    </select>
-                </t>
-
-                <!-- ── Default free-text input (all other kanbans) ────── -->
-                <t t-else="">
-                    <input type="text"
-                           class="o_kanban_header_input form-control form-control-sm"
-                           t-ref="inputRef"
-                           t-att-placeholder="placeholder"
-                           t-on-keydown="onInputKeydown"
-                           t-on-blur="onInputBlur"
-                           autofocus=""/>
-                </t>
-
-            </div>
+        <!-- Hide the native input when our select is active -->
+        <!-- FIX: OWL uses JavaScript expressions — "not x" is invalid, "!x" is correct -->
+        <xpath expr="//input[@t-ref='autofocus']" position="attributes">
+            <attribute name="t-if">!isTaskTypeGroup</attribute>
         </xpath>
 
     </t>
