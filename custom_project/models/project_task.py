@@ -1,6 +1,10 @@
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Domain
+
+_logger = logging.getLogger(__name__)
 
 
 class ProjectTask(models.Model):
@@ -68,14 +72,6 @@ class ProjectTask(models.Model):
         store=False,
     )
 
-    @api.depends('assigned_to')
-    @api.depends_context('uid')
-    def _compute_can_change_state(self):
-        is_priv = self._is_privileged()
-        employee = self._get_current_employee()
-        for task in self:
-            task.can_change_state = is_priv or (task.assigned_to == employee)
-
     # ── Computes ──────────────────────────────────────────────────────────────
 
     def _compute_assignment_request_count(self):
@@ -83,6 +79,14 @@ class ProjectTask(models.Model):
             task.assignment_request_count = self.env[
                 'task.assignment.request'
             ].sudo().search_count([('task_id', '=', task.id)])
+
+    @api.depends('assigned_to')
+    @api.depends_context('uid')
+    def _compute_can_change_state(self):
+        is_priv = self._is_privileged()
+        employee = self._get_current_employee()
+        for task in self:
+            task.can_change_state = is_priv or (task.assigned_to == employee)
 
     @api.model
     def _group_expand_states(self, states, domain):
@@ -113,28 +117,36 @@ class ProjectTask(models.Model):
 
     def _is_manager(self):
         return (
-                self.env.user.has_group('custom_project.group_team_manager')
-                or self.env.user.has_group('project.group_project_manager')
+            self.env.user.has_group('custom_project.group_team_manager')
+            or self.env.user.has_group('project.group_project_manager')
         )
 
     def _is_privileged(self):
         """Managers and HR bypass all team restrictions."""
         return (
-                self.env.user.has_group('custom_project.group_team_manager')
-                or self.env.user.has_group('hr.group_hr_user')
+            self.env.user.has_group('custom_project.group_team_manager')
+            or self.env.user.has_group('hr.group_hr_user')
         )
 
     def _check_state_transition_access(self):
         """
         Only the employee assigned to a task may advance its state.
         Managers and HR are exempt.
-        Raises UserError on the first task that fails the check so the
-        message always names the specific task.
         """
         if self._is_privileged():
+            _logger.warning("STATE CHECK: uid=%s is privileged — bypassing", self.env.uid)
             return
         current_employee = self._get_current_employee()
+        _logger.warning("STATE CHECK: uid=%s employee=%s", self.env.uid, current_employee)
+        if not current_employee:
+            raise UserError(
+                _('Your user account is not linked to an employee record.')
+            )
         for task in self:
+            _logger.warning(
+                "STATE CHECK: task=%s assigned_to=%s match=%s",
+                task.name, task.assigned_to, task.assigned_to == current_employee
+            )
             if task.assigned_to != current_employee:
                 raise UserError(
                     _('Only the assigned employee (%s) can change '
@@ -144,38 +156,6 @@ class ProjectTask(models.Model):
                         task.name,
                     )
                 )
-
-    # ── State transitions ─────────────────────────────────────────────────────────
-
-    def action_start_progress(self):
-        self._check_state_transition_access()
-        for task in self:
-            if task.task_state == 'assigned':
-                task.task_state = 'in_progress'
-
-    def action_mark_completed(self):
-        self._check_state_transition_access()
-        for task in self:
-            if task.task_state == 'in_progress':
-                task.task_state = 'completed'
-
-    def action_verify(self):
-        self._check_state_transition_access()
-        for task in self:
-            if task.task_state == 'completed':
-                task.task_state = 'verified'
-
-    def action_close(self):
-        self._check_state_transition_access()
-        for task in self:
-            if task.task_state == 'verified':
-                task.task_state = 'closed'
-
-    def action_reset_to_draft(self):
-        if not self._is_manager():
-            raise UserError(_('Only managers can reset a task to Draft.'))
-        for task in self:
-            task.task_state = 'draft'
 
     # ── Visibility: Python-level filter ───────────────────────────────────────
 
@@ -192,10 +172,6 @@ class ProjectTask(models.Model):
                     '|', ('team_id.team_lead_id', '=', employee.id),
                     '|', ('assigned_to', '=', employee.id),
                     '|', ('assigned_by', '=', employee.id),
-                    # ── FIX: always show tasks created by the current user ──
-                    # Without this, a quick-created task (no assigned_to/by,
-                    # team set from project) vanishes immediately after save
-                    # because none of the earlier OR branches match yet.
                     ('create_uid', '=', self.env.uid),
                 ]
                 domain = Domain(list(domain)) & Domain(team_domain)
@@ -209,7 +185,6 @@ class ProjectTask(models.Model):
         project_id = vals.get('project_id') or (self.project_id.id if self else False)
         if project_id:
             project = self.env['project.project'].browse(project_id)
-            # team_id may not exist on project.project in all configurations
             team = getattr(project, 'team_id', False)
             if team:
                 return team
@@ -275,18 +250,11 @@ class ProjectTask(models.Model):
         pending_requests = []
 
         for i, vals in enumerate(vals_list):
-            # ── FIX: always stamp assigned_by on creation ──────────────────
-            # This is the primary visibility anchor.  The record rule and
-            # _search domain both include ('assigned_by.user_id', '=', user.id)
-            # so without this stamp a quick-created task (no assigned_to)
-            # becomes invisible the instant the kanban refreshes — which looks
-            # like "Enter does nothing" and the stage is never applied.
             if current_employee and not vals.get('assigned_by'):
                 vals['assigned_by'] = current_employee.id
 
             if not vals.get('team_id') and vals.get('project_id'):
                 project = self.env['project.project'].browse(vals['project_id'])
-                # team_id may not exist on project.project in all configs
                 project_team = getattr(project, 'team_id', False)
                 if project_team:
                     vals['team_id'] = project_team.id
@@ -310,6 +278,27 @@ class ProjectTask(models.Model):
     # ── ORM: write ────────────────────────────────────────────────────────────
 
     def write(self, vals):
+        # ── Native state field restriction ────────────────────────────────────
+        # Odoo's built-in state field (kanban state: in_progress, done, etc.)
+        # should only be writable by the assigned employee, managers, and HR.
+        if 'state' in vals and not self._is_privileged():
+            current_employee = self._get_current_employee()
+            if not current_employee:
+                raise UserError(
+                    _('Your user account is not linked to an employee record.')
+                )
+            for task in self:
+                if task.assigned_to != current_employee:
+                    raise UserError(
+                        _('Only the assigned employee (%s) can change '
+                          'the state of task "%s".')
+                        % (
+                            task.assigned_to.name if task.assigned_to else _('nobody'),
+                            task.name,
+                        )
+                    )
+
+        # ── Existing logic below — unchanged ──────────────────────────────────
         if 'project_id' in vals and not vals.get('team_id'):
             project = self.env['project.project'].browse(vals['project_id'])
             project_team = getattr(project, 'team_id', False)
@@ -337,21 +326,25 @@ class ProjectTask(models.Model):
     # ── State transitions ─────────────────────────────────────────────────────
 
     def action_start_progress(self):
+        self._check_state_transition_access()
         for task in self:
             if task.task_state == 'assigned':
                 task.task_state = 'in_progress'
 
     def action_mark_completed(self):
+        self._check_state_transition_access()
         for task in self:
             if task.task_state == 'in_progress':
                 task.task_state = 'completed'
 
     def action_verify(self):
+        self._check_state_transition_access()
         for task in self:
             if task.task_state == 'completed':
                 task.task_state = 'verified'
 
     def action_close(self):
+        self._check_state_transition_access()
         for task in self:
             if task.task_state == 'verified':
                 task.task_state = 'closed'
