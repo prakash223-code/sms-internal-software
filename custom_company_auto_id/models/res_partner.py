@@ -28,49 +28,46 @@ class ResPartner(models.Model):
         store=False,
     )
 
+    # ------------------------------------------------------------------
+    # name_create — guard quick creates from many2one dropdowns
+    # ------------------------------------------------------------------
+
     @api.model
     def name_create(self, name):
-        """Override to prevent auto-ID generation during quick-create.
-
-        When a user types a company name in a many2one field (e.g. partner_id on
-        a CRM lead) and clicks "Create 'XYZ'" from the dropdown, Odoo calls
-        name_create() → create() immediately — before the user ever opens or
-        saves a proper company form.  We suppress ID generation here; the ID
-        will be assigned only when the company record is explicitly saved from
-        its own form view.
+        """Prevent ID generation when a partner is quick-created from a
+        many2one field (e.g. partner_id on a CRM lead).
+        ID will be generated when the company is saved from its own form.
         """
         record = self.with_context(skip_company_id_generation=True).create(
             {'name': name}
         )
         return record.id, record.display_name
 
+    # ------------------------------------------------------------------
+    # create — NO automatic ID generation here.
+    #
+    # Reason: Odoo 19 partner_autocomplete calls web_save() -> create()
+    # immediately when the user clicks an IAP suggestion, before the user
+    # has explicitly clicked Save.  Generating the ID here would fire on
+    # every autocomplete selection, not just on intentional saves.
+    #
+    # ID generation is handled by the JS FormController (saveButtonClicked)
+    # which calls action_generate_company_id() only on explicit Save.
+    # ------------------------------------------------------------------
+
     @api.model_create_multi
     def create(self, vals_list):
-        records = super().create(vals_list)
+        return super().create(vals_list)
 
-        # Skip entirely when called from name_create() or any other context
-        # that signals an intermediate / automated creation (not an explicit Save).
-        if self.env.context.get('skip_company_id_generation'):
-            return records
-
-        for record in records:
-            if not record.company_custom_id and record.name:
-                record.sudo().write({
-                    'company_custom_id': record._generate_company_id(
-                        company_name=record.name,
-                        company_type=record.company_type_selection or 'national',
-                    )
-                })
-        return records
+    # ------------------------------------------------------------------
+    # write — only regenerates when user changes National <-> International
+    # ------------------------------------------------------------------
 
     def write(self, vals):
         result = super().write(vals)
 
-        skip = self.env.context.get('skip_company_id_generation')
-
         if 'company_type_selection' in vals:
-            # User explicitly changed National ↔ International → always regenerate.
-            # This is never triggered by autocomplete, so no skip-guard needed.
+            # Intentional user action — always regenerate the ID.
             for record in self:
                 new_id = record._generate_company_id(
                     company_name=record.name or '',
@@ -81,29 +78,29 @@ class ResPartner(models.Model):
                 )
                 super(ResPartner, record).write({'company_custom_id': new_id})
 
-        elif 'is_company' in vals and vals.get('is_company') and not skip:
-            # Existing contact being converted to a company (user toggled the
-            # "Company" switch and clicked Save).
-            # Guarded by skip_company_id_generation so that partner_autocomplete
-            # enrichment — which also writes is_company=True — does NOT trigger
-            # premature generation.
-            for record in self:
-                if not record.company_custom_id:
-                    new_id = record._generate_company_id(
+        return result
+
+    # ------------------------------------------------------------------
+    # action_generate_company_id — called by the JS FormController
+    # after an explicit Save button click, and available as a fallback
+    # button in the view for contacts converted to companies.
+    # ------------------------------------------------------------------
+
+    def action_generate_company_id(self):
+        for record in self:
+            if record.is_company and not record.company_custom_id:
+                record.sudo().write({
+                    'company_custom_id': record._generate_company_id(
                         company_name=record.name or '',
                         company_type=record.company_type_selection or 'national',
                     )
-                    super(ResPartner, record).write({'company_custom_id': new_id})
-
-        return result
+                })
 
     # ------------------------------------------------------------------
     # ID generation
     # ------------------------------------------------------------------
 
     def _generate_company_id(self, company_name='', company_type='national'):
-        """Return a unique ID string, e.g. N001SMSTECHGARMENTS."""
-        # Ensure sequence exists
         sequence = self.env['ir.sequence'].sudo().search(
             [('code', '=', 'res.partner.company.id')], limit=1
         )
@@ -118,16 +115,13 @@ class ResPartner(models.Model):
                 'number_next_actual': 1,
             })
         else:
-            # Clear any stale prefix/suffix from older config
             sequence.sudo().write({'prefix': '', 'suffix': ''})
 
         seq_number = self.env['ir.sequence'].sudo().next_by_code(
             'res.partner.company.id'
         )
-
         clean_name = re.sub(r'\s+', '', company_name.upper())
         clean_name = re.sub(r'[^A-Z0-9]', '', clean_name)
-
         prefix = 'IN' if company_type == 'international' else 'N'
         return f'{prefix}{seq_number}{clean_name}'
 

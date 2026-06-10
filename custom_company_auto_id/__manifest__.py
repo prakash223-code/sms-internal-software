@@ -9,6 +9,11 @@
         'views/res_partner_view.xml',
         'views/crm_lead_view.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_company_auto_id/static/src/js/res_partner_company_id_form.js',
+        ],
+    },
     'installable': True,
     'auto_install': False,
     'license': 'LGPL-3',

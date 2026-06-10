@@ -6,6 +6,11 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
 
+            <!-- Register our custom JS controller on the form -->
+            <xpath expr="//form" position="attributes">
+                <attribute name="js_class">res_partner_company_id_form</attribute>
+            </xpath>
+
             <field name="name" position="after">
                 <field name="company_type_selection"
                        string="Company Type"
@@ -17,6 +22,17 @@
                        string="Company ID"
                        readonly="1"
                        invisible="not is_company"/>
+                <!--
+                    Fallback button: shown only when an existing contact
+                    has been converted to a company (is_company toggled)
+                    and no ID was generated yet because the user did not
+                    click Save while our JS controller was active.
+                -->
+                <button string="Generate Company ID"
+                        name="action_generate_company_id"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="not is_company or company_custom_id"/>
             </field>
 
             <field name="parent_id" position="after">
