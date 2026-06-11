@@ -416,22 +416,16 @@ class ProjectTask(models.Model):
     # just post the message (follower auto-add is less critical)
 
 
+# ── Notifications ─────────────────────────────────────────────────────────
+
 def _notify_assigned_employee(self, employee):
-    """
-    Send a direct inbox/email notification to the assigned employee.
-    Uses message_notify which is the correct Odoo API for pushing
-    notifications directly to a partner without needing follower status.
-    """
+    """Send an inbox notification to the assigned employee."""
     if not employee or not employee.user_id:
         return
     partner = employee.user_id.partner_id
     if not partner:
         return
-
-    # Subscribe them as a follower so future chatter activity notifies them
     self.message_subscribe(partner_ids=[partner.id])
-
-    # message_notify pushes directly to inbox/email — does not post to chatter
     self.message_notify(
         partner_ids=[partner.id],
         subject=_('Task Assigned to You: %s') % self.name,
@@ -440,9 +434,9 @@ def _notify_assigned_employee(self, employee):
             '<p>You have been assigned to task <b>%s</b>.</p>'
             '<p>Project: %s</p>'
         ) % (
-                 employee.name,
-                 self.name,
-                 self.project_id.name if self.project_id else _('N/A'),
-             ),
+            employee.name,
+            self.name,
+            self.project_id.name if self.project_id else _('N/A'),
+        ),
         record_name=self.name,
     )
