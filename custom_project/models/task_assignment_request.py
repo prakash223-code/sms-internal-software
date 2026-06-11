@@ -154,6 +154,8 @@ class TaskAssignmentRequest(models.Model):
             'team_id':     self.target_team_id.id if self.target_team_id else False,
             'task_state':  'assigned',
         })
+        # Notify the newly assigned employee
+        self.task_id._notify_assigned_employee(self.target_employee_id)
 
         # sudo() ensures the write succeeds regardless of which approver
         # group the user belongs to (manager, project manager, or HR).
@@ -198,6 +200,10 @@ class TaskAssignmentRequest(models.Model):
             'state':         'rejected',
             'approved_by':   deciding_employee.id if deciding_employee else False,
             'decision_date': fields.Datetime.now(),
+        })
+
+        self.task_id.sudo().write({
+            'assigned_to': False,
         })
 
         return {

@@ -117,15 +117,15 @@ class ProjectTask(models.Model):
 
     def _is_manager(self):
         return (
-            self.env.user.has_group('custom_project.group_team_manager')
-            or self.env.user.has_group('project.group_project_manager')
+                self.env.user.has_group('custom_project.group_team_manager')
+                or self.env.user.has_group('project.group_project_manager')
         )
 
     def _is_privileged(self):
         """Managers and HR bypass all team restrictions."""
         return (
-            self.env.user.has_group('custom_project.group_team_manager')
-            or self.env.user.has_group('hr.group_hr_user')
+                self.env.user.has_group('custom_project.group_team_manager')
+                or self.env.user.has_group('hr.group_hr_user')
         )
 
     def _check_state_transition_access(self):
@@ -217,6 +217,7 @@ class ProjectTask(models.Model):
         if task_team and task_team in assignee_teams:
             vals['task_state'] = 'assigned'
             return vals, None
+
         else:
             assigner_teams = self._get_employee_teams(current_employee)
             pending_info = {
@@ -225,7 +226,9 @@ class ProjectTask(models.Model):
                 'assignee_teams': assignee_teams,
                 'task_team': task_team,
             }
-            vals['assigned_to'] = False
+            # DO NOT clear assigned_to — keep it visible so the creator
+            # can see who the task is intended for while approval is pending.
+            # task_state = 'draft' is the signal that it's not yet confirmed.
             vals['task_state'] = 'draft'
             return vals, pending_info
 
@@ -259,6 +262,24 @@ class ProjectTask(models.Model):
                 if project_team:
                     vals['team_id'] = project_team.id
 
+            # Bridge user_ids (quick-create "Assignees") → assigned_to
+            if 'user_ids' in vals and not vals.get('assigned_to'):
+                user_id = None
+                for cmd in (vals['user_ids'] or []):
+                    if isinstance(cmd, (list, tuple)):
+                        if cmd[0] == 6 and cmd[2]:
+                            user_id = cmd[2][0]
+                            break
+                        elif cmd[0] == 4:
+                            user_id = cmd[1]
+                            break
+                if user_id:
+                    emp = self.env['hr.employee'].search(
+                        [('user_id', '=', user_id)], limit=1
+                    )
+                    if emp:
+                        vals['assigned_to'] = emp.id
+
             if 'assigned_to' in vals:
                 vals, pending_info = self._handle_cross_team_assignment(
                     vals, current_employee
@@ -273,37 +294,44 @@ class ProjectTask(models.Model):
                 tasks[task_idx], pending_info, current_employee
             )
 
-        return tasks
+        # Deferred notifications — fresh cursor to avoid dead-cursor issues
+        notify_pairs = [
+            (task.id, task.assigned_to.id)
+            for task in tasks
+            if task.assigned_to
+        ]
+        if notify_pairs:
+            uid = self.env.uid
+            context = dict(self.env.context)
+            registry = self.env.registry
+
+            def _send():
+                try:
+                    with registry.cursor() as cr:
+                        env = api.Environment(cr, uid, context)
+                        for task_id, emp_id in notify_pairs:
+                            t = env['project.task'].browse(task_id)
+                            emp = env['hr.employee'].browse(emp_id)
+                            t._notify_assigned_employee(emp)
+                except Exception as e:
+                    _logger.warning("Task assignment notification failed: %s", e)
+
+            self.env.cr.postcommit.add(_send)
+
+        return tasks  # ← must always be the last line, never inside an if block
 
     # ── ORM: write ────────────────────────────────────────────────────────────
 
     def write(self, vals):
-        # ── Native state field restriction ────────────────────────────────────
-        # Odoo's built-in state field (kanban state: in_progress, done, etc.)
-        # should only be writable by the assigned employee, managers, and HR.
-        if 'state' in vals and not self._is_privileged():
-            current_employee = self._get_current_employee()
-            if not current_employee:
-                raise UserError(
-                    _('Your user account is not linked to an employee record.')
-                )
-            for task in self:
-                if task.assigned_to != current_employee:
-                    raise UserError(
-                        _('Only the assigned employee (%s) can change '
-                          'the state of task "%s".')
-                        % (
-                            task.assigned_to.name if task.assigned_to else _('nobody'),
-                            task.name,
-                        )
-                    )
-
-        # ── Existing logic below — unchanged ──────────────────────────────────
         if 'project_id' in vals and not vals.get('team_id'):
             project = self.env['project.project'].browse(vals['project_id'])
             project_team = getattr(project, 'team_id', False)
             if project_team:
                 vals['team_id'] = project_team.id
+
+        # Capture previous assigned_to before the write so we can detect changes
+        old_assigned = {task.id: task.assigned_to for task in self} \
+            if 'assigned_to' in vals else {}
 
         if 'assigned_to' not in vals:
             return super().write(vals)
@@ -320,6 +348,22 @@ class ProjectTask(models.Model):
                 self._create_assignment_request(
                     task, pending_info, current_employee
                 )
+
+        # Notify if assigned_to changed to a real employee
+        if old_assigned:
+            notify_pairs = [
+                (task.id, task.assigned_to.id)
+                for task in self
+                if task.assigned_to and task.assigned_to != old_assigned.get(task.id)
+            ]
+            if notify_pairs:
+                def _send():
+                    for task_id, emp_id in notify_pairs:
+                        t = self.env['project.task'].browse(task_id)
+                        emp = self.env['hr.employee'].browse(emp_id)
+                        t._notify_assigned_employee(emp)
+
+                self.env.cr.postcommit.add(_send)
 
         return result
 
@@ -365,3 +409,40 @@ class ProjectTask(models.Model):
             'domain': [('task_id', '=', self.id)],
             'context': {'default_task_id': self.id},
         }
+
+    # ── Notification helper ───────────────────────────────────────────────────
+
+    # In _notify_assigned_employee — remove message_subscribe entirely,
+    # just post the message (follower auto-add is less critical)
+
+
+def _notify_assigned_employee(self, employee):
+    """
+    Send a direct inbox/email notification to the assigned employee.
+    Uses message_notify which is the correct Odoo API for pushing
+    notifications directly to a partner without needing follower status.
+    """
+    if not employee or not employee.user_id:
+        return
+    partner = employee.user_id.partner_id
+    if not partner:
+        return
+
+    # Subscribe them as a follower so future chatter activity notifies them
+    self.message_subscribe(partner_ids=[partner.id])
+
+    # message_notify pushes directly to inbox/email — does not post to chatter
+    self.message_notify(
+        partner_ids=[partner.id],
+        subject=_('Task Assigned to You: %s') % self.name,
+        body=_(
+            '<p>Hi %s,</p>'
+            '<p>You have been assigned to task <b>%s</b>.</p>'
+            '<p>Project: %s</p>'
+        ) % (
+                 employee.name,
+                 self.name,
+                 self.project_id.name if self.project_id else _('N/A'),
+             ),
+        record_name=self.name,
+    )

@@ -1,8 +1,9 @@
 {
     'name': 'Company Auto ID',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'CRM',
-    'summary': 'Auto generate unique Company ID',
+    'author': 'Your Company',
+    'summary': 'Auto generate unique Company ID based on country',
     'depends': ['base', 'contacts', 'crm'],
     'data': [
         'security/ir.model.access.csv',

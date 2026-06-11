@@ -6,27 +6,26 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
 
-            <!-- Register our custom JS controller on the form -->
+            <!-- Register our custom JS controller -->
             <xpath expr="//form" position="attributes">
                 <attribute name="js_class">res_partner_company_id_form</attribute>
             </xpath>
 
+            <!-- Country is mandatory for companies (client-side) -->
+            <field name="country_id" position="attributes">
+                <attribute name="required">is_company</attribute>
+            </field>
+
+            <!-- Company ID display (read-only, auto-generated) -->
             <field name="name" position="after">
-                <field name="company_type_selection"
-                       string="Company Type"
-                       invisible="not is_company"
-                       required="is_company"
-                       widget="radio"
-                       options="{'horizontal': true}"/>
                 <field name="company_custom_id"
                        string="Company ID"
                        readonly="1"
                        invisible="not is_company"/>
                 <!--
-                    Fallback button: shown only when an existing contact
-                    has been converted to a company (is_company toggled)
-                    and no ID was generated yet because the user did not
-                    click Save while our JS controller was active.
+                    Fallback button: only visible when a company has no ID yet
+                    (e.g. an existing contact converted to a company, or a
+                    record created before this module was installed).
                 -->
                 <button string="Generate Company ID"
                         name="action_generate_company_id"
@@ -35,6 +34,7 @@
                         invisible="not is_company or company_custom_id"/>
             </field>
 
+            <!-- Show parent company's ID on individual contacts -->
             <field name="parent_id" position="after">
                 <field name="contact_company_id_display"
                        string="Company ID"

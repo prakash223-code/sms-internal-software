@@ -7,10 +7,8 @@ import { formView } from "@web/views/form/form_view";
 /**
  * Custom FormController for res.partner.
  *
- * Odoo 19's partner_autocomplete calls web_save() immediately when the user
- * clicks an IAP suggestion, which triggers Python create() before the user
- * has explicitly clicked Save.  We therefore generate the company_custom_id
- * here — after an explicit Save button click — rather than in Python create().
+ * Generates company_custom_id only when the user explicitly clicks Save —
+ * not when partner_autocomplete calls web_save() on IAP suggestion click.
  */
 class PartnerCompanyIdFormController extends FormController {
 
@@ -27,8 +25,7 @@ class PartnerCompanyIdFormController extends FormController {
         const resId = record.resId;
         if (!resId) return;
 
-        // Reload to pick up any server-side side effects (e.g. company_type
-        // regeneration from the Python write() handler).
+        // Reload to pick up server-side field values after save.
         await record.load();
 
         if (record.data.is_company && !record.data.company_custom_id) {
@@ -37,7 +34,7 @@ class PartnerCompanyIdFormController extends FormController {
                 "action_generate_company_id",
                 [[resId]]
             );
-            // Reload once more so the generated ID appears in the form.
+            // Reload to display the generated ID in the form.
             await record.load();
         }
     }
