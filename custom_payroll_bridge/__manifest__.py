@@ -8,8 +8,8 @@
     'category': 'Human Resources',
     'license': 'LGPL-3',
     'depends': [
-        'bi_hr_payroll',       # BrowseInfo payroll module
-        'custom_attendance',   # your attendance module (unpaid_absent_days)
+        'bi_hr_payroll',  # BrowseInfo payroll module
+        'custom_attendance',  # your attendance module (unpaid_absent_days)
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -20,6 +20,7 @@
         'views/payslip_kanban_fix.xml',
         'views/employee_payslip_menu.xml',
         'views/employee_defaults_view.xml',
+        'views/create_user_password_view.xml',
     ],
     'assets': {
         'web.assets_backend': [

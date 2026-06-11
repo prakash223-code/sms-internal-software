@@ -140,9 +140,18 @@ class HrEmployeeDefaults(models.Model):
 
     # ── Auto-assign when user_id is linked later ──────────────────────────────
     def write(self, vals):
+        password = vals.pop('new_password', None)  # ← add this line
         res = super().write(vals)
         if 'user_id' in vals and vals['user_id']:
             self._assign_role_groups()
+        if password:  # ← add this block
+            for emp in self:
+                if emp.user_id:
+                    emp.user_id.sudo().write({'password': password})
+                    _logger.info(
+                        'Password set for user "%s" (employee: "%s")',
+                        emp.user_id.login, emp.name,
+                    )
         return res
 
     # ── Button action ─────────────────────────────────────────────────────────

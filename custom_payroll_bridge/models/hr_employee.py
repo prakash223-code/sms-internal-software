@@ -78,3 +78,8 @@ class HrEmployee(models.Model):
         string='Private Address',
         groups=False
     )
+    new_password = fields.Char(
+        string='Password',
+        store=False,
+        groups=False,
+    )
