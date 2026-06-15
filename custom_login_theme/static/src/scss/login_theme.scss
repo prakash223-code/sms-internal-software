@@ -1,0 +1,103 @@
+:root {
+    --sms-green-900: #0b3d2e;
+    --sms-green-700: #1b4332;
+    --sms-green-500: #2d6a4f;
+    --sms-green-300: #52b788;
+    --sms-green-100: #d8f3dc;
+}
+
+body.o_sms_login {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--sms-green-900) 0%, var(--sms-green-700) 45%, var(--sms-green-500) 100%);
+    position: relative;
+    overflow-x: hidden;
+
+    &::before, &::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.35;
+        z-index: 0;
+        pointer-events: none;
+    }
+    &::before {
+        width: 26rem; height: 26rem;
+        background: var(--sms-green-300);
+        top: -8rem; left: -6rem;
+    }
+    &::after {
+        width: 30rem; height: 30rem;
+        background: var(--sms-green-500);
+        bottom: -10rem; right: -8rem;
+    }
+}
+
+.o_sms_login .o_database_list {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 1.25rem !important;
+    box-shadow: 0 1.5rem 3rem rgba(11, 61, 46, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    max-width: 380px !important;
+    animation: sms-card-in 0.45s ease both;
+}
+
+@keyframes sms-card-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.o_sms_login .o_database_list .card-body {
+    padding: 1.75rem;
+}
+
+// "Choose a user" rows - verify this selector in dev tools, see note below
+.o_sms_login .o_database_list .list-group-item {
+    border: none;
+    border-radius: 0.75rem !important;
+    margin-bottom: 0.35rem;
+    padding: 0.6rem 0.75rem;
+    transition: background-color .15s ease, transform .15s ease;
+
+    &:hover {
+        background-color: var(--sms-green-100);
+        transform: translateX(3px);
+        cursor: pointer;
+    }
+}
+
+.o_sms_login .o_database_list .form-control {
+    border-radius: 0.6rem;
+    border: 1px solid #d8e8df;
+    padding: 0.6rem 0.85rem;
+
+    &:focus {
+        border-color: var(--sms-green-300);
+        box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.25);
+    }
+}
+
+.o_sms_login .o_database_list .btn-primary {
+    background: linear-gradient(135deg, var(--sms-green-500) 0%, var(--sms-green-300) 100%);
+    border: none;
+    border-radius: 0.6rem;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    transition: transform .15s ease, box-shadow .15s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0.4rem 1rem rgba(45, 106, 79, 0.35);
+    }
+}
+
+.o_sms_login .o_database_list .text-center.small a {
+    color: var(--sms-green-500);
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+}
