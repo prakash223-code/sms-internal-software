@@ -8,3 +8,6 @@ access_assignment_request_manager,task.assignment.request manager,model_task_ass
 access_assignment_request_hr,task.assignment.request hr,model_task_assignment_request,hr.group_hr_user,1,1,1,1
 access_task_type_team_manager,project.task.type team manager,project.model_project_task_type,custom_project.group_team_manager,1,1,1,1
 access_task_type_hr,project.task.type hr,project.model_project_task_type,hr.group_hr_user,1,1,1,1
+access_project_category_user,project.category user,model_project_category,base.group_user,1,0,0,0
+access_project_category_manager,project.category manager,model_project_category,custom_project.group_team_manager,1,1,1,1
+access_project_category_hr,project.category hr,model_project_category,hr.group_hr_user,1,1,1,1

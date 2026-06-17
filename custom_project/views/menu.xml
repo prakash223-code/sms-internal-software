@@ -5,7 +5,6 @@
         <field name="active" eval="False"/>
     </record>
 
-
     <record id="project.menu_project_config_project" model="ir.ui.menu">
         <field name="active" eval="False"/>
     </record>
@@ -60,16 +59,20 @@
               action="action_all_assignment_requests"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
-    <!--
-         Task Stages
-         We place this directly under Odoo's native Configuration menu
-         to prevent duplicates in the navigation bar.
-    -->
+    <!-- Configuration -->
     <menuitem id="menu_task_stage_config"
               name="Task Stages"
               parent="project.menu_project_config"
               sequence="10"
               action="action_project_stage_management"
+              groups="custom_project.group_team_manager,hr.group_hr_user"/>
+
+    <!-- NEW: Project Categories under Configuration -->
+    <menuitem id="menu_project_category_config"
+              name="Project Categories"
+              parent="project.menu_project_config"
+              sequence="20"
+              action="action_project_category"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
 </odoo>

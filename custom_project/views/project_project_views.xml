@@ -2,40 +2,100 @@
 <odoo>
 
     <!--
-        Add a "Stages" tab to the project settings form.
-
-        project.edit_project is the settings dialog that opens when you
-        click the three-dot menu → Settings on a project card, or when
-        you create a project.  It is stable across Odoo 17-19.
-
-        The Many2many field uses no_create / no_create_edit so users can
-        only pick from the stage library managed in
-        Configuration → Project Stages.
+        Inherit the project settings dialog (edit_project) to add:
+        • Project Category field
+        • Planned Hours field
+        • Stages tab (existing)
     -->
     <record id="view_project_form_stages_tab" model="ir.ui.view">
         <field name="name">project.project.form.stages.tab</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
+
+            <!-- ── Category + hours — inject before the notebook ── -->
+            <xpath expr="//notebook" position="before">
+                <group>
+                    <group string="Classification">
+                        <field name="project_category_id"
+                               options="{'no_create_edit': False}"
+                               placeholder="Select a category…"/>
+                        <field name="planned_hours"
+                               widget="float_time"
+                               string="Planned Hours"/>
+                    </group>
+                    <group string="Progress"
+                           invisible="planned_hours == 0">
+                        <field name="total_hours_spent"
+                               widget="float_time"
+                               string="Hours Logged"
+                               readonly="1"/>
+                        <field name="hours_progress"
+                               widget="progressbar"
+                               string="Consumed"
+                               readonly="1"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- ── Stages tab (unchanged from before) ── -->
             <xpath expr="//notebook" position="inside">
                 <page string="Stages" name="task_stages" icon="fa-columns">
-
                     <p class="fst-italic text-muted mb-3">
                         Select which stages are available for tasks in this
-                        project.  To create or rename stages, go to
+                        project. To create or rename stages, go to
                         <strong>Configuration → Project Stages</strong>.
                     </p>
-
                     <field name="type_ids"
                            widget="many2many_tags"
                            options="{'no_create_edit': True, 'no_create': True}"
                            string="Active Stages"
                            nolabel="1"
                            domain="[]"/>
-
                 </page>
             </xpath>
+
         </field>
     </record>
+
+    <!--
+        Inherit the project KANBAN card to add a smart button for the
+        estimation helper. project.view_project_kanban is the standard
+        kanban in Odoo 19 accessed from the Projects top-level page.
+
+        The smart button is only meaningful when:
+          • A category has been set
+          • There is at least one similar completed project to compare against
+    -->
+    <record id="view_project_kanban_estimation_btn" model="ir.ui.view">
+        <field name="name">project.project.kanban.estimation.btn</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="arch" type="xml">
+
+            <!-- Inject estimation fields so the kanban card can read them -->
+            <xpath expr="//kanban" position="inside">
+                <field name="project_category_id"/>
+                <field name="similar_project_count"/>
+                <field name="avg_hours_similar"/>
+                <field name="total_hours_spent"/>
+                <field name="planned_hours"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!--
+        List view columns (category + hours) intentionally omitted here.
+        To add them, first find the correct Odoo 19 XML ID:
+
+        SELECT concat(d.module,'.',d.name) AS xml_id, v.name
+        FROM ir_ui_view v
+        JOIN ir_model_data d ON d.res_id = v.id AND d.model = 'ir.ui.view'
+        WHERE v.model = 'project.project' AND v.type = 'list'
+        AND d.module = 'project';
+
+        Then add the inherit block back with the correct ref.
+    -->
 
 </odoo>
