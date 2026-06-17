@@ -43,15 +43,13 @@ class ProjectDocument(models.Model):
         attachment=True,
     )
 
-    filename = fields.Char(
-        string='File Name',
-    )
+    filename = fields.Char(string='File Name')
 
     file_type = fields.Char(
         string='File Type',
         compute='_compute_file_type',
         store=True,
-        help='File extension extracted from the uploaded filename (e.g. PDF, PNG, DOCX).',
+        help='File extension extracted from the uploaded filename.',
     )
 
     file_url = fields.Char(
@@ -78,6 +76,13 @@ class ProjectDocument(models.Model):
         help='Optional remarks about this document.',
     )
 
+    # Computed flag exposed to the view layer so fields can be made
+    # readonly without duplicating the group-check logic in XML.
+    can_write = fields.Boolean(
+        compute='_compute_can_write',
+        help='True when the current user may create / edit / delete documents.',
+    )
+
     # ------------------------------------------------------------------
     # COMPUTED
     # ------------------------------------------------------------------
@@ -99,25 +104,28 @@ class ProjectDocument(models.Model):
             else:
                 rec.file_url = False
 
+    def _compute_can_write(self):
+        result = self._user_can_write()
+        for rec in self:
+            rec.can_write = result
+
     # ------------------------------------------------------------------
     # ACCESS HELPERS
     # ------------------------------------------------------------------
 
     def _user_can_write(self):
         """
-        Manager, HR, and Team Lead employees can create/edit/delete documents.
-        Plain employees are read-only.
+        Returns True for Manager, HR, and Team Lead employees.
+        Plain project users are read-only.
         """
         user = self.env.user
 
-        # Manager group covers both Manager (Owner) and HR
         if user.has_group('project.group_project_manager'):
             return True
 
         if user.has_group('hr.group_hr_user'):
             return True
 
-        # Team Lead check — is_team_lead boolean on linked hr.employee
         employee = self.env['hr.employee'].sudo().search(
             [('user_id', '=', user.id)], limit=1
         )

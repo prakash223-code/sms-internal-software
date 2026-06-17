@@ -10,7 +10,6 @@
     <field name="arch" type="xml">
       <form string="Project Document">
 
-        <!-- Banners before <sheet> — span full viewport width -->
         <div class="o_prd_banner o_prd_banner_pending" invisible="filename">
           <i class="fa fa-cloud-upload" title="Upload Required"/>
           <div><strong>No file yet</strong> — attach a document file below to complete this record.</div>
@@ -21,8 +20,9 @@
         </div>
 
         <sheet>
+          <!-- can_write drives all readonly/invisible decisions below -->
+          <field name="can_write" invisible="1"/>
 
-          <!-- Reference block: scales from 320px to 1440px via CSS -->
           <div class="oe_title">
             <div class="o_prd_ref_block">
               <div class="o_prd_ref_icon">
@@ -31,14 +31,13 @@
               <div class="o_prd_ref_text_group">
                 <div class="o_prd_ref_label">Document Name</div>
                 <div class="o_prd_ref_value">
-                  <field name="name" nolabel="1"
+                  <field name="name" nolabel="1" readonly="not can_write"
                          placeholder="e.g. Project Contract, Design Blueprint"/>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Document Details -->
           <div class="o_prd_section_label">
             <i class="fa fa-info-circle" title="Details"/> Document Details
           </div>
@@ -46,7 +45,7 @@
             <group>
               <group>
                 <field name="project_id" readonly="1"/>
-                <field name="document_type"/>
+                <field name="document_type" readonly="not can_write"/>
               </group>
               <group>
                 <field name="upload_date" readonly="1"/>
@@ -57,21 +56,17 @@
 
           <div class="o_prd_divider"/>
 
-          <!-- File upload -->
           <div class="o_prd_section_label">
             <i class="fa fa-paperclip" title="File"/> Attached File
           </div>
           <div class="o_prd_file_card">
             <group>
-              <field name="file" filename="filename" string="Attach File" widget="binary"/>
+              <field name="file" filename="filename" string="Attach File"
+                     widget="binary" readonly="not can_write"/>
               <field name="filename" invisible="1"/>
-              <!-- File type badge — visible after upload -->
-              <div invisible="not file_type or file_type == '—'" style="padding:2px 0 4px 0;">
-                <span class="o_prd_filetype_badge">
-                  <i class="fa fa-file-o" title="Type"/>
-                  <field name="file_type" readonly="1" nolabel="1"/>
-                </span>
-              </div>
+              <field name="file_type" nolabel="1" readonly="1"
+                     invisible="not file_type or file_type == '—'"
+                     class="o_prd_filetype_field"/>
               <field name="file_url" string="Preview in Browser" widget="url"
                      text="Click to Preview" invisible="not file_url" readonly="1"/>
             </group>
@@ -79,12 +74,11 @@
 
           <div class="o_prd_divider"/>
 
-          <!-- Notes -->
           <div class="o_prd_section_label">
             <i class="fa fa-sticky-note-o" title="Notes"/> Notes
           </div>
           <group>
-            <field name="notes" string="" nolabel="1"
+            <field name="notes" nolabel="1" readonly="not can_write"
                    placeholder="Optional remarks about this document..."/>
           </group>
 
@@ -95,25 +89,23 @@
 
 
   <!-- ================================================================
-       LIST VIEW
+       LIST VIEW  —  create/delete disabled here; the action method
+       re-enables them via context flags for privileged users.
        ================================================================ -->
   <record id="view_project_document_list" model="ir.ui.view">
     <field name="name">project.document.list</field>
     <field name="model">project.document</field>
     <field name="arch" type="xml">
-      <list string="Documents" create="1" delete="1"
+      <list string="Documents" create="0" delete="0"
             decoration-success="document_type in ('contract', 'approval')"
             decoration-info="document_type in ('blueprint', 'report', 'minutes')"
             decoration-warning="document_type in ('invoice', 'handover')">
 
-        <!-- Always-visible on mobile -->
-        <field name="name" string="Document Name"/>
+        <field name="name"         string="Document Name"/>
         <field name="document_type" string="Category" widget="badge"
                decoration-success="document_type in ('contract', 'approval')"
                decoration-info="document_type in ('blueprint', 'report', 'minutes')"
                decoration-warning="document_type in ('invoice', 'handover')"/>
-
-        <!-- Optional columns — collapse on narrow screens -->
         <field name="file_type"   string="Type"        readonly="1"  optional="show"/>
         <field name="project_id"  string="Project"                   optional="show"/>
         <field name="file" filename="filename" string="File"
@@ -131,7 +123,8 @@
 
 
   <!-- ================================================================
-       KANBAN VIEW
+       KANBAN VIEW  —  quick_create already false; New button visibility
+       controlled by context 'create' flag set in the action method.
        ================================================================ -->
   <record id="view_project_document_kanban" model="ir.ui.view">
     <field name="name">project.document.kanban</field>
@@ -152,10 +145,7 @@
         <templates>
           <t t-name="card">
 
-            <!-- ── Header: file-type icon + name + category badge ── -->
             <div class="o_prd_card_header">
-
-              <!-- Coloured icon keyed on file extension -->
               <t t-set="ft" t-value="record.file_type.raw_value ? record.file_type.raw_value.toUpperCase() : ''"/>
               <div t-attf-class="o_prd_doc_icon #{
                   ft == 'PDF'  ? 'o_prd_icon_pdf'   :
@@ -182,11 +172,8 @@
                 </t>
               </div>
 
-              <!-- Title column: name + document_type badge -->
               <div class="o_prd_card_title">
-                <div class="o_prd_card_name">
-                  <field name="name"/>
-                </div>
+                <div class="o_prd_card_name"><field name="name"/></div>
                 <field name="document_type" widget="badge"
                        decoration-success="document_type in ('contract', 'approval')"
                        decoration-info="document_type in ('blueprint', 'report', 'minutes')"
@@ -196,7 +183,6 @@
 
             <div class="o_prd_kanban_divider"/>
 
-            <!-- ── Meta: project + uploader + date ───────────────── -->
             <div class="o_prd_card_meta">
               <div class="o_prd_card_meta_row">
                 <i class="fa fa-briefcase" title="Project"/>
@@ -214,14 +200,11 @@
 
             <div class="o_prd_kanban_divider"/>
 
-            <!-- ── Footer: preview or no-file ────────────────────── -->
             <div class="o_prd_card_footer">
               <t t-if="record.file_url.raw_value">
-                <a class="o_prd_preview_btn"
-                   role="button"
+                <a class="o_prd_preview_btn" role="button"
                    t-att-href="record.file_url.raw_value"
-                   target="_blank"
-                   onclick="event.stopPropagation()">
+                   target="_blank" onclick="event.stopPropagation()">
                   <i class="fa fa-eye" title="Preview"/>
                   Preview File
                 </a>
@@ -242,7 +225,7 @@
 
 
   <!-- ================================================================
-       ACTION — list + kanban + form
+       ACTION
        ================================================================ -->
   <record id="action_project_document" model="ir.actions.act_window">
     <field name="name">Project Documents</field>

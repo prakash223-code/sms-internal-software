@@ -7,6 +7,10 @@ from odoo.http import request
 
 class ProjectDocumentPreviewController(http.Controller):
 
+    # ------------------------------------------------------------------
+    # Project Document preview
+    # ------------------------------------------------------------------
+
     @http.route(
         '/project/document/preview/<int:doc_id>',
         type='http',
@@ -16,31 +20,64 @@ class ProjectDocumentPreviewController(http.Controller):
     )
     def preview_document(self, doc_id, **kwargs):
         """
-        Serves project document with Content-Disposition: inline so the
-        browser renders it instead of downloading.
-
-        Uses werkzeug Response directly to avoid Odoo's internal wrappers
-        that may override Content-Disposition back to attachment.
-
-        Access:  Any logged-in project user can preview.
-                 (project-level access is controlled at the model/view layer)
+        Serves a project document inline in the browser.
         """
-        # Access check — must be at least a project user
         if not request.env.user.has_group('project.group_project_user'):
             return Response('Access Denied', status=403)
 
-        # Find the document record (sudo so read always works for URL preview)
         document = request.env['project.document'].sudo().browse(doc_id)
         if not document.exists() or not document.file:
             return Response('Not Found', status=404)
 
-        filename = document.filename or 'document'
+        return self._serve_binary(
+            res_model='project.document',
+            res_id=doc_id,
+            field_binary=document.file,
+            filename=document.filename or 'document',
+        )
 
-        # Read binary data through ir.attachment — more reliable when
-        # Binary field is stored with attachment=True
+    # ------------------------------------------------------------------
+    # Case Study preview
+    # ------------------------------------------------------------------
+
+    @http.route(
+        '/project/case-study/preview/<int:doc_id>',
+        type='http',
+        auth='user',
+        methods=['GET'],
+        csrf=False,
+    )
+    def preview_case_study(self, doc_id, **kwargs):
+        """
+        Serves a project case-study supporting file inline in the browser.
+        """
+        if not request.env.user.has_group('project.group_project_user'):
+            return Response('Access Denied', status=403)
+
+        case_study = request.env['project.case.study'].sudo().browse(doc_id)
+        if not case_study.exists() or not case_study.file:
+            return Response('Not Found', status=404)
+
+        return self._serve_binary(
+            res_model='project.case.study',
+            res_id=doc_id,
+            field_binary=case_study.file,
+            filename=case_study.filename or 'case_study',
+        )
+
+    # ------------------------------------------------------------------
+    # Shared helper
+    # ------------------------------------------------------------------
+
+    def _serve_binary(self, res_model, res_id, field_binary, filename):
+        """
+        Build a werkzeug Response that renders the file inline in the browser.
+        Tries ir.attachment first (more reliable when attachment=True);
+        falls back to the field value directly.
+        """
         attachment = request.env['ir.attachment'].sudo().search([
-            ('res_model', '=', 'project.document'),
-            ('res_id', '=', doc_id),
+            ('res_model', '=', res_model),
+            ('res_id', '=', res_id),
             ('res_field', '=', 'file'),
         ], limit=1)
 
@@ -48,27 +85,17 @@ class ProjectDocumentPreviewController(http.Controller):
             file_data = base64.b64decode(attachment.datas)
             mimetype = attachment.mimetype or None
         else:
-            # Fallback: read directly from field
-            file_data = base64.b64decode(document.file)
+            file_data = base64.b64decode(field_binary)
             mimetype = None
 
-        # Guess mimetype from filename extension if not already known
         if not mimetype:
             mimetype, _ = mimetypes.guess_type(filename)
         if not mimetype:
             mimetype = 'application/octet-stream'
 
-        # Build werkzeug Response directly — guarantees headers are not
-        # overridden by Odoo middleware
-        response = Response(
-            file_data,
-            status=200,
-            mimetype=mimetype,
-        )
-        # inline → browser renders the file instead of downloading
+        response = Response(file_data, status=200, mimetype=mimetype)
         response.headers['Content-Disposition'] = f'inline; filename="{filename}"'
         response.headers['Content-Length'] = str(len(file_data))
         response.headers['Cache-Control'] = 'no-cache, no-store'
         response.headers['X-Content-Type-Options'] = 'nosniff'
-
         return response

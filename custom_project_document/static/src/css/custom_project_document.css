@@ -168,9 +168,10 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   FILE TYPE BADGE  (form)
+   FILE TYPE BADGE  (form) — rendered via .o_prd_filetype_field class
+   on the <field> tag; no wrapping <span> needed
 ───────────────────────────────────────────────────────────── */
-.o_prd_filetype_badge {
+.o_prd_filetype_field.o_field_widget .o_field_char {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -182,11 +183,7 @@
     color: #fff;
     border-radius: 4px;
     padding: 3px 8px;
-    margin-top: 4px;
-}
-
-.o_prd_filetype_badge .fa {
-    font-size: 10px;
+    margin-top: 2px;
 }
 
 
@@ -243,101 +240,29 @@
 }
 
 /* Colour variants by file extension */
-.o_prd_icon_pdf {
-    background: #fef2f2;
-    border: 1.5px solid #fecaca;
-    color: #dc2626;
-}
+.o_prd_icon_pdf   { background: #fef2f2; border: 1.5px solid #fecaca; color: #dc2626; }
+.o_prd_icon_pdf   .o_prd_doc_icon_ext { color: #dc2626; background: #fef2f2; border-color: #fca5a5; }
 
-.o_prd_icon_pdf .o_prd_doc_icon_ext {
-    color: #dc2626;
-    background: #fef2f2;
-    border-color: #fca5a5;
-}
+.o_prd_icon_word  { background: #eff6ff; border: 1.5px solid #bfdbfe; color: #2563eb; }
+.o_prd_icon_word  .o_prd_doc_icon_ext { color: #2563eb; background: #eff6ff; border-color: #93c5fd; }
 
-.o_prd_icon_word {
-    background: #eff6ff;
-    border: 1.5px solid #bfdbfe;
-    color: #2563eb;
-}
+.o_prd_icon_excel { background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #16a34a; }
+.o_prd_icon_excel .o_prd_doc_icon_ext { color: #16a34a; background: #f0fdf4; border-color: #86efac; }
 
-.o_prd_icon_word .o_prd_doc_icon_ext {
-    color: #2563eb;
-    background: #eff6ff;
-    border-color: #93c5fd;
-}
+.o_prd_icon_image { background: #faf5ff; border: 1.5px solid #e9d5ff; color: #9333ea; }
+.o_prd_icon_image .o_prd_doc_icon_ext { color: #9333ea; background: #faf5ff; border-color: #d8b4fe; }
 
-.o_prd_icon_excel {
-    background: #f0fdf4;
-    border: 1.5px solid #bbf7d0;
-    color: #16a34a;
-}
+.o_prd_icon_ppt   { background: #fff7ed; border: 1.5px solid #fed7aa; color: #ea580c; }
+.o_prd_icon_ppt   .o_prd_doc_icon_ext { color: #ea580c; background: #fff7ed; border-color: #fdba74; }
 
-.o_prd_icon_excel .o_prd_doc_icon_ext {
-    color: #16a34a;
-    background: #f0fdf4;
-    border-color: #86efac;
-}
+.o_prd_icon_zip   { background: #fffbeb; border: 1.5px solid #fde68a; color: #d97706; }
+.o_prd_icon_zip   .o_prd_doc_icon_ext { color: #d97706; background: #fffbeb; border-color: #fcd34d; }
 
-.o_prd_icon_image {
-    background: #faf5ff;
-    border: 1.5px solid #e9d5ff;
-    color: #9333ea;
-}
+.o_prd_icon_txt   { background: #f8fafc; border: 1.5px solid #cbd5e1; color: #64748b; }
+.o_prd_icon_txt   .o_prd_doc_icon_ext { color: #64748b; background: #f8fafc; border-color: #94a3b8; }
 
-.o_prd_icon_image .o_prd_doc_icon_ext {
-    color: #9333ea;
-    background: #faf5ff;
-    border-color: #d8b4fe;
-}
-
-.o_prd_icon_ppt {
-    background: #fff7ed;
-    border: 1.5px solid #fed7aa;
-    color: #ea580c;
-}
-
-.o_prd_icon_ppt .o_prd_doc_icon_ext {
-    color: #ea580c;
-    background: #fff7ed;
-    border-color: #fdba74;
-}
-
-.o_prd_icon_zip {
-    background: #fffbeb;
-    border: 1.5px solid #fde68a;
-    color: #d97706;
-}
-
-.o_prd_icon_zip .o_prd_doc_icon_ext {
-    color: #d97706;
-    background: #fffbeb;
-    border-color: #fcd34d;
-}
-
-.o_prd_icon_txt {
-    background: #f8fafc;
-    border: 1.5px solid #cbd5e1;
-    color: #64748b;
-}
-
-.o_prd_icon_txt .o_prd_doc_icon_ext {
-    color: #64748b;
-    background: #f8fafc;
-    border-color: #94a3b8;
-}
-
-.o_prd_icon_other {
-    background: #f1f5f9;
-    border: 1.5px solid #e2e8f0;
-    color: #94a3b8;
-}
-
-.o_prd_icon_other .o_prd_doc_icon_ext {
-    color: #94a3b8;
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-}
+.o_prd_icon_other { background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #94a3b8; }
+.o_prd_icon_other .o_prd_doc_icon_ext { color: #94a3b8; background: #f1f5f9; border-color: #cbd5e1; }
 
 /* ── Card header (icon + name + badge) ──────────────────────── */
 .o_prd_card_header {
@@ -373,7 +298,7 @@
     color: inherit;
 }
 
-/* ── Meta rows (uploader / date) ─────────────────────────────── */
+/* ── Meta rows ─────────────────────────────────────────────── */
 .o_prd_card_meta {
     display: flex;
     flex-direction: column;
@@ -407,14 +332,14 @@
     margin: 0 2px;
 }
 
-/* ── Kanban divider ──────────────────────────────────────────── */
+/* ── Kanban divider ─────────────────────────────────────────── */
 .o_prd_kanban_divider {
     border: none;
     border-top: 1px solid #f1f5f9;
     margin: 10px 0;
 }
 
-/* ── Footer — preview / no file ─────────────────────────────── */
+/* ── Footer ─────────────────────────────────────────────────── */
 .o_prd_card_footer {
     margin-top: 2px;
 }
@@ -485,220 +410,70 @@
    RESPONSIVE BREAKPOINTS
 ═══════════════════════════════════════════════════════════════ */
 
-/* ── Tablet portrait & below (≤ 767px) ────────────────────────── */
 @media (max-width: 767px) {
-
-    .o_prd_banner {
-        padding: 10px 12px;
-        font-size: 12.5px;
-        gap: 8px;
-    }
-
-    .o_prd_ref_block {
-        max-width: 100%;
-        padding: 9px 14px;
-        gap: 10px;
-    }
-
-    .o_prd_ref_icon {
-        width: 32px;
-        height: 32px;
-        font-size: 13px;
-    }
-
-    .o_prd_ref_value {
-        font-size: 15px;
-    }
-
+    .o_prd_banner           { padding: 10px 12px; font-size: 12.5px; gap: 8px; }
+    .o_prd_ref_block        { max-width: 100%; padding: 9px 14px; gap: 10px; }
+    .o_prd_ref_icon         { width: 32px; height: 32px; font-size: 13px; }
+    .o_prd_ref_value        { font-size: 15px; }
     .o_prd_info_card,
-    .o_prd_file_card {
-        padding: 12px 12px;
-    }
-
-    .o_prd_doc_icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        font-size: 18px;
-    }
-
-    .o_prd_card_name {
-        font-size: 13px;
-    }
-
-    .o_prd_card_header {
-        gap: 9px;
-        margin-bottom: 8px;
-    }
-
+    .o_prd_file_card        { padding: 12px 12px; }
+    .o_prd_doc_icon         { width: 40px; height: 40px; border-radius: 10px; font-size: 18px; }
+    .o_prd_card_name        { font-size: 13px; }
+    .o_prd_card_header      { gap: 9px; margin-bottom: 8px; }
     .o_prd_preview_btn,
-    .o_prd_nofile_btn {
-        min-height: 44px;
-        font-size: 13px;
-    }
-
-    .o_prd_kanban_view .o_kanban_renderer {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+    .o_prd_nofile_btn       { min-height: 44px; font-size: 13px; }
+    .o_prd_kanban_view .o_kanban_renderer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 
-/* ── Mobile phone (≤ 575px) ───────────────────────────────────── */
 @media (max-width: 575px) {
-
-    .o_prd_banner {
-        padding: 10px 11px;
-        gap: 8px;
-        font-size: 12px;
-        border-radius: 5px;
-    }
-
-    .o_prd_ref_block {
-        padding: 8px 12px;
-        gap: 9px;
-        border-radius: 8px;
-    }
-
-    .o_prd_ref_icon {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
-    }
-
-    .o_prd_ref_label {
-        font-size: 9px;
-    }
-
-    .o_prd_ref_value {
-        font-size: 14px;
-    }
-
-    .o_prd_divider {
-        margin: 10px 0 13px;
-    }
-
+    .o_prd_banner           { padding: 10px 11px; gap: 8px; font-size: 12px; border-radius: 5px; }
+    .o_prd_ref_block        { padding: 8px 12px; gap: 9px; border-radius: 8px; }
+    .o_prd_ref_icon         { width: 30px; height: 30px; font-size: 12px; }
+    .o_prd_ref_label        { font-size: 9px; }
+    .o_prd_ref_value        { font-size: 14px; }
+    .o_prd_divider          { margin: 10px 0 13px; }
     .o_prd_info_card,
-    .o_prd_file_card {
-        padding: 10px 11px;
-        border-radius: 7px;
-    }
-
-    .o_prd_section_label {
-        font-size: 10px;
-        margin-bottom: 6px;
-    }
-
-    .o_prd_doc_icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 9px;
-        font-size: 16px;
-    }
-
-    .o_prd_doc_icon_ext {
-        font-size: 6px;
-    }
-
-    .o_prd_card_name {
-        font-size: 13px;
-        -webkit-line-clamp: 3;
-    }
-
-    .o_prd_card_meta_row {
-        font-size: 11px;
-    }
-
-    .o_prd_card_title {
-        gap: 4px;
-    }
-
+    .o_prd_file_card        { padding: 10px 11px; border-radius: 7px; }
+    .o_prd_section_label    { font-size: 10px; margin-bottom: 6px; }
+    .o_prd_doc_icon         { width: 36px; height: 36px; border-radius: 9px; font-size: 16px; }
+    .o_prd_doc_icon_ext     { font-size: 6px; }
+    .o_prd_card_name        { font-size: 13px; -webkit-line-clamp: 3; }
+    .o_prd_card_meta_row    { font-size: 11px; }
+    .o_prd_card_title       { gap: 4px; }
     .o_prd_preview_btn,
-    .o_prd_nofile_btn {
-        min-height: 46px;
-        border-radius: 7px;
-    }
-
-    .o_prd_kanban_view .o_kanban_record {
-        border-radius: 10px;
-    }
-
-    .o_prd_kanban_view .o_kanban_group {
-        min-width: 0;
-        width: 100%;
-    }
+    .o_prd_nofile_btn       { min-height: 46px; border-radius: 7px; }
+    .o_prd_kanban_view .o_kanban_record { border-radius: 10px; }
+    .o_prd_kanban_view .o_kanban_group  { min-width: 0; width: 100%; }
 }
 
-/* ── Tablet landscape (768px–991px) ──────────────────────────── */
 @media (min-width: 768px) and (max-width: 991px) {
-    .o_prd_ref_block {
-        max-width: 480px;
-    }
-
-    .o_prd_ref_value {
-        font-size: 17px;
-    }
-
-    .o_prd_doc_icon {
-        width: 44px;
-        height: 44px;
-        font-size: 20px;
-    }
-
-    .o_prd_card_name {
-        font-size: 13.5px;
-    }
+    .o_prd_ref_block { max-width: 480px; }
+    .o_prd_ref_value { font-size: 17px; }
+    .o_prd_doc_icon  { width: 44px; height: 44px; font-size: 20px; }
+    .o_prd_card_name { font-size: 13.5px; }
 }
 
-/* ── Large desktop (≥ 1280px) ────────────────────────────────── */
 @media (min-width: 1280px) {
-    .o_prd_ref_block {
-        max-width: 620px;
-    }
-
-    .o_prd_ref_value {
-        font-size: 20px;
-    }
-
-    .o_prd_doc_icon {
-        width: 52px;
-        height: 52px;
-        font-size: 24px;
-    }
+    .o_prd_ref_block { max-width: 620px; }
+    .o_prd_ref_value { font-size: 20px; }
+    .o_prd_doc_icon  { width: 52px; height: 52px; font-size: 24px; }
 }
 
-/* ── Touch devices — active state feedback ───────────────────── */
 @media (hover: none) and (pointer: coarse) {
     .o_prd_preview_btn:active {
         background: #dcfce7;
         border-color: #86efac;
         color: #15803d;
     }
-
     .o_prd_kanban_view .o_kanban_record:active {
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
     }
 }
 
-/* ── Odoo's own mobile form class ────────────────────────────── */
-.o_form_mobile .o_prd_ref_block {
-    max-width: 100%;
-    padding: 8px 12px;
-}
-
-.o_form_mobile .o_prd_ref_value {
-    font-size: 14px;
-}
-
+.o_form_mobile .o_prd_ref_block   { max-width: 100%; padding: 8px 12px; }
+.o_form_mobile .o_prd_ref_value   { font-size: 14px; }
 .o_form_mobile .o_prd_info_card,
-.o_form_mobile .o_prd_file_card {
-    padding: 10px 11px;
-}
+.o_form_mobile .o_prd_file_card   { padding: 10px 11px; }
+.o_form_mobile .o_prd_divider     { margin: 9px 0 12px; }
 
-.o_form_mobile .o_prd_divider {
-    margin: 9px 0 12px;
-}
-
-/* ── Odoo mobile kanban ──────────────────────────────────────── */
-.o_is_mobile .o_prd_kanban_view .o_kanban_record {
-    margin-bottom: 8px;
-}
+.o_is_mobile .o_prd_kanban_view .o_kanban_record { margin-bottom: 8px; }

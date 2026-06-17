@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_project_document_manager,project.document.manager,model_project_document,project.group_project_manager,1,1,1,1
 access_project_document_user,project.document.user,model_project_document,project.group_project_user,1,1,1,1
+access_project_case_study_manager,project.case.study.manager,model_project_case_study,project.group_project_manager,1,1,1,1
+access_project_case_study_user,project.case.study.user,model_project_case_study,project.group_project_user,1,1,1,1
