@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ================================================================
+       FORM VIEW
+       ================================================================ -->
+  <record id="view_project_case_study_form" model="ir.ui.view">
+    <field name="name">project.case.study.form</field>
+    <field name="model">project.case.study</field>
+    <field name="arch" type="xml">
+      <form string="Case Study">
+
+        <!-- Banners -->
+        <div class="o_pcs_banner o_pcs_banner_pending" invisible="file">
+          <i class="fa fa-lightbulb-o" title="Draft"/>
+          <div><strong>No supporting file yet</strong> — attach a PDF or document below to complete this record.</div>
+        </div>
+        <div class="o_pcs_banner o_pcs_banner_success" invisible="not file">
+          <i class="fa fa-check-circle" title="File Attached"/>
+          <div><strong>Supporting file attached</strong> — use the Preview link below to open it in your browser.</div>
+        </div>
+
+        <sheet>
+          <!-- can_write drives all readonly/invisible decisions below -->
+          <field name="can_write" invisible="1"/>
+
+          <!-- Title block -->
+          <div class="oe_title">
+            <div class="o_pcs_ref_block">
+              <div class="o_pcs_ref_icon">
+                <i class="fa fa-book" title="Case Study"/>
+              </div>
+              <div class="o_pcs_ref_text_group">
+                <div class="o_pcs_ref_label">Case Study Title</div>
+                <div class="o_pcs_ref_value">
+                  <field name="name" nolabel="1" readonly="not can_write"
+                         placeholder="e.g. Q3 Client Onboarding, Infrastructure Migration"/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Details card -->
+          <div class="o_pcs_section_label">
+            <i class="fa fa-info-circle" title="Details"/> Study Details
+          </div>
+          <div class="o_pcs_info_card">
+            <group>
+              <group>
+                <field name="project_id" readonly="1"/>
+                <field name="case_study_type" readonly="not can_write"/>
+              </group>
+              <group>
+                <field name="upload_date" readonly="1" string="Recorded On"/>
+                <field name="uploaded_by" readonly="1" string="Recorded By"/>
+              </group>
+            </group>
+          </div>
+
+          <div class="o_pcs_divider"/>
+
+          <!-- Narrative sections -->
+          <div class="o_pcs_section_label">
+            <i class="fa fa-align-left" title="Narrative"/> Narrative
+          </div>
+          <div class="o_pcs_narrative_card">
+            <group>
+              <field name="summary" readonly="not can_write"
+                     placeholder="Write a 2–4 sentence executive summary of this case study..."
+                     string="Executive Summary"/>
+            </group>
+            <div class="o_pcs_narrative_divider"/>
+            <div class="o_pcs_narrative_columns">
+              <div class="o_pcs_narrative_col">
+                <div class="o_pcs_narrative_col_label">
+                  <i class="fa fa-exclamation-circle" title="Challenge"/>
+                  Challenge / Problem
+                </div>
+                <field name="challenge" nolabel="1" readonly="not can_write"
+                       placeholder="What problem or challenge needed to be addressed?"/>
+              </div>
+              <div class="o_pcs_narrative_col">
+                <div class="o_pcs_narrative_col_label">
+                  <i class="fa fa-cogs" title="Solution"/>
+                  Solution / Approach
+                </div>
+                <field name="solution" nolabel="1" readonly="not can_write"
+                       placeholder="How was the challenge tackled? Methods, tools, processes…"/>
+              </div>
+              <div class="o_pcs_narrative_col">
+                <div class="o_pcs_narrative_col_label">
+                  <i class="fa fa-bar-chart" title="Outcome"/>
+                  Outcome / Results
+                </div>
+                <field name="outcome" nolabel="1" readonly="not can_write"
+                       placeholder="Key results, metrics, or conclusions…"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="o_pcs_divider"/>
+
+          <!-- Supporting file -->
+          <div class="o_pcs_section_label">
+            <i class="fa fa-paperclip" title="File"/> Supporting File
+          </div>
+          <div class="o_pcs_file_card">
+            <group>
+              <field name="file" filename="filename" string="Attach File" widget="binary" readonly="not can_write"/>
+              <field name="filename" invisible="1"/>
+              <!--
+                FIX: same as document form — field inside <span> inside group caused
+                     a <label for="X"> with no matching element id.
+              -->
+              <field name="file_type" nolabel="1" readonly="1"
+                     invisible="not file_type or file_type == '—'"
+                     class="o_pcs_filetype_field"/>
+              <field name="file_url" string="Preview in Browser" widget="url"
+                     text="Click to Preview" invisible="not file_url" readonly="1"/>
+            </group>
+          </div>
+
+          <div class="o_pcs_divider"/>
+
+          <!-- Notes — FIX: removed string="" to avoid empty <label for="X"> -->
+          <div class="o_pcs_section_label">
+            <i class="fa fa-sticky-note-o" title="Notes"/> Notes
+          </div>
+          <group>
+            <field name="notes" nolabel="1" readonly="not can_write"
+                   placeholder="Optional references, links, or remarks..."/>
+          </group>
+
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+
+  <!-- ================================================================
+       LIST VIEW
+       ================================================================ -->
+  <record id="view_project_case_study_list" model="ir.ui.view">
+    <field name="name">project.case.study.list</field>
+    <field name="model">project.case.study</field>
+    <field name="arch" type="xml">
+      <list string="Case Studies" create="0" delete="0"
+            decoration-success="case_study_type in ('client_success', 'business')"
+            decoration-info="case_study_type in ('technical', 'process_improvement')"
+            decoration-warning="case_study_type in ('risk_analysis', 'post_mortem')">
+
+        <field name="name" string="Title"/>
+        <field name="case_study_type" string="Type" widget="badge"
+               decoration-success="case_study_type in ('client_success', 'business')"
+               decoration-info="case_study_type in ('technical', 'process_improvement')"
+               decoration-warning="case_study_type in ('risk_analysis', 'post_mortem')"/>
+        <field name="summary"        string="Summary"         optional="show"/>
+        <field name="project_id"     string="Project"         optional="show"/>
+        <field name="file_type"      string="File Type"       readonly="1" optional="show"/>
+        <field name="file" filename="filename" string="File"
+               widget="binary"                                optional="show"/>
+        <field name="filename"       string="File Name"       readonly="1" optional="hide"/>
+        <field name="file_url"       string="Preview"         widget="url"
+               text="Preview" invisible="not file_url" readonly="1" optional="show"/>
+        <field name="upload_date"    string="Recorded On"     readonly="1" optional="show"/>
+        <field name="uploaded_by"    string="Recorded By"     readonly="1" optional="hide"/>
+        <field name="notes"          string="Notes"                        optional="hide"/>
+
+      </list>
+    </field>
+  </record>
+
+
+  <!-- ================================================================
+       KANBAN VIEW
+       ================================================================ -->
+  <record id="view_project_case_study_kanban" model="ir.ui.view">
+    <field name="name">project.case.study.kanban</field>
+    <field name="model">project.case.study</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="case_study_type" quick_create="false"
+              class="o_pcs_kanban_view">
+
+        <field name="name"/>
+        <field name="case_study_type"/>
+        <field name="summary"/>
+        <field name="file_type"/>
+        <field name="project_id"/>
+        <field name="upload_date"/>
+        <field name="uploaded_by"/>
+        <field name="file_url"/>
+        <field name="filename"/>
+
+        <templates>
+          <t t-name="card">
+
+            <!-- ── Header: type badge + title ── -->
+            <div class="o_pcs_card_header">
+
+              <!-- Coloured icon keyed on case study type -->
+              <t t-set="ct" t-value="record.case_study_type.raw_value || ''"/>
+              <div t-attf-class="o_pcs_type_icon #{
+                  ct == 'technical'           ? 'o_pcs_icon_technical'    :
+                  ct == 'business'            ? 'o_pcs_icon_business'     :
+                  ct == 'client_success'      ? 'o_pcs_icon_client'       :
+                  ct == 'process_improvement' ? 'o_pcs_icon_process'      :
+                  ct == 'risk_analysis'       ? 'o_pcs_icon_risk'         :
+                  ct == 'post_mortem'         ? 'o_pcs_icon_postmortem'   :
+                  'o_pcs_icon_other'
+              }">
+                <i t-attf-class="fa #{
+                    ct == 'technical'           ? 'fa-code'            :
+                    ct == 'business'            ? 'fa-line-chart'      :
+                    ct == 'client_success'      ? 'fa-trophy'          :
+                    ct == 'process_improvement' ? 'fa-cogs'            :
+                    ct == 'risk_analysis'       ? 'fa-shield'          :
+                    ct == 'post_mortem'         ? 'fa-flag-checkered'  :
+                    'fa-book'
+                }" t-att-title="record.case_study_type.value || 'Case Study'"/>
+              </div>
+
+              <div class="o_pcs_card_title">
+                <div class="o_pcs_card_name">
+                  <field name="name"/>
+                </div>
+                <field name="case_study_type" widget="badge"
+                       decoration-success="case_study_type in ('client_success', 'business')"
+                       decoration-info="case_study_type in ('technical', 'process_improvement')"
+                       decoration-warning="case_study_type in ('risk_analysis', 'post_mortem')"/>
+              </div>
+            </div>
+
+            <div class="o_pcs_kanban_divider"/>
+
+            <!-- ── Summary excerpt ───────────────────────── -->
+            <t t-if="record.summary.raw_value">
+              <div class="o_pcs_card_summary">
+                <field name="summary"/>
+              </div>
+              <div class="o_pcs_kanban_divider"/>
+            </t>
+
+            <!-- ── Meta: project + date ──────────────────── -->
+            <div class="o_pcs_card_meta">
+              <div class="o_pcs_card_meta_row">
+                <i class="fa fa-briefcase" title="Project"/>
+                <field name="project_id"/>
+              </div>
+              <div class="o_pcs_card_meta_row">
+                <i class="fa fa-calendar-o" title="Recorded On"/>
+                <field name="upload_date"/>
+                <t t-if="record.uploaded_by.raw_value">
+                  <span class="o_pcs_card_meta_sep">·</span>
+                  <field name="uploaded_by"/>
+                </t>
+              </div>
+            </div>
+
+            <div class="o_pcs_kanban_divider"/>
+
+            <!-- ── Footer: file preview or no-file ──────── -->
+            <div class="o_pcs_card_footer">
+              <t t-if="record.file_url.raw_value">
+                <a class="o_pcs_preview_btn"
+                   role="button"
+                   t-att-href="record.file_url.raw_value"
+                   target="_blank"
+                   onclick="event.stopPropagation()">
+                  <i class="fa fa-eye" title="Preview"/>
+                  Preview File
+                </a>
+              </t>
+              <t t-else="">
+                <div class="o_pcs_nofile_btn">
+                  <i class="fa fa-cloud-upload" title="No File"/>
+                  No file attached
+                </div>
+              </t>
+            </div>
+
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+
+  <!-- ================================================================
+       ACTION
+       ================================================================ -->
+  <record id="action_project_case_study" model="ir.actions.act_window">
+    <field name="name">Project Case Studies</field>
+    <field name="res_model">project.case.study</field>
+    <field name="view_mode">kanban,list,form</field>
+    <field name="context">{'default_project_id': active_id}</field>
+  </record>
+
+</odoo>
