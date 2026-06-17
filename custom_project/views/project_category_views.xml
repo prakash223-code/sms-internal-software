@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Form view ══════════════════════════════════════════════════════ -->
+    <record id="view_project_category_form" model="ir.ui.view">
+        <field name="name">project.category.form</field>
+        <field name="model">project.category</field>
+        <field name="arch" type="xml">
+            <form string="Project Category">
+                <sheet>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_projects"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-folder-open"
+                                invisible="project_count == 0">
+                            <field name="project_count"
+                                   widget="statinfo"
+                                   string="Projects"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name" string="Category Name"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="e.g. E-commerce Website, ERP Implementation"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Summary">
+                            <field name="avg_hours"
+                                   string="Avg Hours (Completed Projects)"
+                                   readonly="1"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Description">
+                            <field name="description"
+                                   nolabel="1"
+                                   placeholder="Describe what type of projects fall under this category…"
+                                   colspan="2"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ List view ══════════════════════════════════════════════════════ -->
+    <record id="view_project_category_list" model="ir.ui.view">
+        <field name="name">project.category.list</field>
+        <field name="model">project.category</field>
+        <field name="arch" type="xml">
+            <list string="Project Categories"
+                  editable="bottom"
+                  decoration-muted="not active">
+                <field name="name"         string="Category Name"/>
+                <field name="project_count" string="Projects"   readonly="1"/>
+                <field name="avg_hours"     string="Avg Hours"  readonly="1"/>
+                <field name="active"        column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Window action ══════════════════════════════════════════════════ -->
+    <record id="action_project_category" model="ir.actions.act_window">
+        <field name="name">Project Categories</field>
+        <field name="res_model">project.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No project categories yet.
+            </p>
+            <p>
+                Create categories (e.g. "E-commerce", "ERP Implementation") to
+                group similar projects together. When creating a new project,
+                pick a category to see the historical average delivery hours
+                from past similar projects.
+            </p>
+        </field>
+    </record>
+
+</odoo>
