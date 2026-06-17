@@ -19,7 +19,8 @@
                      invisible="state != 'draft'">
                     <i class="fa fa-pencil-square-o" title="Draft"/>
                     <div>
-                        <strong>Draft</strong> — Payslip has not been confirmed yet.
+                        <strong>Draft</strong>
+                        — Payslip has not been confirmed yet.
                         Click <em>Compute Sheet</em> to calculate salary lines and
                         inject the attendance deduction.
                     </div>
@@ -29,7 +30,8 @@
                      invisible="state != 'verify'">
                     <i class="fa fa-clock-o" title="Waiting"/>
                     <div>
-                        <strong>Waiting for Approval</strong> — Salary lines have been
+                        <strong>Waiting for Approval</strong>
+                        — Salary lines have been
                         computed. Review and confirm to finalise.
                     </div>
                 </div>
@@ -38,7 +40,8 @@
                      invisible="state != 'done'">
                     <i class="fa fa-check-circle" title="Done"/>
                     <div>
-                        <strong>Confirmed</strong> — Payslip is locked and salary
+                        <strong>Confirmed</strong>
+                        — Payslip is locked and salary
                         lines are finalised.
                     </div>
                 </div>
@@ -47,13 +50,24 @@
                      invisible="state != 'cancel'">
                     <i class="fa fa-times-circle" title="Cancelled"/>
                     <div>
-                        <strong>Cancelled</strong> — This payslip has been cancelled
+                        <strong>Cancelled</strong>
+                        — This payslip has been cancelled
                         and is no longer valid.
                     </div>
                 </div>
 
             </xpath>
 
+            <xpath expr="//div[./field[@name='date_from']]" position="replace">
+                <div class="o_row">
+                    <field name="slip_month" class="oe_inline" readonly="state != 'draft'"/>
+                    <field name="slip_year" class="oe_inline" readonly="state != 'draft'"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//label[@for='date_from']" position="attributes">
+                <attribute name="for">slip_month</attribute>
+            </xpath>
             <!-- ── 2. Attendance Bridge section (before the salary notebook) ───
                  NOTE: bi_hr_payroll's payslip form uses a <notebook> for salary
                  computation / input lines. This xpath injects a full-width styled

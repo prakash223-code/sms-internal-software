@@ -2,12 +2,51 @@
 
 from odoo import models, fields, api
 import logging
+import calendar
+from datetime import date
 
 _logger = logging.getLogger(__name__)
 
 
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
+    slip_month = fields.Selection(
+        selection=[
+            ('1', 'January'), ('2', 'February'), ('3', 'March'),
+            ('4', 'April'), ('5', 'May'), ('6', 'June'),
+            ('7', 'July'), ('8', 'August'), ('9', 'September'),
+            ('10', 'October'), ('11', 'November'), ('12', 'December'),
+        ],
+        string='Month',
+        compute='_compute_slip_period',
+        inverse='_inverse_slip_period',
+        store=True,
+    )
+    slip_year = fields.Integer(
+        string='Year',
+        compute='_compute_slip_period',
+        inverse='_inverse_slip_period',
+        store=True,
+    )
+
+    @api.depends('date_from')
+    def _compute_slip_period(self):
+        for slip in self:
+            if slip.date_from:
+                slip.slip_month = str(slip.date_from.month)
+                slip.slip_year = slip.date_from.year
+            else:
+                slip.slip_month = False
+                slip.slip_year = False
+
+    def _inverse_slip_period(self):
+        for slip in self:
+            if slip.slip_month and slip.slip_year:
+                month = int(slip.slip_month)
+                year = slip.slip_year
+                last_day = calendar.monthrange(year, month)[1]
+                slip.date_from = date(year, month, 1)
+                slip.date_to = date(year, month, last_day)
 
     attendance_summary_id = fields.Many2one(
         'attendance.monthly.summary',
