@@ -49,7 +49,7 @@
                     <button name="action_compute"
                             string="Compute / Recompute"
                             type="object" class="btn-primary"
-                            invisible="state == 'confirmed'"
+                            invisible="state == 'confirmed' or not id"
                             confirm="This will overwrite current values. Proceed?"/>
                     <button name="action_confirm"
                             string="Confirm and Lock"
@@ -66,24 +66,23 @@
                 <sheet>
 
                     <!-- ── Employee header ── -->
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                    <group invisible="id != False" string="New Summary">
+                        <field name="employee_id" required="1"/>
+                        <field name="month" required="1"/>
+                        <field name="year" required="1"/>
+                    </group>
+                    <div invisible="not id" class="d-flex align-items-center gap-3 mb-3">
                         <div class="o_att_avatar_circle o_att_avatar_lg">
                             <i class="fa fa-user" title="Employee"/>
                         </div>
                         <div class="flex-grow-1">
                             <div class="o_att_emp_name">
-                                <field name="employee_id"
-                                       readonly="id != False"
-                                       nolabel="1"/>
+                                <field name="employee_id" readonly="1" nolabel="1"/>
                             </div>
                             <div class="o_att_period_sub">
-                                <field name="month"
-                                       readonly="id != False"
-                                       nolabel="1"/>
+                                <field name="month" readonly="1" nolabel="1"/>
                                 —
-                                <field name="year"
-                                       readonly="id != False"
-                                       nolabel="1"/>
+                                <field name="year" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                         <div>
@@ -102,7 +101,8 @@
                     <div class="o_att_stats_row">
                         <div class="o_att_stat_card o_att_card_neutral">
                             <span class="o_att_stat_label">
-                                <i class="fa fa-calendar" title="Working days"/> Working Days
+                                <i class="fa fa-calendar" title="Working days"/>
+                                Working Days
                             </span>
                             <div class="o_att_stat_value">
                                 <field name="working_days" readonly="1" nolabel="1"/>
@@ -110,7 +110,8 @@
                         </div>
                         <div class="o_att_stat_card o_att_card_green">
                             <span class="o_att_stat_label">
-                                <i class="fa fa-check-circle" title="Present"/> Present
+                                <i class="fa fa-check-circle" title="Present"/>
+                                Present
                             </span>
                             <div class="o_att_stat_value">
                                 <field name="present_days" readonly="1" nolabel="1"/>
@@ -118,7 +119,8 @@
                         </div>
                         <div class="o_att_stat_card o_att_card_amber">
                             <span class="o_att_stat_label">
-                                <i class="fa fa-clock-o" title="Late entries"/> Late Entries
+                                <i class="fa fa-clock-o" title="Late entries"/>
+                                Late Entries
                             </span>
                             <div class="o_att_stat_value">
                                 <field name="late_days" readonly="1" nolabel="1"/>
@@ -130,7 +132,8 @@
                     <div class="o_att_stats_row">
                         <div class="o_att_stat_card o_att_card_blue">
                             <span class="o_att_stat_label">
-                                <i class="fa fa-umbrella" title="Approved leave"/> Approved Leave
+                                <i class="fa fa-umbrella" title="Approved leave"/>
+                                Approved Leave
                             </span>
                             <div class="o_att_stat_value">
                                 <field name="leave_days" readonly="1" nolabel="1"/>
@@ -138,7 +141,8 @@
                         </div>
                         <div class="o_att_stat_card o_att_card_orange">
                             <span class="o_att_stat_label">
-                                <i class="fa fa-minus-circle" title="Unpaid leave"/> Unpaid Leave
+                                <i class="fa fa-minus-circle" title="Unpaid leave"/>
+                                Unpaid Leave
                             </span>
                             <div class="o_att_stat_value">
                                 <field name="unpaid_leave_days" readonly="1" nolabel="1"/>
@@ -146,7 +150,8 @@
                         </div>
                         <div class="o_att_stat_card o_att_card_red">
                             <span class="o_att_stat_label">
-                                <i class="fa fa-times-circle" title="Absent"/> Absent
+                                <i class="fa fa-times-circle" title="Absent"/>
+                                Absent
                             </span>
                             <div class="o_att_stat_value">
                                 <field name="absent_days" readonly="1" nolabel="1"/>
@@ -159,7 +164,8 @@
 
                     <div class="o_att_payroll_card">
                         <span class="o_att_payroll_label">
-                            <i class="fa fa-exclamation-circle" title="Deduction"/> Total Unpaid Deduction Days
+                            <i class="fa fa-exclamation-circle" title="Deduction"/>
+                            Total Unpaid Deduction Days
                         </span>
                         <div class="o_att_payroll_value">
                             <field name="unpaid_absent_days" readonly="1" nolabel="1"/>

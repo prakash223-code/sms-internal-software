@@ -37,8 +37,9 @@ class AttendanceMonthlySummary(models.Model):
     )
 
     year = fields.Integer(
-        string='Year',
+        string="Year",
         required=True,
+        default=lambda self: fields.Date.today().year,
     )
 
     working_days = fields.Integer(
@@ -163,7 +164,15 @@ class AttendanceMonthlySummary(models.Model):
     def _compute_summary(self):
         self.ensure_one()
 
-        year  = self.year
+        # --- Guards ---
+        if not self.year or not self.month:
+            raise UserError(_('Please set Employee, Month, and Year before computing.'))
+        if self.year < 2020 or self.year > 2100:
+            raise UserError(_('Year %s is out of valid range (2020–2100).') % self.year)
+        if not self.employee_id:
+            raise UserError(_('Please set an Employee before computing.'))
+
+        year = self.year
         month = int(self.month)
         employee = self.employee_id
 
@@ -173,7 +182,7 @@ class AttendanceMonthlySummary(models.Model):
         except pytz.UnknownTimeZoneError:
             tz = pytz.timezone('Asia/Kolkata')
 
-        # --- 1. Working days (Mon–Fri + 1st/3rd/5th Saturdays, minus holidays) ---
+        # --- 1. Working days ---
         working_day_dates = self._get_working_day_dates(year, month)
         working_days_count = len(working_day_dates)
 
@@ -190,21 +199,21 @@ class AttendanceMonthlySummary(models.Model):
 
         # --- 5. Absent days ---
         effective_present = present_date_set & working_day_dates
-        effective_leave   = leave_date_set   & working_day_dates
-        covered_days      = effective_present | effective_leave
-        absent_date_set   = working_day_dates - covered_days
+        effective_leave = leave_date_set & working_day_dates
+        covered_days = effective_present | effective_leave
+        absent_date_set = working_day_dates - covered_days
         absent_days_count = len(absent_date_set)
 
         # --- 6. Unpaid absent (for payroll deduction) ---
         unpaid_absent_days_count = absent_days_count + unpaid_leave_days_count
 
         self.write({
-            'working_days':      working_days_count,
-            'present_days':      len(effective_present),
-            'late_days':         late_days_count,
-            'leave_days':        leave_days_count,
+            'working_days': working_days_count,
+            'present_days': len(effective_present),
+            'late_days': late_days_count,
+            'leave_days': leave_days_count,
             'unpaid_leave_days': unpaid_leave_days_count,
-            'absent_days':       absent_days_count,
+            'absent_days': absent_days_count,
             'unpaid_absent_days': unpaid_absent_days_count,
         })
 
