@@ -19,10 +19,11 @@ _logger = logging.getLogger(__name__)
 #
 _ROLE_GROUPS = {
     'employee': [
-        'base.group_user',                                # internal user login
-        'hr_attendance.group_hr_attendance_officer',      # check in / check out
-        'project.group_project_user',                     # view assigned tasks
-        'custom_work_report.group_work_report_employee',  # submit daily work reports
+        'base.group_user',  # internal user login
+        'hr_attendance.group_hr_attendance_officer',  # check in / check out
+        'project.group_project_user',  # view assigned tasks
+        'custom_work_report.group_work_report_employee'  # submit daily work reports
+        'hr_timesheet.group_hr_timesheet_user',
     ],
     'hr': [
         # ── Base ──────────────────────────────────────────────────────────────
@@ -31,19 +32,20 @@ _ROLE_GROUPS = {
         'project.group_project_user',
         'custom_work_report.group_work_report_employee',
         # ── Work report ───────────────────────────────────────────────────────
-        'custom_work_report.group_work_report_hr',        # review all work reports
+        'custom_work_report.group_work_report_hr',  # review all work reports
         # ── HR management ─────────────────────────────────────────────────────
-        'hr.group_hr_user',                               # manage employees
-        'hr.group_hr_manager',                            # create/manage contracts
-        'hr_attendance.group_hr_attendance_user',         # manage all attendance
+        'hr.group_hr_user',  # manage employees
+        'hr.group_hr_manager',  # create/manage contracts
+        'hr_attendance.group_hr_attendance_user',  # manage all attendance
         # ── Leave ─────────────────────────────────────────────────────────────
-        'hr_holidays.group_hr_holidays_manager',          # approve / reject leave
+        'hr_holidays.group_hr_holidays_manager',  # approve / reject leave
         # ── Payroll (admin level) ─────────────────────────────────────────────
-        'bi_hr_payroll.group_hr_payroll_manager',         # generate payslips for all
+        'bi_hr_payroll.group_hr_payroll_manager',  # generate payslips for all
         # ── Project (needed to create projects from won leads) ───────────────────
-        'project.group_project_manager',                  # create / manage projects
+        'project.group_project_manager',  # create / manage projects
         # ── CRM (query to project conversion) ─────────────────────────────────
-        'sales_team.group_sale_salesman_all_leads',       # view all leads/opportunities
+        'sales_team.group_sale_salesman_all_leads',  # view all leads/opportunities
+        'hr_timesheet.group_hr_timesheet_approver',  # ← all timesheets
     ],
     'manager': [
         # ── Base ──────────────────────────────────────────────────────────────
@@ -53,21 +55,22 @@ _ROLE_GROUPS = {
         'custom_work_report.group_work_report_employee',
         # ── Work report ───────────────────────────────────────────────────────
         'custom_work_report.group_work_report_hr',
-        'custom_work_report.group_work_report_manager',   # full work report control
+        'custom_work_report.group_work_report_manager',  # full work report control
         # ── HR management ─────────────────────────────────────────────────────
         'hr.group_hr_user',
         'hr.group_hr_manager',
         'hr_attendance.group_hr_attendance_user',
-        'hr_attendance.group_hr_attendance_manager',      # full attendance control
+        'hr_attendance.group_hr_attendance_manager',  # full attendance control
         # ── Leave ─────────────────────────────────────────────────────────────
         'hr_holidays.group_hr_holidays_manager',
         # ── Payroll ───────────────────────────────────────────────────────────
         'bi_hr_payroll.group_hr_payroll_manager',
         # ── CRM (full control) ────────────────────────────────────────────────
         'sales_team.group_sale_salesman_all_leads',
-        'sales_team.group_sale_manager',                  # CRM administrator
+        'sales_team.group_sale_manager',  # CRM administrator
         # ── Project ───────────────────────────────────────────────────────────
-        'project.group_project_manager',                  # full project visibility
+        'project.group_project_manager',  # full project visibility
+        'hr_timesheet.group_timesheet_manager',
     ],
 }
 
@@ -90,7 +93,22 @@ class HrEmployeeDefaults(models.Model):
 
     # ── Core assignment method ────────────────────────────────────────────────
     def _assign_role_groups(self):
-        """Assign groups to the linked user based on employee_role."""
+        """
+        Assign groups to the linked user based on employee_role.
+        First strips ALL role-managed groups from the user, then applies
+        only the groups for the current role — ensures clean role switching
+        with no leftover permissions from a previous role.
+        """
+        # Resolve every group that appears in ANY role so we know
+        # exactly which ones this module manages.
+        all_managed_ids = set()
+        for xml_ids in _ROLE_GROUPS.values():
+            for xml_id in xml_ids:
+                try:
+                    all_managed_ids.add(self.env.ref(xml_id).id)
+                except Exception:
+                    pass
+
         for employee in self:
             user = employee.user_id
             if not user:
@@ -102,29 +120,38 @@ class HrEmployeeDefaults(models.Model):
             role = employee.employee_role or 'employee'
             xml_ids = _ROLE_GROUPS.get(role, _ROLE_GROUPS['employee'])
 
-            group_ids = []
+            # Resolve target groups for this role
+            target_ids = set()
             skipped = []
             for xml_id in xml_ids:
                 try:
-                    group = self.env.ref(xml_id)
-                    group_ids.append((4, group.id))
+                    target_ids.add(self.env.ref(xml_id).id)
                 except Exception:
                     skipped.append(xml_id)
                     _logger.warning(
                         'Role groups: group not found — %s (skipped)', xml_id
                     )
 
-            if group_ids:
-                user.sudo().write({'group_ids': group_ids})
-                _logger.info(
-                    'Role groups: assigned %d group(s) to user "%s" '
-                    '(employee: "%s", role: %s)',
-                    len(group_ids), user.login, employee.name, role,
-                )
+            # Current groups on user
+            current_ids = set(user.sudo().group_ids.ids)
+
+            # Keep groups we don't manage (system/odoo internal groups)
+            unmanaged_ids = current_ids - all_managed_ids
+
+            # Final set: unmanaged groups + target role groups
+            final_ids = list(unmanaged_ids | target_ids)
+
+            user.sudo().write({'group_ids': [(6, 0, final_ids)]})
+
+            _logger.info(
+                'Role groups: applied role "%s" to user "%s" (employee: "%s") '
+                '— %d group(s) set, %d skipped',
+                role, user.login, employee.name,
+                len(target_ids), len(skipped),
+            )
             if skipped:
                 _logger.warning(
-                    'Role groups: %d group(s) skipped for "%s": %s',
-                    len(skipped), employee.name, skipped,
+                    'Role groups: skipped for "%s": %s', employee.name, skipped
                 )
 
     # ── Backward-compat alias ─────────────────────────────────────────────────
