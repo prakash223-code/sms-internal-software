@@ -22,7 +22,7 @@ _ROLE_GROUPS = {
         'base.group_user',  # internal user login
         'hr_attendance.group_hr_attendance_officer',  # check in / check out
         'project.group_project_user',  # view assigned tasks
-        'custom_work_report.group_work_report_employee'  # submit daily work reports
+        'custom_work_report.group_work_report_employee',  # submit daily work reports
         'hr_timesheet.group_hr_timesheet_user',
     ],
     'hr': [

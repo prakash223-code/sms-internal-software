@@ -27,7 +27,6 @@
             'custom_payroll_bridge/static/src/css/custom_payroll_bridge.css',
         ],
     },
-    'post_migrate': 'custom_payroll_bridge.hooks.post_migrate',
     'installable': True,
     'application': False,
     'auto_install': False,
