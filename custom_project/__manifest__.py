@@ -4,7 +4,7 @@
     'summary': 'Team-based task assignment with cross-team manager approval workflow',
     'author': 'Your Company',
     'license': 'LGPL-3',
-    'depends': ['hr', 'project', 'mail', 'custom_employee_id'],
+    'depends': ['hr', 'project', 'mail', 'custom_employee_id','hr_timesheet', 'analytic'],
     'data': [
         # 1. Security
         'security/security_groups.xml',
@@ -19,6 +19,7 @@
         'views/task_views.xml',
         'views/assignment_request_views.xml',
         'views/hr_employee_views.xml',
+        'views/project_views.xml',
         'views/project_project_views.xml',
         'views/project_stage_views.xml',
         'views/res_users_views.xml',
