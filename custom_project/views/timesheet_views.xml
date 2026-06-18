@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        PURPOSE: Centralized timesheet log for managers and HR.
+          • Reads directly from account.analytic.line
+          • Single place to see all employee timesheet entries across
+            every project, filterable by date/employee/project
+          • Defaults to Today, grouped by Date
+    -->
+
+    <!-- ══ List view ══════════════════════════════════════════════════════ -->
+    <record id="view_timesheet_log_list" model="ir.ui.view">
+        <field name="name">account.analytic.line.timesheet.log.list</field>
+        <field name="model">account.analytic.line</field>
+        <field name="arch" type="xml">
+            <list string="Timesheet Log"
+                  create="0"
+                  delete="0"
+                  decoration-muted="unit_amount == 0">
+                <field name="date"          string="Date"/>
+                <field name="employee_id"   string="Employee"/>
+                <field name="project_id"    string="Project"/>
+                <field name="task_id"       string="Task"          optional="show"/>
+                <field name="name"          string="Description"   optional="show"/>
+                <field name="software_used" string="Software Used" optional="show"/>
+                <field name="unit_amount"   string="Hours"
+                       widget="float_time"
+                       sum="Total Hours"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Search view ════════════════════════════════════════════════════ -->
+    <record id="view_timesheet_log_search" model="ir.ui.view">
+        <field name="name">account.analytic.line.timesheet.log.search</field>
+        <field name="model">account.analytic.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Timesheets">
+
+                <field name="employee_id" string="Employee"/>
+                <field name="project_id"  string="Project"/>
+                <field name="task_id"     string="Task"/>
+
+                <separator/>
+
+                <filter string="Today"
+                        name="today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="This Week"
+                        name="this_week"
+                        domain="[
+                            ('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                            ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+                <filter string="This Month"
+                        name="this_month"
+                        domain="[
+                            ('date', '>=', context_today().strftime('%Y-%m-01')),
+                            ('date', '&lt;=', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+
+                <separator/>
+
+                <filter string="Group by Date"
+                        name="grp_date"
+                        context="{'group_by': 'date'}"/>
+                <filter string="Group by Employee"
+                        name="grp_employee"
+                        context="{'group_by': 'employee_id'}"/>
+                <filter string="Group by Project"
+                        name="grp_project"
+                        context="{'group_by': 'project_id'}"/>
+
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Window action ══════════════════════════════════════════════════ -->
+    <record id="action_timesheet_log" model="ir.actions.act_window">
+        <field name="name">Timesheet Log</field>
+        <field name="res_model">account.analytic.line</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('project_id', '!=', False)]</field>
+        <field name="search_view_id" ref="view_timesheet_log_search"/>
+        <field name="context">{
+            'search_default_today': 1,
+            'search_default_grp_date': 1,
+        }</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_timesheet_log_list')}),
+        ]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No timesheet entries found for today.
+            </p>
+            <p>
+                Entries appear here as employees log time inside their tasks.
+                Use the filters to browse by week, month, employee, or project.
+            </p>
+        </field>
+    </record>
+
+</odoo>
