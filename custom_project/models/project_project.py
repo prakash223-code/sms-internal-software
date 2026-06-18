@@ -1,8 +1,16 @@
-from odoo import api, models
+from odoo import api, fields, models
 
 
 class ProjectProject(models.Model):
     _inherit = 'project.project'
+
+    team_id = fields.Many2one(
+        'team.team',
+        string='Team',
+        tracking=True,
+        help='The team responsible for this project. '
+             'Tasks created under this project will inherit this team.',
+    )
 
     @api.model_create_multi
     def create(self, vals_list):

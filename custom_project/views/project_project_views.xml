@@ -2,19 +2,36 @@
 <odoo>
 
     <!--
-        Add a "Stages" tab to the project settings form.
+        Extend the project settings form with:
+          • team_id field in the Settings tab (or main group)
+          • a "Stages" tab to manage per-project kanban stages
     -->
-    <record id="view_project_form_stages_tab" model="ir.ui.view">
-        <field name="name">project.project.form.stages.tab</field>
+    <record id="view_project_form_team_and_stages" model="ir.ui.view">
+        <field name="name">project.project.form.team.and.stages</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
+
+            <!--
+                Insert team_id just after the project name field.
+                The <h1><field name="name"/></h1> block sits inside
+                oe_title — we target the first <group> that follows it
+                inside <sheet> and prepend our field at the top.
+            -->
+            <xpath expr="//field[@name='user_id']" position="before">
+                <field name="team_id"
+                       widget="many2one"
+                       options="{'no_create_edit': True}"
+                       placeholder="Assign a team…"/>
+            </xpath>
+
+            <!-- Stages tab -->
             <xpath expr="//notebook" position="inside">
                 <page string="Stages" name="task_stages" icon="fa-columns">
 
                     <p class="fst-italic text-muted mb-3">
                         Select which stages are available for tasks in this
-                        project.  To create or rename stages, go to
+                        project. To create or rename stages, go to
                         <strong>Configuration → Project Stages</strong>.
                     </p>
 
@@ -27,6 +44,7 @@
 
                 </page>
             </xpath>
+
         </field>
     </record>
 

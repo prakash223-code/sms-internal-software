@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="project_project_form_timesheet" model="ir.ui.view">
+        <field name="name">project.project.form.timesheet</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+
+                <page string="Timesheets" name="timesheets">
+
+                    <!-- Summary Stats -->
+                    <group>
+                        <group string="Time Summary">
+                            <field name="total_time_spent"
+                                   string="Total Hours Spent"
+                                   widget="float_time"
+                                   readonly="1"/>
+                            <field name="remaining_time"
+                                   string="Remaining Hours"
+                                   widget="float_time"
+                                   readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Timesheet Lines -->
+                    <field name="timesheet_ids" nolabel="1">
+                        <list editable="bottom"
+                              decoration-muted="unit_amount == 0">
+                            <field name="date"
+                                   string="Date"/>
+                            <field name="employee_id"
+                                   string="Employee"/>
+                            <field name="name"
+                                   string="Description"
+                                   optional="show"/>
+                            <field name="task_id"
+                                   string="Task"
+                                   optional="show"/>
+                            <field name="x_software_used"
+                                   string="Software Used"
+                                   optional="show"/>
+                            <field name="unit_amount"
+                                   string="Hours"
+                                   widget="float_time"
+                                   sum="Total Hours"/>
+                        </list>
+                    </field>
+
+                </page>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
