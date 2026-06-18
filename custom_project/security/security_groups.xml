@@ -2,7 +2,6 @@
 <odoo>
     <data>
 
-        <!-- Odoo 19 replacement for category_id -->
         <record id="privilege_team_management" model="res.groups.privilege">
             <field name="name">Team Management</field>
         </record>

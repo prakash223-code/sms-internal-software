@@ -8,6 +8,20 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
 
+            <!-- Read-only banner — shown to employees viewing a task they
+                 did not create (and are not the assignee progressing state) -->
+            <xpath expr="//sheet" position="before">
+                <div class="o_cp_banner o_cp_banner_readonly" invisible="can_edit_task">
+                    <i class="fa fa-lock" title="Read Only"/>
+                    <div>
+                        <strong>Read-only</strong>
+                        — you didn't create this task. Only the
+                        creator, your Team Lead, HR, or a Manager can edit its details.
+                        You can still update its state below if it's assigned to you.
+                    </div>
+                </div>
+            </xpath>
+
             <!-- Smart button for assignment requests -->
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                 <button name="action_view_assignment_requests"
@@ -59,6 +73,14 @@
 
             </xpath>
 
+            <!-- Native description — readonly unless creator/privileged.
+                 (This field is a safe anchor: it's already used elsewhere
+                 in this view for the "position=before" insertion below,
+                 confirming it exists as a unique match.) -->
+            <xpath expr="//field[@name='description']" position="attributes">
+                <attribute name="readonly">not can_edit_task</attribute>
+            </xpath>
+
             <!-- Assignment fields -->
             <xpath expr="//field[@name='description']" position="before">
                 <separator string="Assignment"/>
@@ -72,14 +94,18 @@
                         <field name="assigned_to"
                                widget="many2one_avatar_employee"
                                options="{'no_create_edit': True}"
-                               domain="[('active', '=', True)]"/>
-                        <field name="task_priority" widget="badge"/>
+                               domain="[('active', '=', True)]"
+                               readonly="not can_edit_task"/>
+                        <field name="task_priority"
+                               widget="badge"
+                               readonly="not can_edit_task"/>
                     </group>
                 </group>
 
                 <field name="team_id" invisible="1"/>
                 <field name="assignment_request_count" invisible="1"/>
-                <field name="can_change_state"         invisible="1"/>
+                <field name="can_change_state" invisible="1"/>
+                <field name="can_edit_task" invisible="1"/>
             </xpath>
 
             <!-- Hide native Assignees field -->

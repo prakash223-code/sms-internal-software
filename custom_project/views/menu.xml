@@ -67,12 +67,4 @@
               action="action_project_stage_management"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
-    <!-- NEW: Project Categories under Configuration -->
-    <menuitem id="menu_project_category_config"
-              name="Project Categories"
-              parent="project.menu_project_config"
-              sequence="20"
-              action="action_project_category"
-              groups="custom_project.group_team_manager,hr.group_hr_user"/>
-
 </odoo>

@@ -72,6 +72,17 @@ class ProjectTask(models.Model):
         store=False,
     )
 
+    # Drives readonly on the form for non-privileged, non-creator users.
+    # Managers, Team Leads, and HR may edit any task. Regular employees
+    # may only edit tasks they personally created — everything else is
+    # read-only to them (they can still progress task_state on tasks
+    # assigned to them via the dedicated state-transition buttons, which
+    # are governed separately by can_change_state / _check_state_transition_access).
+    can_edit_task = fields.Boolean(
+        compute='_compute_can_edit_task',
+        store=False,
+    )
+
     # ── Computes ──────────────────────────────────────────────────────────────
 
     def _compute_assignment_request_count(self):
@@ -87,6 +98,14 @@ class ProjectTask(models.Model):
         employee = self._get_current_employee()
         for task in self:
             task.can_change_state = is_priv or (task.assigned_to == employee)
+
+    @api.depends('create_uid')
+    @api.depends_context('uid')
+    def _compute_can_edit_task(self):
+        is_priv = self._is_privileged()
+        uid = self.env.uid
+        for task in self:
+            task.can_edit_task = is_priv or task.create_uid.id == uid
 
     @api.model
     def _group_expand_states(self, states, domain):
@@ -122,16 +141,17 @@ class ProjectTask(models.Model):
         )
 
     def _is_privileged(self):
-        """Managers and HR bypass all team restrictions."""
+        """Managers, Team Leads, and HR bypass all team/creator restrictions."""
         return (
                 self.env.user.has_group('custom_project.group_team_manager')
+                or self.env.user.has_group('custom_project.group_team_lead')
                 or self.env.user.has_group('hr.group_hr_user')
         )
 
     def _check_state_transition_access(self):
         """
         Only the employee assigned to a task may advance its state.
-        Managers and HR are exempt.
+        Managers, Team Leads, and HR are exempt.
         """
         if self._is_privileged():
             _logger.warning("STATE CHECK: uid=%s is privileged — bypassing", self.env.uid)
@@ -156,6 +176,42 @@ class ProjectTask(models.Model):
                         task.name,
                     )
                 )
+
+    def _check_edit_access(self, vals):
+        """
+        Enforce creator-only editing for regular employees.
+
+        • Managers, Team Leads, and HR: unrestricted — may edit any task.
+        • Regular employees: may edit any field ONLY on tasks they
+          personally created (create_uid == current user).
+        • Exception: the employee a task is assigned to may still update
+          task_state alone (via the Start/Complete/Verify/Close buttons),
+          even if they didn't create the task — this preserves the core
+          task-progression workflow. That narrower check is layered on
+          top of (not instead of) _check_state_transition_access, which
+          already validates the assigned_to match.
+
+        Internal/system writes (sudo, e.g. assignment-request approval)
+        bypass this check entirely via self.env.su.
+        """
+        if self.env.su or self._is_privileged():
+            return
+
+        current_employee = self._get_current_employee()
+        state_only = set(vals.keys()) <= {'task_state'}
+
+        for task in self:
+            if task.create_uid.id == self.env.uid:
+                continue  # creator may edit freely
+
+            if state_only and current_employee and task.assigned_to == current_employee:
+                continue  # assignee may still progress task state
+
+            raise UserError(
+                _('You can only edit tasks you created. "%s" was created '
+                  'by someone else — contact your Team Lead, HR, or a '
+                  'Manager for changes to this task.') % task.name
+            )
 
     # ── Visibility: Python-level filter ───────────────────────────────────────
 
@@ -323,6 +379,8 @@ class ProjectTask(models.Model):
     # ── ORM: write ────────────────────────────────────────────────────────────
 
     def write(self, vals):
+        self._check_edit_access(vals)
+
         if 'project_id' in vals and not vals.get('team_id'):
             project = self.env['project.project'].browse(vals['project_id'])
             project_team = getattr(project, 'team_id', False)
@@ -434,9 +492,9 @@ def _notify_assigned_employee(self, employee):
             '<p>You have been assigned to task <b>%s</b>.</p>'
             '<p>Project: %s</p>'
         ) % (
-            employee.name,
-            self.name,
-            self.project_id.name if self.project_id else _('N/A'),
-        ),
+                 employee.name,
+                 self.name,
+                 self.project_id.name if self.project_id else _('N/A'),
+             ),
         record_name=self.name,
     )

@@ -86,6 +86,18 @@
 }
 .o_cp_banner .fa { margin-top: 2px; flex-shrink: 0; font-size: 14px; }
 
+/* ── Read-only task banner — shown when can_edit_task is False ── */
+.o_cp_banner_readonly {
+    background: var(--o-cp-amber-50);
+    border: 1px solid var(--o-cp-amber-100);
+    border-left: 4px solid var(--o-cp-amber-600);
+    color: var(--o-cp-amber-900);
+    font-weight: 500;
+}
+.o_cp_banner_readonly .fa {
+    color: var(--o-cp-amber-600);
+}
+
 /* ── Request-specific banners ─────────────────────────────── */
 .o_cp_req_banner {
     border-radius: var(--o-cp-radius-sm);
