@@ -34,18 +34,6 @@ class ProjectTask(models.Model):
         help='Auto-populated from the project team.',
     )
 
-    task_priority = fields.Selection(
-        selection=[
-            ('low', 'Low'),
-            ('normal', 'Normal'),
-            ('high', 'High'),
-            ('critical', 'Critical'),
-        ],
-        string='Task Priority',
-        default='normal',
-        tracking=True,
-    )
-
     task_state = fields.Selection(
         selection=[
             ('draft', 'Draft'),
@@ -473,28 +461,27 @@ class ProjectTask(models.Model):
     # In _notify_assigned_employee — remove message_subscribe entirely,
     # just post the message (follower auto-add is less critical)
 
+    # ── Notifications ─────────────────────────────────────────────────────────
 
-# ── Notifications ─────────────────────────────────────────────────────────
-
-def _notify_assigned_employee(self, employee):
-    """Send an inbox notification to the assigned employee."""
-    if not employee or not employee.user_id:
-        return
-    partner = employee.user_id.partner_id
-    if not partner:
-        return
-    self.message_subscribe(partner_ids=[partner.id])
-    self.message_notify(
-        partner_ids=[partner.id],
-        subject=_('Task Assigned to You: %s') % self.name,
-        body=_(
-            '<p>Hi %s,</p>'
-            '<p>You have been assigned to task <b>%s</b>.</p>'
-            '<p>Project: %s</p>'
-        ) % (
-                 employee.name,
-                 self.name,
-                 self.project_id.name if self.project_id else _('N/A'),
-             ),
-        record_name=self.name,
-    )
+    def _notify_assigned_employee(self, employee):
+        """Send an inbox notification to the assigned employee."""
+        if not employee or not employee.user_id:
+            return
+        partner = employee.user_id.partner_id
+        if not partner:
+            return
+        self.message_subscribe(partner_ids=[partner.id])
+        self.message_notify(
+            partner_ids=[partner.id],
+            subject=_('Task Assigned to You: %s') % self.name,
+            body=_(
+                '<p>Hi %s,</p>'
+                '<p>You have been assigned to task <b>%s</b>.</p>'
+                '<p>Project: %s</p>'
+            ) % (
+                     employee.name,
+                     self.name,
+                     self.project_id.name if self.project_id else _('N/A'),
+                 ),
+            record_name=self.name,
+        )

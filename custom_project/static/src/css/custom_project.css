@@ -290,40 +290,6 @@
     margin-top: 2px;
 }
 
-/* ── Priority badges ───────────────────────────────────────── */
-.o_cp_priority_badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    padding: 2px 7px;
-    border-radius: 20px;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-.o_cp_priority_low {
-    background: var(--o-cp-slate-100);
-    color: var(--o-cp-slate-500);
-    border: 1px solid var(--o-cp-slate-200);
-}
-.o_cp_priority_normal {
-    background: var(--o-cp-blue-50);
-    color: var(--o-cp-blue-600);
-    border: 1px solid var(--o-cp-blue-100);
-}
-.o_cp_priority_high {
-    background: var(--o-cp-amber-50);
-    color: var(--o-cp-amber-600);
-    border: 1px solid var(--o-cp-amber-100);
-}
-.o_cp_priority_critical {
-    background: var(--o-cp-red-50);
-    color: var(--o-cp-red-600);
-    border: 1px solid var(--o-cp-red-100);
-    font-weight: 800;
-}
-
 /* ─────────────────────────────────────────────────────────────
    ASSIGNMENT REQUEST KANBAN CARD  (.o_cp_req_card)
 ───────────────────────────────────────────────────────────── */
@@ -432,7 +398,6 @@
     .o_cp_task_card     { padding: 10px 12px; }
     .o_cp_req_card      { padding: 10px 12px; }
     .o_cp_req_banner    { padding: 9px 12px; font-size: 12.5px; }
-    .o_cp_priority_badge { font-size: 9px; padding: 2px 6px; }
     .o_cp_section_label { font-size: 10px; }
 }
 

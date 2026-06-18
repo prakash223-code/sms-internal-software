@@ -96,9 +96,7 @@
                                options="{'no_create_edit': True}"
                                domain="[('active', '=', True)]"
                                readonly="not can_edit_task"/>
-                        <field name="task_priority"
-                               widget="badge"
-                               readonly="not can_edit_task"/>
+
                     </group>
                 </group>
 
@@ -130,7 +128,6 @@
                     class="o_kanban_small_column">
                 <field name="name"/>
                 <field name="task_state"/>
-                <field name="task_priority"/>
                 <field name="assigned_to"/>
                 <field name="project_id"/>
                 <templates>
@@ -139,9 +136,6 @@
                             <div class="o_cp_task_card_top">
                                 <span class="o_cp_task_name">
                                     <field name="name"/>
-                                </span>
-                                <span t-attf-class="o_cp_priority_badge o_cp_priority_#{record.task_priority.raw_value}">
-                                    <t t-esc="record.task_priority.value"/>
                                 </span>
                             </div>
                             <div class="o_cp_task_card_meta">
@@ -177,11 +171,6 @@
                        widget="many2one_avatar_employee" optional="show"/>
                 <field name="assigned_to" string="Assigned To"
                        widget="many2one_avatar_employee"/>
-                <field name="task_priority" string="Priority"
-                       widget="badge"
-                       decoration-danger="task_priority == 'critical'"
-                       decoration-warning="task_priority == 'high'"
-                       decoration-info="task_priority == 'normal'"/>
                 <field name="task_state" string="State"
                        widget="badge"
                        decoration-success="task_state in ('verified','closed')"
@@ -218,8 +207,6 @@
                 <separator/>
                 <filter string="Group by State" name="grp_state"
                         context="{'group_by': 'task_state'}"/>
-                <filter string="Group by Priority" name="grp_priority"
-                        context="{'group_by': 'task_priority'}"/>
                 <filter string="Group by Project" name="grp_project"
                         context="{'group_by': 'project_id'}"/>
             </search>
