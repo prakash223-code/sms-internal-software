@@ -138,7 +138,14 @@ class ProjectCaseStudy(models.Model):
     # ------------------------------------------------------------------
 
     def _user_can_write(self):
-        """Manager, HR, and Team Leads can create/edit/delete. Others read-only."""
+        """
+        Manager, HR, and Team Leads can create/edit/delete. Others read-only.
+
+        Team Lead status is NOT a stored field on hr.employee — it is
+        derived from team.team.team_lead_id (defined in custom_project).
+        An employee is a team lead if they are set as team_lead_id on
+        at least one team.team record.
+        """
         user = self.env.user
 
         if user.has_group('project.group_project_manager'):
@@ -150,8 +157,12 @@ class ProjectCaseStudy(models.Model):
         employee = self.env['hr.employee'].sudo().search(
             [('user_id', '=', user.id)], limit=1
         )
-        if employee and employee.is_team_lead:
-            return True
+        if employee:
+            is_lead = self.env['team.team'].sudo().search_count(
+                [('team_lead_id', '=', employee.id)]
+            )
+            if is_lead:
+                return True
 
         return False
 

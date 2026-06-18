@@ -78,6 +78,9 @@ class ProjectProject(models.Model):
         Mirrors the _user_can_write logic from project.document /
         project.case.study so the action methods can set UI flags
         without instantiating either model first.
+
+        Team Lead status is NOT a stored field on hr.employee — it is
+        derived from team.team.team_lead_id (defined in custom_project).
         """
         user = self.env.user
         if user.has_group('project.group_project_manager'):
@@ -87,4 +90,9 @@ class ProjectProject(models.Model):
         employee = self.env['hr.employee'].sudo().search(
             [('user_id', '=', user.id)], limit=1
         )
-        return bool(employee and employee.is_team_lead)
+        if not employee:
+            return False
+        is_lead = self.env['team.team'].sudo().search_count(
+            [('team_lead_id', '=', employee.id)]
+        )
+        return bool(is_lead)

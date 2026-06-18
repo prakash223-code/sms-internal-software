@@ -3,7 +3,7 @@
     'version': '19.0.1.1.0',
     'summary': 'Upload and manage project documents and case studies with role-based access',
     'author': 'SMS Enterprises',
-    'depends': ['project', 'hr'],
+    'depends': ['project', 'hr', 'custom_project'],
     'license': 'LGPL-3',
     'data': [
         'security/ir.model.access.csv',

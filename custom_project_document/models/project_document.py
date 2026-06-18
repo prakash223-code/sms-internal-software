@@ -117,6 +117,11 @@ class ProjectDocument(models.Model):
         """
         Returns True for Manager, HR, and Team Lead employees.
         Plain project users are read-only.
+
+        Team Lead status is NOT a stored field on hr.employee — it is
+        derived from team.team.team_lead_id (defined in custom_project).
+        An employee is a team lead if they are set as team_lead_id on
+        at least one team.team record.
         """
         user = self.env.user
 
@@ -129,8 +134,12 @@ class ProjectDocument(models.Model):
         employee = self.env['hr.employee'].sudo().search(
             [('user_id', '=', user.id)], limit=1
         )
-        if employee and employee.is_team_lead:
-            return True
+        if employee:
+            is_lead = self.env['team.team'].sudo().search_count(
+                [('team_lead_id', '=', employee.id)]
+            )
+            if is_lead:
+                return True
 
         return False
 
