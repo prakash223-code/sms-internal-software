@@ -25,12 +25,12 @@ class ProjectProject(models.Model):
                 existing = vals.get('type_ids') or []
                 has_real_stages = any(
                     isinstance(cmd, (list, tuple)) and (
-                        (cmd[0] == 6 and cmd[2])  # (6, 0, [non-empty ids])
-                        or cmd[0] == 4            # (4, id) individual link
+                        (cmd[0] == 6 and cmd[2])
+                        or cmd[0] == 4
                     )
                     for cmd in existing
                 )
                 if not has_real_stages:
                     vals['type_ids'] = [(6, 0, stage_ids)]
 
-        return super(ProjectProject, self.sudo()).create(vals_list)
+        return super().create(vals_list)

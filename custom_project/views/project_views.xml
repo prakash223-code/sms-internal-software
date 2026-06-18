@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
+    <!--
+        PURPOSE: Timesheet tab on the project form.
+          • Shows total hours spent and remaining hours (computed, read-only)
+          • Inline editable timesheet lines linked to this project
+          • software_used — free-text field declared in account_analytic_line.py
+    -->
     <record id="project_project_form_timesheet" model="ir.ui.view">
         <field name="name">project.project.form.timesheet</field>
         <field name="model">project.project</field>
@@ -11,7 +16,6 @@
 
                 <page string="Timesheets" name="timesheets">
 
-                    <!-- Summary Stats -->
                     <group>
                         <group string="Time Summary">
                             <field name="total_time_spent"
@@ -25,25 +29,15 @@
                         </group>
                     </group>
 
-                    <!-- Timesheet Lines -->
                     <field name="timesheet_ids" nolabel="1">
                         <list editable="bottom"
                               decoration-muted="unit_amount == 0">
-                            <field name="date"
-                                   string="Date"/>
-                            <field name="employee_id"
-                                   string="Employee"/>
-                            <field name="name"
-                                   string="Description"
-                                   optional="show"/>
-                            <field name="task_id"
-                                   string="Task"
-                                   optional="show"/>
-                            <field name="x_software_used"
-                                   string="Software Used"
-                                   optional="show"/>
-                            <field name="unit_amount"
-                                   string="Hours"
+                            <field name="date"          string="Date"/>
+                            <field name="employee_id"   string="Employee"/>
+                            <field name="name"          string="Description"   optional="show"/>
+                            <field name="task_id"       string="Task"          optional="show"/>
+                            <field name="software_used" string="Software Used" optional="show"/>
+                            <field name="unit_amount"   string="Hours"
                                    widget="float_time"
                                    sum="Total Hours"/>
                         </list>

@@ -9,7 +9,10 @@
         <record id="group_team_employee" model="res.groups">
             <field name="name">Team Project / Employee</field>
             <field name="privilege_id" ref="privilege_team_management"/>
-            <field name="implied_ids" eval="[(4, ref('project.group_project_user'))]"/>
+            <field name="implied_ids" eval="[
+                (4, ref('project.group_project_user')),
+                (4, ref('hr_timesheet.group_hr_timesheet_user')),
+            ]"/>
         </record>
 
         <record id="group_team_lead" model="res.groups">
@@ -23,7 +26,8 @@
             <field name="privilege_id" ref="privilege_team_management"/>
             <field name="implied_ids" eval="[
                 (4, ref('group_team_lead')),
-                (4, ref('project.group_project_manager'))
+                (4, ref('project.group_project_manager')),
+                (4, ref('hr_timesheet.group_timesheet_manager')),
             ]"/>
         </record>
 

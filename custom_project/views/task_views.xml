@@ -260,4 +260,19 @@
         </field>
     </record>
 
+    <!-- ══ 7. Add Software Used column to task Timesheets tab ════════════ -->
+    <record id="view_task_form_timesheet_software_used" model="ir.ui.view">
+        <field name="name">project.task.form.timesheet.software.used</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='timesheet_ids']//field[@name='unit_amount']"
+                   position="before">
+                <field name="software_used"
+                       string="Software Used"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

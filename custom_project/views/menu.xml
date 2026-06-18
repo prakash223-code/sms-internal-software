@@ -59,6 +59,14 @@
               action="action_all_assignment_requests"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
+    <!-- Timesheet Log — manager and HR only -->
+    <menuitem id="menu_team_management_timesheet_log"
+              name="Timesheets"
+              parent="project.menu_main_pm"
+              sequence="75"
+              action="action_timesheet_log"
+              groups="custom_project.group_team_manager,hr.group_hr_user"/>
+
     <!-- Configuration -->
     <menuitem id="menu_task_stage_config"
               name="Task Stages"
