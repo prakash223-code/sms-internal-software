@@ -483,5 +483,5 @@ class ProjectTask(models.Model):
                      self.name,
                      self.project_id.name if self.project_id else _('N/A'),
                  ),
-            record_name=self.name,
+            # record_name=self.name,   ← REMOVED: not supported in Odoo 19
         )

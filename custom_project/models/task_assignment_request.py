@@ -68,7 +68,7 @@ class TaskAssignmentRequest(models.Model):
 
     state = fields.Selection(
         selection=[
-            ('pending',  'Pending'),
+            ('pending', 'Pending'),
             ('approved', 'Approved'),
             ('rejected', 'Rejected'),
         ],
@@ -104,8 +104,8 @@ class TaskAssignmentRequest(models.Model):
         for vals in vals_list:
             if vals.get('name', 'New') == 'New':
                 vals['name'] = (
-                    self.env['ir.sequence'].next_by_code('task.assignment.request')
-                    or 'New'
+                        self.env['ir.sequence'].next_by_code('task.assignment.request')
+                        or 'New'
                 )
         return super().create(vals_list)
 
@@ -120,9 +120,9 @@ class TaskAssignmentRequest(models.Model):
           • hr.group_hr_user                   — HR officers / administrators
         """
         return (
-            self.env.user.has_group('custom_project.group_team_manager')
-            or self.env.user.has_group('project.group_project_manager')
-            or self.env.user.has_group('hr.group_hr_user')
+                self.env.user.has_group('custom_project.group_team_manager')
+                or self.env.user.has_group('project.group_project_manager')
+                or self.env.user.has_group('hr.group_hr_user')
         )
 
     def _check_manager(self):
@@ -133,12 +133,6 @@ class TaskAssignmentRequest(models.Model):
             )
 
     def action_approve(self):
-        """
-        Manager / HR approves the cross-team request:
-        • Assign the task to the target employee
-        • Set the task state to Assigned
-        • Move the request to Approved
-        """
         self.ensure_one()
         self._check_manager()
 
@@ -151,39 +145,39 @@ class TaskAssignmentRequest(models.Model):
 
         self.task_id.sudo().write({
             'assigned_to': self.target_employee_id.id,
-            'team_id':     self.target_team_id.id if self.target_team_id else False,
-            'task_state':  'assigned',
+            'team_id': self.target_team_id.id if self.target_team_id else False,
+            'task_state': 'assigned',
         })
-        # Notify the newly assigned employee
         self.task_id._notify_assigned_employee(self.target_employee_id)
 
-        # sudo() ensures the write succeeds regardless of which approver
-        # group the user belongs to (manager, project manager, or HR).
         self.sudo().write({
-            'state':         'approved',
-            'approved_by':   deciding_employee.id if deciding_employee else False,
+            'state': 'approved',
+            'approved_by': deciding_employee.id if deciding_employee else False,
             'decision_date': fields.Datetime.now(),
         })
 
         return {
             'type': 'ir.actions.client',
-            'tag':  'display_notification',
+            'tag': 'display_notification',
             'params': {
-                'title':   _('Request Approved'),
+                'title': _('Request Approved'),
                 'message': _(
                     'Task "%s" has been assigned to %s.'
                 ) % (self.task_id.name, self.target_employee_id.name),
-                'type':    'success',
-                'sticky':  False,
+                'type': 'success',
+                'sticky': False,
+                'next': {
+                    'type': 'ir.actions.act_window',
+                    'res_model': 'task.assignment.request',
+                    'res_id': self.id,
+                    'view_mode': 'form',
+                    'views': [(False, 'form')],
+                    'target': 'current',
+                },
             },
         }
 
     def action_reject(self):
-        """
-        Manager / HR rejects the request:
-        • Task remains unassigned (state stays Draft)
-        • Request moves to Rejected
-        """
         self.ensure_one()
         self._check_manager()
 
@@ -194,11 +188,9 @@ class TaskAssignmentRequest(models.Model):
             [('user_id', '=', self.env.uid)], limit=1
         )
 
-        # sudo() ensures the write succeeds regardless of which approver
-        # group the user belongs to (manager, project manager, or HR).
         self.sudo().write({
-            'state':         'rejected',
-            'approved_by':   deciding_employee.id if deciding_employee else False,
+            'state': 'rejected',
+            'approved_by': deciding_employee.id if deciding_employee else False,
             'decision_date': fields.Datetime.now(),
         })
 
@@ -208,12 +200,20 @@ class TaskAssignmentRequest(models.Model):
 
         return {
             'type': 'ir.actions.client',
-            'tag':  'display_notification',
+            'tag': 'display_notification',
             'params': {
-                'title':   _('Request Rejected'),
+                'title': _('Request Rejected'),
                 'message': _('The assignment request has been rejected.'),
-                'type':    'warning',
-                'sticky':  False,
+                'type': 'warning',
+                'sticky': False,
+                'next': {
+                    'type': 'ir.actions.act_window',
+                    'res_model': 'task.assignment.request',
+                    'res_id': self.id,
+                    'view_mode': 'form',
+                    'views': [(False, 'form')],
+                    'target': 'current',
+                },
             },
         }
 
