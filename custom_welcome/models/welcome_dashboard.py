@@ -314,15 +314,15 @@ class WelcomeDashboard(models.TransientModel):
     # ------------------------------------------------------------------
 
     def action_view_my_attendance(self):
-        return self.env.ref('custom_attendance.action_my_attendance').read()[0]
+        return self.env['ir.actions.actions']._for_xml_id('custom_attendance.action_my_attendance')
 
     def action_view_my_leaves(self):
-        return self.env.ref('hr_holidays.hr_leave_action_my').read()[0]
+        return self.env['ir.actions.actions']._for_xml_id('hr_holidays.hr_leave_action_my')
 
     def action_view_payslips(self):
         # Works when hr_payroll is installed; gracefully returns False if not.
         try:
-            return self.env.ref('hr_payroll.action_hr_payslip_my_list').read()[0]
+            return self.env['ir.actions.actions']._for_xml_id('hr_payroll.action_hr_payslip_my_list')
         except Exception:
             return False
 
@@ -341,6 +341,6 @@ class WelcomeDashboard(models.TransientModel):
         }
 
     def action_view_my_monthly_summary(self):
-        return self.env.ref(
+        return self.env['ir.actions.actions']._for_xml_id(
             'custom_attendance.action_monthly_summary_employee'
-        ).read()[0]
+        )
