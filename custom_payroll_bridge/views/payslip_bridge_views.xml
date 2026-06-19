@@ -93,7 +93,7 @@
                         <div class="o_pay_stat_value">
                             <field name="unpaid_absent_days" readonly="1" nolabel="1"/>
                         </div>
-                        <div class="o_pay_stat_hint">days deducted at daily rate (wage ÷ 30)</div>
+                        <div class="o_pay_stat_hint">days deducted at daily rate</div>
                     </div>
 
                     <!-- Attendance summary reference card -->

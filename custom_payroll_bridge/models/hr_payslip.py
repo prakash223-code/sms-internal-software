@@ -74,71 +74,81 @@ class HrPayslip(models.Model):
 
         month_int = self.date_from.month
         month_str = str(month_int)
-        year      = self.date_from.year
+        year = self.date_from.year
 
         # ── Try both string and integer month (defensive) ─────────────
         summary = Summary.search([
             ('employee_id', '=', self.employee_id.id),
-            ('month',       '=', month_str),
-            ('year',        '=', year),
-            ('state',       '=', 'confirmed'),
+            ('month', '=', month_str),
+            ('year', '=', year),
+            ('state', '=', 'confirmed'),
         ], limit=1)
 
-        # Fallback: try integer month in case stored differently
         if not summary:
             summary = Summary.search([
                 ('employee_id', '=', self.employee_id.id),
-                ('month',       '=', month_int),
-                ('year',        '=', year),
-                ('state',       '=', 'confirmed'),
+                ('month', '=', month_int),
+                ('year', '=', year),
+                ('state', '=', 'confirmed'),
             ], limit=1)
-
-        _logger.info(
-            'Payslip %s | employee: %s (id=%s) | %s/%s | '
-            'summary found: %s | unpaid_absent_days: %s',
-            self.id,
-            self.employee_id.name,
-            self.employee_id.id,
-            month_str,
-            year,
-            bool(summary),
-            summary.unpaid_absent_days if summary else 0.0,
-        )
 
         if not summary:
             _logger.warning(
                 'Payslip %s: No confirmed summary for employee "%s" '
-                'month=%s year=%s — deduction will be 0.',
+                'month=%s year=%s — deduction will be 0, per-day rate '
+                'will fall back to wage/30.',
                 self.id, self.employee_id.name, month_str, year,
             )
 
         unpaid_days = summary.unpaid_absent_days if summary else 0.0
 
+        # working_days comes from the confirmed monthly summary — it already
+        # excludes Sundays, 2nd/4th Saturdays, and any declared company.holiday
+        # records, so it shifts automatically whenever HR adds/removes a holiday.
+        # Fall back to 30 only when no confirmed summary exists yet for the period.
+        working_days = summary.working_days if (summary and summary.working_days) else 30
+
+        _logger.info(
+            'Payslip %s | employee: %s (id=%s) | %s/%s | summary found: %s | '
+            'unpaid_absent_days: %s | working_days: %s',
+            self.id, self.employee_id.name, self.employee_id.id,
+            month_str, year, bool(summary), unpaid_days, working_days,
+        )
+
         self.attendance_summary_id = summary.id if summary else False
-        self.unpaid_absent_days    = unpaid_days
+        self.unpaid_absent_days = unpaid_days
 
         if not self.contract_id:
-            _logger.warning('Payslip %s: no contract — cannot inject ABSENT_DAYS.', self.id)
+            _logger.warning('Payslip %s: no contract — cannot inject inputs.', self.id)
             return
 
-        # ── Remove stale input ────────────────────────────────────────
-        stale = self.env['hr.payslip.input'].sudo().search([
-            ('payslip_id', '=', self.id),
-            ('code',       '=', 'ABSENT_DAYS'),
-        ])
-        if stale:
-            stale.sudo().unlink()
+        Input = self.env['hr.payslip.input'].sudo()
 
-        # ── Inject fresh input ────────────────────────────────────────
-        self.env['hr.payslip.input'].sudo().create({
-            'name':        'Unpaid Absent Days',
-            'code':        'ABSENT_DAYS',
-            'amount':      unpaid_days,
+        # ── Remove stale inputs ────────────────────────────────────────
+        Input.search([
+            ('payslip_id', '=', self.id),
+            ('code', 'in', ['ABSENT_DAYS', 'WORKING_DAYS']),
+        ]).unlink()
+
+        # ── Inject fresh inputs ──────────────────────────────────────────
+        Input.create({
+            'name': 'Unpaid Absent Days',
+            'code': 'ABSENT_DAYS',
+            'amount': unpaid_days,
             'contract_id': self.contract_id.id,
-            'payslip_id':  self.id,
-            'sequence':    5,
+            'payslip_id': self.id,
+            'sequence': 5,
+        })
+        Input.create({
+            'name': 'Working Days in Month',
+            'code': 'WORKING_DAYS',
+            'amount': working_days,
+            'contract_id': self.contract_id.id,
+            'payslip_id': self.id,
+            'sequence': 6,
         })
 
         _logger.info(
-            'Payslip %s: ABSENT_DAYS injected — amount=%s', self.id, unpaid_days
+            'Payslip %s: ABSENT_DAYS=%s, WORKING_DAYS=%s injected',
+            self.id, unpaid_days, working_days,
         )
