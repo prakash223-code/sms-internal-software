@@ -18,14 +18,6 @@
           <field name="document_count" string="Documents" widget="statinfo"/>
         </button>
 
-        <button name="action_view_case_studies"
-                type="object"
-                class="oe_stat_button"
-                icon="fa-book"
-                groups="project.group_project_user">
-          <field name="case_study_count" string="Case Studies" widget="statinfo"/>
-        </button>
-
       </xpath>
 
       <!-- ── Tabs inside the project form ── -->
@@ -58,40 +50,6 @@
                        text="Preview" invisible="not file_url" readonly="1"  optional="show"/>
                 <field name="upload_date" string="Uploaded On" readonly="1"  optional="show"/>
                 <field name="uploaded_by" string="Uploaded By" readonly="1"  optional="hide"/>
-                <field name="notes"       string="Notes"                      optional="hide"/>
-
-              </list>
-            </field>
-
-          </page>
-
-          <!-- Case Studies tab -->
-          <page string="Case Studies" name="case_studies_tab"
-                groups="project.group_project_manager,hr.group_hr_user">
-
-            <field name="case_study_ids" mode="list"
-                   context="{'default_project_id': id}">
-              <list editable="bottom" create="1" delete="1"
-                    decoration-success="case_study_type in ('client_success', 'business')"
-                    decoration-info="case_study_type in ('technical', 'process_improvement')"
-                    decoration-warning="case_study_type in ('risk_analysis', 'post_mortem')">
-
-                <field name="name" string="Title"
-                       placeholder="e.g. Q3 Onboarding Review" required="1"/>
-                <field name="case_study_type" string="Type" required="1"
-                       widget="badge"
-                       decoration-success="case_study_type in ('client_success', 'business')"
-                       decoration-info="case_study_type in ('technical', 'process_improvement')"
-                       decoration-warning="case_study_type in ('risk_analysis', 'post_mortem')"/>
-                <field name="summary"     string="Summary"       optional="show"/>
-                <field name="file_type"   string="File Type"     readonly="1" optional="show"/>
-                <field name="file" filename="filename" string="File"
-                       widget="binary"                           optional="show"/>
-                <field name="filename"    string="File Name"     readonly="1" optional="hide"/>
-                <field name="file_url"    string="Preview"       widget="url"
-                       text="Preview" invisible="not file_url" readonly="1"  optional="show"/>
-                <field name="upload_date" string="Recorded On"   readonly="1" optional="show"/>
-                <field name="uploaded_by" string="Recorded By"   readonly="1" optional="hide"/>
                 <field name="notes"       string="Notes"                      optional="hide"/>
 
               </list>

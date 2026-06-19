@@ -32,40 +32,6 @@ class ProjectProject(models.Model):
             'domain': [('project_id', '=', self.id)],
             'context': {
                 'default_project_id': self.id,
-                # False hides New / Delete buttons in list + kanban for non-privileged users
-                'create': can_write,
-                'delete': can_write,
-            },
-        }
-
-    # ── Case Studies ──────────────────────────────────────────────────
-
-    case_study_ids = fields.One2many(
-        'project.case.study',
-        'project_id',
-        string='Case Studies',
-    )
-
-    case_study_count = fields.Integer(
-        string='Case Study Count',
-        compute='_compute_case_study_count',
-    )
-
-    def _compute_case_study_count(self):
-        for project in self:
-            project.case_study_count = len(project.case_study_ids)
-
-    def action_view_case_studies(self):
-        self.ensure_one()
-        can_write = self._docs_user_can_write()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Case Studies',
-            'res_model': 'project.case.study',
-            'view_mode': 'kanban,list,form',
-            'domain': [('project_id', '=', self.id)],
-            'context': {
-                'default_project_id': self.id,
                 'create': can_write,
                 'delete': can_write,
             },
@@ -75,9 +41,8 @@ class ProjectProject(models.Model):
 
     def _docs_user_can_write(self):
         """
-        Mirrors the _user_can_write logic from project.document /
-        project.case.study so the action methods can set UI flags
-        without instantiating either model first.
+        Mirrors the _user_can_write logic from project.document so the
+        action method can set UI flags without instantiating the model first.
 
         Team Lead status is NOT a stored field on hr.employee — it is
         derived from team.team.team_lead_id (defined in custom_project).

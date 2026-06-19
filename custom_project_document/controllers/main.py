@@ -37,35 +37,6 @@ class ProjectDocumentPreviewController(http.Controller):
         )
 
     # ------------------------------------------------------------------
-    # Case Study preview
-    # ------------------------------------------------------------------
-
-    @http.route(
-        '/project/case-study/preview/<int:doc_id>',
-        type='http',
-        auth='user',
-        methods=['GET'],
-        csrf=False,
-    )
-    def preview_case_study(self, doc_id, **kwargs):
-        """
-        Serves a project case-study supporting file inline in the browser.
-        """
-        if not request.env.user.has_group('project.group_project_user'):
-            return Response('Access Denied', status=403)
-
-        case_study = request.env['project.case.study'].sudo().browse(doc_id)
-        if not case_study.exists() or not case_study.file:
-            return Response('Not Found', status=404)
-
-        return self._serve_binary(
-            res_model='project.case.study',
-            res_id=doc_id,
-            field_binary=case_study.file,
-            filename=case_study.filename or 'case_study',
-        )
-
-    # ------------------------------------------------------------------
     # Shared helper
     # ------------------------------------------------------------------
 
