@@ -43,4 +43,17 @@
         <field name="nextcall">2025-01-01 01:00:00</field>
     </record>
 
+    <record id="cron_process_leave_anniversaries" model="ir.cron">
+        <field name="name">Leave: Process Anniversary Carry-Forward</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process_leave_anniversaries()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+        <field name="priority">15</field>
+        <field name="nextcall">2025-01-01 01:30:00</field>
+    </record>
+
 </odoo>

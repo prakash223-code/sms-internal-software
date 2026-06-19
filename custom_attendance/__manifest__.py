@@ -14,6 +14,7 @@
         'security/ir.model.access.csv',
         'security/attendance_security.xml',
         'data/attendance_cron.xml',
+        'data/leave_type_data.xml',
         'views/attendance_views.xml',
         'views/monthly_summary_views.xml',
         'views/attendance_checkin_views.xml',
