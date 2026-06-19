@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
+<odoo noupdate="0">
 
     <record id="leave_type_casual" model="hr.leave.type">
         <field name="name">Casual Leave</field>
         <field name="requires_allocation" eval="True"/>
-        <field name="employee_requests" eval="False"/>
+        <field name="employee_requests" eval="True"/>
         <field name="allocation_validation_type">no_validation</field>
         <field name="leave_validation_type">hr</field>
         <field name="unpaid" eval="False"/>
@@ -14,7 +14,7 @@
     <record id="leave_type_earned" model="hr.leave.type">
         <field name="name">Earned Leave</field>
         <field name="requires_allocation" eval="True"/>
-        <field name="employee_requests" eval="False"/>
+        <field name="employee_requests" eval="True"/>
         <field name="allocation_validation_type">no_validation</field>
         <field name="leave_validation_type">hr</field>
         <field name="unpaid" eval="False"/>
@@ -24,7 +24,7 @@
     <record id="leave_type_medical" model="hr.leave.type">
         <field name="name">Medical Leave</field>
         <field name="requires_allocation" eval="True"/>
-        <field name="employee_requests" eval="False"/>
+        <field name="employee_requests" eval="True"/>
         <field name="allocation_validation_type">no_validation</field>
         <field name="leave_validation_type">hr</field>
         <field name="unpaid" eval="False"/>

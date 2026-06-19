@@ -302,10 +302,6 @@ class AttendanceMonthlySummary(models.Model):
             date_from_local = max(date_from_local, first_day)
             date_to_local   = min(date_to_local,   last_day)
 
-            is_within_policy = leave.holiday_status_id.id in {
-                self.env.ref(xmlid).id for xmlid in CL_EL_ML_XMLIDS
-                if self.env.ref(xmlid, raise_if_not_found=False)
-            }
             is_unpaid = bool(leave.holiday_status_id.unpaid)
 
             current = date_from_local

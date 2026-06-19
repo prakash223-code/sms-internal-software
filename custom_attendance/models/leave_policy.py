@@ -16,6 +16,11 @@ LEAVE_POLICY = {
     'medical': {'xmlid': 'custom_attendance.leave_type_medical', 'quota': 3.0,  'carry_cap': 3.0},
 }
 
+# XML IDs of the three managed leave types — used in monthly_summary.py
+# to identify whether a leave is within policy (paid vs unpaid distinction
+# is handled via holiday_status_id.unpaid directly).
+CL_EL_ML_XMLIDS = [p['xmlid'] for p in LEAVE_POLICY.values()]
+
 
 def _is_leap_year(year):
     return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
@@ -113,8 +118,9 @@ class HrEmployeeLeavePolicy(models.Model):
             prev_allocation = Allocation.search([
                 ('employee_id', '=', self.id),
                 ('holiday_status_id', '=', leave_type.id),
-                ('date_to', '=', cycle_end_prev),
-            ], limit=1, order='date_from desc')
+                ('date_to', '<', cycle_start),
+                ('state', '=', 'validate'),
+            ], limit=1, order='date_to desc')
 
             quota = policy['quota']
             carry_cap = policy['carry_cap']
@@ -180,13 +186,13 @@ class HrEmployeeLeavePolicy(models.Model):
     def _allocation_vals(employee, leave_type, date_from, number_of_days):
         date_to = date_from + relativedelta(years=1) - relativedelta(days=1)
         return {
-            'name': _('%s — %s to %s') % (leave_type.name, date_from, date_to),
+            'name': f'{leave_type.name} — {date_from} to {date_to}',
             'employee_id': employee.id,
             'holiday_status_id': leave_type.id,
             'number_of_days': number_of_days,
             'date_from': date_from,
             'date_to': date_to,
-            'state': 'validate',
+            'state': 'confirm',   # Odoo auto-validates for no_validation leave types
         }
 
     @staticmethod

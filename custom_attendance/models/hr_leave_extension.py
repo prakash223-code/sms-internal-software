@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, api, _
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from datetime import timedelta
 import pytz
@@ -7,6 +7,24 @@ import pytz
 
 class HrLeave(models.Model):
     _inherit = 'hr.leave'
+
+    @api.constrains('date_from', 'state')
+    def _check_no_past_leave_request(self):
+        today = fields.Date.context_today(self)
+        for leave in self:
+            if leave.state in ('refuse', 'cancel'):
+                continue
+            if not leave.date_from:
+                continue
+            # HR and managers can backdate leaves
+            if self.env.user.has_group('hr.group_hr_user'):
+                continue
+            leave_date = leave.date_from.date()
+            if leave_date < today:
+                raise ValidationError(_(
+                    'Leave requests cannot be submitted for past dates (%s). '
+                    'Please contact HR if you need to record a past leave.'
+                ) % leave_date.strftime('%d %b %Y'))
 
     @api.constrains('date_from', 'date_to', 'state', 'employee_id')
     def _check_leave_against_company_holidays(self):
@@ -38,7 +56,7 @@ class HrLeave(models.Model):
             date_to_local   = date_to.astimezone(tz).date()
 
             # Walk each day in the requested range
-            holiday_days      = []
+            holiday_days       = []
             valid_working_days = []
             current = date_from_local
 
@@ -66,11 +84,6 @@ class HrLeave(models.Model):
                     '%s\n\n'
                     'Please select working days only.'
                 ) % day_list)
-
-            # ── Warn: some days are holidays (informational, not blocked) ─
-            # Odoo automatically excludes resource.calendar.leaves from
-            # duration calculation, so the day count will be correct.
-            # No additional action needed here.
 
     @staticmethod
     def _day_name(d):
