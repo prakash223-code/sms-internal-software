@@ -17,7 +17,7 @@ def post_init_hook(env):
         ('name', 'ilike', 'Kiosk')
     ])
     if kiosk_menus:
-        kiosk_menus.write({'groups_id': restrict})
+        kiosk_menus.write({'group_ids': restrict})
 
     # --- Apps / Settings menus ---
     # Employees, HR, and Managers have no need to access module management
@@ -27,4 +27,4 @@ def post_init_hook(env):
         ('parent_id', '=', False),   # top-level only
     ])
     if apps_menus:
-        apps_menus.write({'groups_id': restrict})
+        apps_menus.write({'group_ids': restrict})
