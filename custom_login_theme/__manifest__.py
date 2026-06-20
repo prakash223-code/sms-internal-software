@@ -3,6 +3,7 @@
     'version': '19.0.1.0.0',
     'summary': 'Branded, modern theme for the login / user-picker screen',
     'category': 'Theme/Backend',
+    'author': 'SMS Software team',
     'depends': ['web'],
     'data': [
         'views/login_templates.xml',
