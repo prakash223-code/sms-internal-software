@@ -46,6 +46,13 @@ _ROLE_GROUPS = {
         # ── CRM (query to project conversion) ─────────────────────────────────
         'sales_team.group_sale_salesman_all_leads',  # view all leads/opportunities
         'hr_timesheet.group_hr_timesheet_approver',  # ← all timesheets
+        # NOTE: custom_project.group_team_manager is intentionally NOT
+        # granted to the HR role. Per spec, project completion-request
+        # approval/rejection and editing a locked (completed) project are
+        # Manager-only actions — HR is explicitly excluded from both, even
+        # though HR has broad access elsewhere in this module (tasks,
+        # stages, etc. via hr.group_hr_user checks). If that ever needs to
+        # change, add 'custom_project.group_team_manager' here too.
     ],
     'manager': [
         # ── Base ──────────────────────────────────────────────────────────────
@@ -71,6 +78,17 @@ _ROLE_GROUPS = {
         # ── Project ───────────────────────────────────────────────────────────
         'project.group_project_manager',  # full project visibility
         'hr_timesheet.group_timesheet_manager',
+        # ── Team Management (custom_project) ──────────────────────────────────
+        # Grants Team Project / Manager — required to:
+        #   • approve/reject task assignment requests
+        #   • approve/reject project completion requests
+        #   • edit a locked (completed) project or its tasks
+        #   • reopen a locked project
+        #   • manage task stages (Configuration > Task Stages)
+        # implied_ids on this group already pulls in Team Lead + Employee
+        # tiers (see custom_project/security/security_groups.xml), so
+        # listing those separately here isn't necessary.
+        'custom_project.group_team_manager',
     ],
 }
 
@@ -91,6 +109,22 @@ class HrEmployeeDefaults(models.Model):
         help='Controls which system permissions are assigned via the Setup Permissions button.',
     )
 
+    # ── Admin safety check ───────────────────────────────────────────────────
+    def _is_admin_account(self, user):
+        """
+        True if the given res.users record is the database superuser (uid=1)
+        or holds Settings/Administrator access (base.group_system).
+        Used to exclude admin accounts from all role-based group automation.
+        """
+        if not user:
+            return False
+        if user.id == 1:  # the bootstrap superuser, e.g. odoobot/admin uid=1
+            return True
+        try:
+            return user.sudo().has_group('base.group_system')
+        except Exception:
+            return False
+
     # ── Core assignment method ────────────────────────────────────────────────
     def _assign_role_groups(self):
         """
@@ -98,6 +132,16 @@ class HrEmployeeDefaults(models.Model):
         First strips ALL role-managed groups from the user, then applies
         only the groups for the current role — ensures clean role switching
         with no leftover permissions from a previous role.
+
+        SAFETY: Administrator / superuser accounts are NEVER touched by this
+        method, regardless of their employee_role value. Role-based group
+        management is meant for ordinary employee/hr/manager accounts only —
+        an admin's permissions are a deliberate manual decision, not
+        something a role dropdown should be able to overwrite. Without this
+        guard, an admin employee record left on the default 'employee' role
+        would get stripped down to the minimal employee group set on the
+        next Setup Permissions click or module upgrade resync — which is
+        exactly what happened before this guard was added.
         """
         # Resolve every group that appears in ANY role so we know
         # exactly which ones this module manages.
@@ -114,6 +158,14 @@ class HrEmployeeDefaults(models.Model):
             if not user:
                 _logger.info(
                     'Role groups: skipping %s — no linked user', employee.name
+                )
+                continue
+
+            if self._is_admin_account(user):
+                _logger.info(
+                    'Role groups: skipping %s — linked user "%s" is an '
+                    'Administrator/superuser account, never managed by role '
+                    'automation.', employee.name, user.login
                 )
                 continue
 
@@ -157,6 +209,38 @@ class HrEmployeeDefaults(models.Model):
     # ── Backward-compat alias ─────────────────────────────────────────────────
     def _assign_default_employee_groups(self):
         self._assign_role_groups()
+
+    # ── Bulk re-sync (called automatically on every module upgrade) ───────────
+    @api.model
+    def _resync_all_role_groups(self):
+        """
+        Re-applies role-based groups to EVERY employee with a linked user,
+        regardless of their employee_role (employee / hr / manager).
+
+        Wired up via a <function> call in data/role_groups_resync.xml with
+        noupdate="0", so it re-runs automatically on every
+        `-u custom_payroll_bridge` upgrade — not just on fresh install.
+
+        This means: whenever _ROLE_GROUPS is edited (e.g. a new group is
+        added to the 'manager' role), the next module upgrade will apply
+        it to all existing employees without anyone needing to open each
+        employee form and click "Setup Permissions" by hand.
+
+        Safe to run repeatedly — _assign_role_groups() is idempotent per
+        employee (it always recomputes the full target set from scratch).
+        """
+        employees = self.search([('user_id', '!=', False)])
+        if not employees:
+            _logger.info('Role groups resync: no linked-user employees found — skipping.')
+            return
+
+        employees._assign_role_groups()
+
+        _logger.info(
+            'Role groups resync: re-applied role-based groups to %d employee(s) '
+            '(roles: employee / hr / manager) on module upgrade.',
+            len(employees),
+        )
 
     # ── Auto-assign on create ─────────────────────────────────────────────────
     @api.model_create_multi
