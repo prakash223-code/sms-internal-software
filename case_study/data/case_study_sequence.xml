@@ -1,0 +1,10 @@
+<odoo>
+    <data noupdate="1">
+        <record id="seq_case_study" model="ir.sequence">
+            <field name="name">Case Study Sequence</field>
+            <field name="code">case.study</field>
+            <field name="prefix">CS/%(year)s/</field>
+            <field name="padding">4</field>
+        </record>
+    </data>
+</odoo>
