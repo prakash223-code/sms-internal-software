@@ -5,12 +5,63 @@
         Extend the project settings form with:
           • team_id field in the Settings tab (or main group)
           • a "Stages" tab to manage per-project kanban stages
+          • completion-request workflow: Request Completion button,
+            Completion Requests smart button, lock banner, Reopen button
     -->
     <record id="view_project_form_team_and_stages" model="ir.ui.view">
         <field name="name">project.project.form.team.and.stages</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
+
+            <!-- Locked banner — shown to everyone when the project is
+                 completed and frozen. Injected before <sheet>, matching
+                 the pattern used elsewhere in this module (e.g. task form). -->
+            <xpath expr="//sheet" position="before">
+                <div class="o_cp_req_banner o_cp_req_banner_approved"
+                     invisible="not is_locked">
+                    <i class="fa fa-lock" title="Locked"/>
+                    <span>
+                        This project is completed and locked. Only Managers
+                        can edit it or its tasks. Use <strong>Reopen</strong>
+                        to unlock it.
+                    </span>
+                </div>
+            </xpath>
+
+            <!-- Smart button: Completion Requests -->
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_view_completion_requests"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-flag-checkered"
+                        invisible="completion_request_count == 0">
+                    <field name="completion_request_count"
+                           widget="statinfo"
+                           string="Completion Requests"/>
+                </button>
+            </xpath>
+
+            <!-- Action buttons: placed right before the title block so
+                 they're visible without scrolling (project.edit_project
+                 has no <header>, so we can't put them in a statusbar area). -->
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="o_cp_section_label">
+                    <button name="action_request_completion"
+                            string="Request Completion"
+                            type="object"
+                            class="btn-primary"
+                            confirm="Send a project completion request to Managers?"
+                            invisible="not can_request_completion"/>
+                    <button name="action_reopen"
+                            string="Reopen Project"
+                            type="object"
+                            class="btn-secondary"
+                            groups="custom_project.group_team_manager"
+                            confirm="Reopen this project? It will become editable again for everyone with normal access."
+                            invisible="not is_locked"/>
+                </div>
+            </xpath>
 
             <!--
                 Insert team_id just after the project name field.
@@ -23,6 +74,13 @@
                        widget="many2one"
                        options="{'no_create_edit': True}"
                        placeholder="Assign a team…"/>
+                <field name="is_locked" widget="boolean_toggle" readonly="1"/>
+            </xpath>
+
+            <!-- Hidden helper fields driving button/banner visibility -->
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="completion_request_count" invisible="1"/>
+                <field name="can_request_completion" invisible="1"/>
             </xpath>
 
             <!-- Stages tab -->

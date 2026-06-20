@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ Form view ══════════════════════════════════════════════════════ -->
+    <record id="view_completion_request_form" model="ir.ui.view">
+        <field name="name">project.completion.request.form</field>
+        <field name="model">project.completion.request</field>
+        <field name="arch" type="xml">
+            <form string="Project Completion Request">
+
+                <header>
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="pending,approved,rejected"/>
+
+                    <!--
+                        Approve / Reject — Manager only (no HR exemption here,
+                        unlike task.assignment.request — project completion
+                        is a Manager-only decision per spec).
+                    -->
+                    <button name="action_approve"
+                            string="Approve"
+                            type="object"
+                            class="btn-success"
+                            groups="custom_project.group_team_manager"
+                            invisible="state != 'pending'"
+                            confirm="Approve completion of this project? It will move to the Done stage and be locked for everyone except Managers."/>
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            class="btn-danger"
+                            groups="custom_project.group_team_manager"
+                            invisible="state != 'pending'"/>
+                </header>
+
+                <sheet>
+
+                    <!-- Status banners -->
+                    <div class="o_cp_req_banner o_cp_req_banner_pending"
+                         invisible="state != 'pending'">
+                        <i class="fa fa-clock-o" title="Pending"/>
+                        Awaiting manager approval before the project is marked complete.
+                    </div>
+                    <div class="o_cp_req_banner o_cp_req_banner_approved"
+                         invisible="state != 'approved'">
+                        <i class="fa fa-check-circle" title="Approved"/>
+                        Approved — the project has been moved to Done and locked.
+                    </div>
+                    <div class="o_cp_req_banner o_cp_req_banner_rejected"
+                         invisible="state != 'rejected'">
+                        <i class="fa fa-times-circle" title="Rejected"/>
+                        Rejected — the project remains on its current stage.
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name" string="Reference"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+
+                        <group string="Project">
+                            <field name="project_id" readonly="1"/>
+                            <field name="project_stage_id"/>
+                            <field name="requesting_team_id" readonly="1"/>
+                        </group>
+
+                        <group string="Request Details">
+                            <field name="requested_by"
+                                   widget="many2one_avatar_employee"
+                                   readonly="1"/>
+                        </group>
+
+                    </group>
+
+                    <group string="Decision" invisible="state == 'pending'">
+                        <field name="approved_by"
+                               widget="many2one_avatar_employee"
+                               readonly="1"
+                               string="Decided By"/>
+                        <field name="decision_date" readonly="1"/>
+                    </group>
+
+                    <group string="Reason">
+                        <field name="reason"
+                               nolabel="1"
+                               placeholder="Explain why this project is ready to be marked complete…"
+                               colspan="2"
+                               readonly="state != 'pending'"/>
+                    </group>
+
+                    <!-- Manager Comment — Manager only -->
+                    <group string="Manager Comment"
+                           groups="custom_project.group_team_manager">
+                        <field name="manager_comment"
+                               nolabel="1"
+                               placeholder="Optional comment for the requester…"
+                               colspan="2"/>
+                    </group>
+
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ List view ══════════════════════════════════════════════════════ -->
+    <record id="view_completion_request_list" model="ir.ui.view">
+        <field name="name">project.completion.request.list</field>
+        <field name="model">project.completion.request</field>
+        <field name="arch" type="xml">
+            <list string="Completion Requests"
+                  decoration-success="state == 'approved'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-warning="state == 'pending'">
+                <field name="name"               string="Reference"/>
+                <field name="project_id"         string="Project"/>
+                <field name="requesting_team_id" string="Team"/>
+                <field name="requested_by"       string="Requested By"
+                       widget="many2one_avatar_employee"/>
+                <field name="state"              string="Status"
+                       widget="badge"
+                       decoration-warning="state == 'pending'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="create_date"        string="Requested On" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Kanban view ════════════════════════════════════════════════════ -->
+    <record id="view_completion_request_kanban" model="ir.ui.view">
+        <field name="name">project.completion.request.kanban</field>
+        <field name="model">project.completion.request</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="project_id"/>
+                <field name="requested_by"/>
+                <field name="requesting_team_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click o_cp_req_card">
+                            <div class="o_cp_req_card_ref">
+                                <strong><field name="name"/></strong>
+                            </div>
+                            <div class="o_cp_req_card_task">
+                                <i class="fa fa-folder-o o_cp_req_icon" title="Project"/>
+                                <field name="project_id"/>
+                            </div>
+                            <div class="o_cp_req_card_row">
+                                <span class="o_cp_req_label">By</span>
+                                <field name="requested_by" widget="many2one_avatar_employee"/>
+                            </div>
+                            <div class="o_cp_req_card_row" t-if="record.requesting_team_id.value">
+                                <span class="o_cp_req_label">Team</span>
+                                <field name="requesting_team_id"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ══ Search view ════════════════════════════════════════════════════ -->
+    <record id="view_completion_request_search" model="ir.ui.view">
+        <field name="name">project.completion.request.search</field>
+        <field name="model">project.completion.request</field>
+        <field name="arch" type="xml">
+            <search string="Search Completion Requests">
+                <field name="name"               string="Reference"/>
+                <field name="project_id"         string="Project"/>
+                <field name="requested_by"       string="Requested By"/>
+                <separator/>
+                <filter string="Pending"  name="pending"
+                        domain="[('state','=','pending')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state','=','approved')]"/>
+                <filter string="Rejected" name="rejected"
+                        domain="[('state','=','rejected')]"/>
+                <separator/>
+                <filter string="My Requests" name="my_requests"
+                        domain="[('requested_by.user_id','=',uid)]"/>
+                <separator/>
+                <filter string="Group by Status" name="grp_state"
+                        context="{'group_by': 'state'}"/>
+                <filter string="Group by Team" name="grp_team"
+                        context="{'group_by': 'requesting_team_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Actions ════════════════════════════════════════════════════════ -->
+
+    <!-- My requests — visible to all employees (Python create() still
+         restricts who can actually submit one to the project's Team Lead) -->
+    <record id="action_my_completion_requests" model="ir.actions.act_window">
+        <field name="name">My Completion Requests</field>
+        <field name="res_model">project.completion.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('requested_by.user_id','=',uid)]</field>
+        <field name="search_view_id" ref="view_completion_request_search"/>
+        <field name="context">{'search_default_my_requests': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No project completion requests yet.
+            </p>
+            <p>
+                As a Team Lead, you can request that a project be marked
+                complete from the project's form view. Once approved, the
+                project moves to Done and is locked for everyone except
+                Managers.
+            </p>
+        </field>
+    </record>
+
+    <!-- All requests — manager only -->
+    <record id="action_all_completion_requests" model="ir.actions.act_window">
+        <field name="name">All Completion Requests</field>
+        <field name="res_model">project.completion.request</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_completion_request_kanban')}),
+            (0, 0, {'view_mode': 'list',   'view_id': ref('view_completion_request_list')}),
+        ]"/>
+        <field name="search_view_id" ref="view_completion_request_search"/>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No pending project completion requests.
+            </p>
+        </field>
+    </record>
+
+</odoo>

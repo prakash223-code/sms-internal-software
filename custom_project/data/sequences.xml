@@ -12,5 +12,15 @@
             <field name="implementation">no_gap</field>
         </record>
 
+        <record id="seq_project_completion_request" model="ir.sequence">
+            <field name="name">Project Completion Request</field>
+            <field name="code">project.completion.request</field>
+            <field name="prefix">PCR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="implementation">no_gap</field>
+        </record>
+
     </data>
 </odoo>

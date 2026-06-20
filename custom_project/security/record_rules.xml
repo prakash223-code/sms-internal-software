@@ -57,6 +57,42 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
+        <!-- ══ project.completion.request rules ═══════════════════════ -->
+
+        <!--
+            Team Lead: sees requests for projects belonging to teams they
+            lead, OR requests they personally submitted. Regular employees
+            technically have model access too (read/write/create per the
+            access CSV), but create() itself is blocked in Python unless
+            they are the project's team_lead_id — this rule just scopes
+            visibility, it doesn't grant the ability to request.
+        -->
+        <record id="rule_completion_request_employee" model="ir.rule">
+            <field name="name">Completion Request: own team's records only</field>
+            <field name="model_id" ref="model_project_completion_request"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[
+                '|',
+                ('requested_by.user_id', '=', user.id),
+                ('project_id.team_id.team_lead_id.user_id', '=', user.id)
+            ]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_completion_request_manager" model="ir.rule">
+            <field name="name">Completion Request: manager sees all</field>
+            <field name="model_id" ref="model_project_completion_request"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read"   eval="True"/>
+            <field name="perm_write"  eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
         <!-- ══ project.task rules ═════════════════════════════════════ -->
 
         <!--

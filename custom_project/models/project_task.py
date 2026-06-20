@@ -71,6 +71,15 @@ class ProjectTask(models.Model):
         store=False,
     )
 
+    # Mirrors project_id.is_locked so the form can show a banner / drive
+    # readonly without an extra round trip.
+    project_is_locked = fields.Boolean(
+        related='project_id.is_locked',
+        string='Project Locked',
+        readonly=True,
+        store=False,
+    )
+
     # ── Computes ──────────────────────────────────────────────────────────────
 
     def _compute_assignment_request_count(self):
@@ -136,6 +145,28 @@ class ProjectTask(models.Model):
                 or self.env.user.has_group('hr.group_hr_user')
         )
 
+    def _is_completion_manager(self):
+        """
+        Stricter than _is_privileged(): used only for the project-lock
+        freeze, where even HR is NOT exempt — only Managers are.
+        """
+        return self.env.user.has_group('custom_project.group_team_manager')
+
+    def _check_project_lock_access(self, project):
+        """
+        When a project is locked (completed), no one may create or edit
+        tasks under it except a Manager. This applies even to HR and
+        Team Leads, unlike _is_privileged() / _check_edit_access().
+        """
+        if self.env.su or self._is_completion_manager():
+            return
+        if project and project.is_locked:
+            raise UserError(
+                _('"%s" is locked as completed. Tasks cannot be created '
+                  'or edited until a Manager reopens the project.')
+                % project.name
+            )
+
     def _check_state_transition_access(self):
         """
         Only the employee assigned to a task may advance its state.
@@ -181,6 +212,10 @@ class ProjectTask(models.Model):
 
         Internal/system writes (sudo, e.g. assignment-request approval)
         bypass this check entirely via self.env.su.
+
+        NOTE: this is layered UNDER the project-lock check
+        (_check_project_lock_access), which runs first in write()/create()
+        and blocks everyone but a Manager when the project is locked.
         """
         if self.env.su or self._is_privileged():
             return
@@ -293,6 +328,15 @@ class ProjectTask(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # Project-lock guard: block task creation under a locked project
+        # for everyone except a Manager (even HR / Team Lead).
+        if not self.env.su and not self._is_completion_manager():
+            for vals in vals_list:
+                project_id = vals.get('project_id')
+                if project_id:
+                    project = self.env['project.project'].browse(project_id)
+                    self._check_project_lock_access(project)
+
         current_employee = self._get_current_employee()
         pending_requests = []
 
@@ -367,6 +411,16 @@ class ProjectTask(models.Model):
     # ── ORM: write ────────────────────────────────────────────────────────────
 
     def write(self, vals):
+        # Project-lock guard runs first, and applies even to HR/Team Leads —
+        # only a Manager may write to tasks under a locked project.
+        if not self.env.su and not self._is_completion_manager():
+            for task in self:
+                self._check_project_lock_access(task.project_id)
+            # Also guard against moving a task INTO a locked project.
+            if vals.get('project_id'):
+                new_project = self.env['project.project'].browse(vals['project_id'])
+                self._check_project_lock_access(new_project)
+
         self._check_edit_access(vals)
 
         if 'project_id' in vals and not vals.get('team_id'):

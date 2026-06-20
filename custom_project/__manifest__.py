@@ -1,6 +1,6 @@
 {
     'name': 'Custom Project – Team Task Management',
-    'version': '19.0.2.0.0',
+    'version': '19.0.3.0.0',
     'summary': 'Team-based task assignment with cross-team manager approval workflow',
     'author': 'Your Company',
     'license': 'LGPL-3',
@@ -18,6 +18,7 @@
         'views/team_views.xml',
         'views/task_views.xml',
         'views/assignment_request_views.xml',
+        'views/project_completion_request_views.xml',
         'views/timesheet_views.xml',
         'views/hr_employee_views.xml',
         'views/project_views.xml',

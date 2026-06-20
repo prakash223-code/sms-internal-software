@@ -59,6 +59,27 @@
               action="action_all_assignment_requests"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
+    <!-- Completion Requests -->
+    <menuitem id="menu_team_management_completion_requests"
+              name="Completion Requests"
+              parent="project.menu_main_pm"
+              sequence="72"
+              groups="base.group_user"/>
+
+    <menuitem id="menu_team_management_my_completion_requests"
+              name="My Completion Requests"
+              parent="menu_team_management_completion_requests"
+              sequence="10"
+              action="action_my_completion_requests"
+              groups="base.group_user"/>
+
+    <menuitem id="menu_team_management_all_completion_requests"
+              name="All Completion Requests"
+              parent="menu_team_management_completion_requests"
+              sequence="20"
+              action="action_all_completion_requests"
+              groups="custom_project.group_team_manager"/>
+
     <!-- Timesheet Log — manager and HR only -->
     <menuitem id="menu_team_management_timesheet_log"
               name="Timesheets"
