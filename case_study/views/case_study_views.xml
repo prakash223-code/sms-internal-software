@@ -75,8 +75,6 @@
                         <field name="name" string="Name"/>
                         <field name="code"/>
                         <field name="active"/>
-
-
                     </group>
                     <field name="description" placeholder="Description..."/>
 
@@ -105,26 +103,6 @@
         <field name="name">Case Study</field>
         <field name="res_model">case.study.department</field>
         <field name="view_mode">kanban,list,form</field>
-    </record>
-
-    <!-- ==================== SOFTWARE ==================== -->
-
-    <record id="case_study_software_list" model="ir.ui.view">
-        <field name="name">case.study.software.list</field>
-        <field name="model">case.study.software</field>
-        <field name="arch" type="xml">
-            <list editable="bottom">
-                <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="active"/>
-            </list>
-        </field>
-    </record>
-
-    <record id="action_case_study_software" model="ir.actions.act_window">
-        <field name="name">Software</field>
-        <field name="res_model">case.study.software</field>
-        <field name="view_mode">list,form</field>
     </record>
 
     <!-- ==================== TAGS ==================== -->
@@ -215,7 +193,6 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <!-- Confirm & Draft buttons: HR/Manager only -->
                     <button name="action_confirm" type="object"
                             string="Confirm" class="btn-primary"
                             invisible="locked"
@@ -228,13 +205,8 @@
                 </header>
                 <sheet>
                     <field name="locked" invisible="1"/>
-                    <!-- Drives readonly on Case Study Details / Documents /
-                         Timesheet tabs: True for HR/Manager, or for an
-                         employee listed in assigned_employee_ids. Everyone
-                         else can read these tabs but not edit them. -->
                     <field name="can_edit_case_study" invisible="1"/>
 
-                    <!-- Smart Button: Open Project -->
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_project" type="object"
                                 class="oe_stat_button" icon="fa-folder-open-o"
@@ -246,7 +218,6 @@
                         </button>
                     </div>
 
-                    <!-- Title area -->
                     <div class="oe_title">
                         <span class="o_form_label text-muted">
                             <field name="code" readonly="1"/>
@@ -263,14 +234,12 @@
                                groups="hr.group_hr_user"/>
                     </div>
 
-                    <!-- Main Fields -->
                     <group>
                         <group string="General Info">
                             <field name="department_id" readonly="locked or not can_edit_case_study"/>
                             <field name="project_id" readonly="locked or not can_edit_case_study"/>
                             <field name="partner_id" readonly="locked or not can_edit_case_study"/>
                             <field name="user_id" readonly="locked or not can_edit_case_study"/>
-                            <!-- Assigned Employees: HR/Manager only - employees cannot see private hr fields -->
                             <field name="assigned_employee_ids"
                                    widget="many2many_tags"
                                    string="Assigned Employees"
@@ -287,7 +256,6 @@
                         </group>
                     </group>
 
-                    <!-- Tabs -->
                     <notebook>
 
                         <page string="Overview" name="description">
@@ -343,9 +311,7 @@
                                 <list editable="bottom">
                                     <field name="date"/>
                                     <field name="employee_id"/>
-                                    <field name="project_id"/>
-                                    <field name="task_id"/>
-                                    <field name="software_id"/>
+                                    <field name="software_name" string="Software Used"/>
                                     <field name="description"/>
                                     <field name="hours"/>
                                 </list>
@@ -361,15 +327,12 @@
 
     <!-- ==================== ACTIONS ==================== -->
 
-    <!-- All Case Studies — now read-only browse for everyone (ir.rule
-         scopes write to assigned employees / HR), full edit for HR/Manager -->
     <record id="action_case_study" model="ir.actions.act_window">
         <field name="name">All Case Studies</field>
         <field name="res_model">case.study</field>
         <field name="view_mode">kanban,list,form</field>
     </record>
 
-    <!-- Employee: Only assigned case studies - READ ONLY via security CSV -->
     <record id="action_case_study_my" model="ir.actions.act_window">
         <field name="name">My Case Studies</field>
         <field name="res_model">case.study</field>
@@ -379,31 +342,23 @@
 
     <!-- ==================== MENUS ==================== -->
 
-    <!-- Single root menu - everyone sees the Case Study app -->
     <menuitem id="menu_case_study_root"
               name="Case Study"
               sequence="50"
               web_icon="case_study,static/description/icon.png"/>
 
-    <!-- Employee: My Case Studies (assigned to them only) -->
     <menuitem id="menu_case_study_my"
               name="My Case Studies"
               parent="menu_case_study_root"
               action="action_case_study_my"
               sequence="5"/>
 
-    <!-- All Case Studies — opened up to every internal user for read-only
-         browsing now that the ir.rule grants read on every record;
-         actual editing inside is still gated per-record by
-         can_edit_case_study in the form view, and enforced server-side
-         by the write-scoped ir.rule. -->
     <menuitem id="menu_case_study_all"
               name="All Case Studies"
               parent="menu_case_study_root"
               action="action_case_study"
               sequence="10"/>
 
-    <!-- HR/Manager: Browse by Department (Kanban) -->
     <menuitem id="menu_case_study_by_dept"
               name="By Department"
               parent="menu_case_study_root"
@@ -429,12 +384,6 @@
               parent="menu_case_study_config"
               action="action_case_study_stage"
               sequence="20"/>
-
-    <menuitem id="menu_case_study_software"
-              name="Software"
-              parent="menu_case_study_config"
-              action="action_case_study_software"
-              sequence="30"/>
 
     <menuitem id="menu_case_study_tag"
               name="Tags"

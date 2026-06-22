@@ -17,23 +17,16 @@ class CaseStudyDepartment(models.Model):
     _description = 'Case Study Department'
     _order = 'sequence, name'
 
-    # ── Char field — free text department name ────────────────
-    # (CFD, IT, Odoo ERP etc. — user types or selects)
     name = fields.Char(string='Department Name', required=True)
-
     code = fields.Char(string='Code', help='e.g. CFD, IT, ERP')
     sequence = fields.Integer(default=10)
     color = fields.Integer(default=0)
     description = fields.Text()
     active = fields.Boolean(default=True)
 
-    # ── ONE department → MANY case studies ───────────────────
-    # case.study has department_id = Many2one(case.study.department)
-    # So this One2many shows all case studies under this dept
     case_study_ids = fields.One2many(
         'case.study', 'department_id', string='Case Studies'
     )
-
     case_study_count = fields.Integer(
         string='Case Studies',
         compute='_compute_case_study_count',
@@ -58,6 +51,7 @@ class CaseStudyDepartment(models.Model):
 
 
 class CaseStudySoftware(models.Model):
+    # Kept for data integrity — no longer exposed in Configuration menus
     _name = 'case.study.software'
     _description = 'Case Study Software'
     _order = 'sequence, name'
@@ -86,12 +80,8 @@ class CaseStudyTimesheet(models.Model):
     date = fields.Date(required=True, default=fields.Date.context_today)
     hours = fields.Float(required=True)
     description = fields.Char(string='Work Description')
-    project_id = fields.Many2one('project.project', string='Project')
-    task_id = fields.Many2one(
-        'project.task', string='Task',
-        domain="[('project_id', '=', project_id)]"
-    )
-    software_id = fields.Many2one('case.study.software', string='Software Used')
+    # Free-text field — no longer linked to case.study.software master list
+    software_name = fields.Char(string='Software Used')
 
 
 class CaseStudyDocument(models.Model):
@@ -144,14 +134,12 @@ class CaseStudy(models.Model):
     color = fields.Integer(default=0)
     locked = fields.Boolean(string='Locked', default=False, tracking=True)
 
-    # ── Department: select from department list ───────────────
     department_id = fields.Many2one(
         'case.study.department',
         string='Department',
         required=True,
         tracking=True,
     )
-
     project_id = fields.Many2one('project.project', string='Project', tracking=True)
     stage_id = fields.Many2one(
         'case.study.stage', string='Stage', tracking=True,
