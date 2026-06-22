@@ -28,6 +28,7 @@
         ],
     },
     'installable': True,
-    'application': False,
+    'application': True,
+    'web_icon': 'custom_work_report,static/description/icon.png',
     'auto_install': False,
 }
