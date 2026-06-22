@@ -3,29 +3,29 @@ from odoo import _, api, fields, models
 
 
 class CaseStudyStage(models.Model):
-    _name        = 'case.study.stage'
+    _name = 'case.study.stage'
     _description = 'Case Study Stage'
-    _order       = 'sequence, id'
+    _order = 'sequence, id'
 
-    name     = fields.Char(required=True)
+    name = fields.Char(required=True)
     sequence = fields.Integer(default=10)
-    fold     = fields.Boolean(default=False)
+    fold = fields.Boolean(default=False)
 
 
 class CaseStudyDepartment(models.Model):
-    _name        = 'case.study.department'
+    _name = 'case.study.department'
     _description = 'Case Study Department'
-    _order       = 'sequence, name'
+    _order = 'sequence, name'
 
     # ── Char field — free text department name ────────────────
     # (CFD, IT, Odoo ERP etc. — user types or selects)
-    name        = fields.Char(string='Department Name', required=True)
+    name = fields.Char(string='Department Name', required=True)
 
-    code        = fields.Char(string='Code', help='e.g. CFD, IT, ERP')
-    sequence    = fields.Integer(default=10)
-    color       = fields.Integer(default=0)
+    code = fields.Char(string='Code', help='e.g. CFD, IT, ERP')
+    sequence = fields.Integer(default=10)
+    color = fields.Integer(default=0)
     description = fields.Text()
-    active      = fields.Boolean(default=True)
+    active = fields.Boolean(default=True)
 
     # ── ONE department → MANY case studies ───────────────────
     # case.study has department_id = Many2one(case.study.department)
@@ -48,66 +48,66 @@ class CaseStudyDepartment(models.Model):
     def action_view_case_studies(self):
         self.ensure_one()
         return {
-            'type':      'ir.actions.act_window',
-            'name':      self.name,
+            'type': 'ir.actions.act_window',
+            'name': self.name,
             'res_model': 'case.study',
             'view_mode': 'kanban,list,form',
-            'domain':    [('department_id', '=', self.id)],
-            'context':   {'default_department_id': self.id},
+            'domain': [('department_id', '=', self.id)],
+            'context': {'default_department_id': self.id},
         }
 
 
 class CaseStudySoftware(models.Model):
-    _name        = 'case.study.software'
+    _name = 'case.study.software'
     _description = 'Case Study Software'
-    _order       = 'sequence, name'
+    _order = 'sequence, name'
 
-    name     = fields.Char(required=True)
+    name = fields.Char(required=True)
     sequence = fields.Integer(default=10)
-    active   = fields.Boolean(default=True)
+    active = fields.Boolean(default=True)
 
 
 class CaseStudyTag(models.Model):
-    _name        = 'case.study.tag'
+    _name = 'case.study.tag'
     _description = 'Case Study Tag'
-    _order       = 'name'
+    _order = 'name'
 
-    name  = fields.Char(required=True)
+    name = fields.Char(required=True)
     color = fields.Integer(default=0)
 
 
 class CaseStudyTimesheet(models.Model):
-    _name        = 'case.study.timesheet'
+    _name = 'case.study.timesheet'
     _description = 'Case Study Timesheet Line'
-    _order       = 'date desc, id desc'
+    _order = 'date desc, id desc'
 
     case_study_id = fields.Many2one('case.study', required=True, ondelete='cascade')
-    employee_id   = fields.Many2one('hr.employee', string='Employee', required=True)
-    date          = fields.Date(required=True, default=fields.Date.context_today)
-    hours         = fields.Float(required=True)
-    description   = fields.Char(string='Work Description')
-    project_id    = fields.Many2one('project.project', string='Project')
-    task_id       = fields.Many2one(
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    date = fields.Date(required=True, default=fields.Date.context_today)
+    hours = fields.Float(required=True)
+    description = fields.Char(string='Work Description')
+    project_id = fields.Many2one('project.project', string='Project')
+    task_id = fields.Many2one(
         'project.task', string='Task',
         domain="[('project_id', '=', project_id)]"
     )
-    software_id   = fields.Many2one('case.study.software', string='Software Used')
+    software_id = fields.Many2one('case.study.software', string='Software Used')
 
 
 class CaseStudyDocument(models.Model):
-    _name        = 'case.study.document'
+    _name = 'case.study.document'
     _description = 'Case Study Document'
-    _order       = 'uploaded_on desc, id desc'
+    _order = 'uploaded_on desc, id desc'
 
     case_study_id = fields.Many2one('case.study', required=True, ondelete='cascade')
-    name          = fields.Char(string='Document Name', required=True)
-    category      = fields.Char(string='Category')
-    file_data     = fields.Binary(string='File', attachment=True)
-    file_name     = fields.Char(string='File Name')
-    mimetype      = fields.Char(compute='_compute_file_info', store=True)
-    type          = fields.Char(string='Type', compute='_compute_file_info', store=True)
-    preview       = fields.Binary(string='Preview', compute='_compute_preview')
-    uploaded_on   = fields.Datetime(string='Uploaded On', default=fields.Datetime.now)
+    name = fields.Char(string='Document Name', required=True)
+    category = fields.Char(string='Category')
+    file_data = fields.Binary(string='File', attachment=True)
+    file_name = fields.Char(string='File Name')
+    mimetype = fields.Char(compute='_compute_file_info', store=True)
+    type = fields.Char(string='Type', compute='_compute_file_info', store=True)
+    preview = fields.Binary(string='Preview', compute='_compute_preview')
+    uploaded_on = fields.Datetime(string='Uploaded On', default=fields.Datetime.now)
 
     @api.depends('file_name')
     def _compute_file_info(self):
@@ -115,34 +115,34 @@ class CaseStudyDocument(models.Model):
             ext = ''
             if rec.file_name and '.' in rec.file_name:
                 ext = rec.file_name.rsplit('.', 1)[-1].upper()
-            rec.type     = ext or False
-            guessed, _   = mimetypes.guess_type(rec.file_name or '')
+            rec.type = ext or False
+            guessed, _ = mimetypes.guess_type(rec.file_name or '')
             rec.mimetype = guessed or False
 
     @api.depends('file_data', 'mimetype')
     def _compute_preview(self):
         for rec in self:
             rec.preview = rec.file_data if (
-                rec.mimetype and rec.mimetype.startswith('image/')
+                    rec.mimetype and rec.mimetype.startswith('image/')
             ) else False
 
 
 class CaseStudy(models.Model):
-    _name        = 'case.study'
+    _name = 'case.study'
     _description = 'Case Study'
-    _inherit     = ['mail.thread', 'mail.activity.mixin']
-    _order       = 'sequence, id desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'sequence, id desc'
 
-    name        = fields.Char(string='case study name', required=True, tracking=True)
-    code        = fields.Char(
+    name = fields.Char(string='case study name', required=True, tracking=True)
+    code = fields.Char(
         string='Case Study No.', copy=False, readonly=True,
         default=lambda self: _('New'),
     )
     date_assign = fields.Date(string='Assigned Date')
-    sequence    = fields.Integer(default=10)
-    active      = fields.Boolean(default=True)
-    color       = fields.Integer(default=0)
-    locked      = fields.Boolean(string='Locked', default=False, tracking=True)
+    sequence = fields.Integer(default=10)
+    active = fields.Boolean(default=True)
+    color = fields.Integer(default=0)
+    locked = fields.Boolean(string='Locked', default=False, tracking=True)
 
     # ── Department: select from department list ───────────────
     department_id = fields.Many2one(
@@ -153,7 +153,7 @@ class CaseStudy(models.Model):
     )
 
     project_id = fields.Many2one('project.project', string='Project', tracking=True)
-    stage_id   = fields.Many2one(
+    stage_id = fields.Many2one(
         'case.study.stage', string='Stage', tracking=True,
         group_expand='_read_group_stage_ids',
         default=lambda self: self.env['case.study.stage'].search(
@@ -176,30 +176,30 @@ class CaseStudy(models.Model):
         tracking=True,
     )
     partner_id = fields.Many2one('res.partner', string='Client', tracking=True)
-    priority   = fields.Selection(
+    priority = fields.Selection(
         [('0', 'Normal'), ('1', 'Important')],
         string='Priority', default='0',
     )
-    tag_ids    = fields.Many2many('case.study.tag', string='Tags')
+    tag_ids = fields.Many2many('case.study.tag', string='Tags')
 
     date_start = fields.Date(string='Start Date')
-    date_end   = fields.Date(string='End Date')
+    date_end = fields.Date(string='End Date')
 
-    description       = fields.Html(string='Overview')
+    description = fields.Html(string='Overview')
     problem_statement = fields.Html(string='Problem Statement')
-    objective         = fields.Html(string='Objective / Scope')
-    methodology       = fields.Html(string='Methodology / Approach')
-    challenges        = fields.Html(string='Challenges Faced')
-    results           = fields.Html(string='Results / Outcome')
-    conclusion        = fields.Html(string='Conclusion')
+    objective = fields.Html(string='Objective / Scope')
+    methodology = fields.Html(string='Methodology / Approach')
+    challenges = fields.Html(string='Challenges Faced')
+    results = fields.Html(string='Results / Outcome')
+    conclusion = fields.Html(string='Conclusion')
 
     planned_hours = fields.Float(string='Planned Hours')
 
-    document_ids  = fields.One2many('case.study.document',  'case_study_id', string='Documents')
+    document_ids = fields.One2many('case.study.document', 'case_study_id', string='Documents')
     timesheet_ids = fields.One2many('case.study.timesheet', 'case_study_id', string='Timesheet')
 
     document_count = fields.Integer(compute='_compute_document_count')
-    total_hours    = fields.Float(compute='_compute_total_hours', store=True)
+    total_hours = fields.Float(compute='_compute_total_hours', store=True)
 
     @api.depends('document_ids')
     def _compute_document_count(self):
@@ -210,6 +210,21 @@ class CaseStudy(models.Model):
     def _compute_total_hours(self):
         for rec in self:
             rec.total_hours = sum(rec.timesheet_ids.mapped('hours'))
+
+    can_edit_case_study = fields.Boolean(
+        string='Can Edit',
+        compute='_compute_can_edit_case_study',
+        help='True if the current user is HR/Manager, or is one of this '
+             'case study\'s assigned employees. Drives readonly on the '
+             'Case Study Details, Documents, and Timesheet tabs.',
+    )
+
+    @api.depends('assigned_employee_ids')
+    def _compute_can_edit_case_study(self):
+        user = self.env.user
+        is_hr = user.has_group('hr.group_hr_user')
+        for rec in self:
+            rec.can_edit_case_study = is_hr or user in rec.assigned_employee_ids.user_id
 
     def _read_group_stage_ids(self, stages, domain):
         return self.env['case.study.stage'].search([], order='sequence asc')
@@ -223,11 +238,11 @@ class CaseStudy(models.Model):
     def action_open_project(self):
         self.ensure_one()
         return {
-            'type':      'ir.actions.act_window',
-            'name':      self.project_id.name,
+            'type': 'ir.actions.act_window',
+            'name': self.project_id.name,
             'res_model': 'project.project',
             'view_mode': 'form',
-            'res_id':    self.project_id.id,
+            'res_id': self.project_id.id,
         }
 
     @api.model_create_multi
@@ -235,6 +250,6 @@ class CaseStudy(models.Model):
         for vals in vals_list:
             if vals.get('code', _('New')) == _('New'):
                 vals['code'] = (
-                    self.env['ir.sequence'].next_by_code('case.study') or _('New')
+                        self.env['ir.sequence'].next_by_code('case.study') or _('New')
                 )
         return super().create(vals_list)

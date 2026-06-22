@@ -228,6 +228,11 @@
                 </header>
                 <sheet>
                     <field name="locked" invisible="1"/>
+                    <!-- Drives readonly on Case Study Details / Documents /
+                         Timesheet tabs: True for HR/Manager, or for an
+                         employee listed in assigned_employee_ids. Everyone
+                         else can read these tabs but not edit them. -->
+                    <field name="can_edit_case_study" invisible="1"/>
 
                     <!-- Smart Button: Open Project -->
                     <div class="oe_button_box" name="button_box">
@@ -247,7 +252,8 @@
                             <field name="code" readonly="1"/>
                         </span>
                         <h1 class="d-flex align-items-center gap-2">
-                            <field name="name" placeholder="Case Study Title" readonly="locked"/>
+                            <field name="name" placeholder="Case Study Title"
+                                   readonly="locked or not can_edit_case_study"/>
                             <field name="priority" widget="priority" readonly="locked"
                                    groups="hr.group_hr_user"/>
                         </h1>
@@ -260,10 +266,10 @@
                     <!-- Main Fields -->
                     <group>
                         <group string="General Info">
-                            <field name="department_id" readonly="locked"/>
-                            <field name="project_id" readonly="locked"/>
-                            <field name="partner_id" readonly="locked"/>
-                            <field name="user_id" readonly="locked"/>
+                            <field name="department_id" readonly="locked or not can_edit_case_study"/>
+                            <field name="project_id" readonly="locked or not can_edit_case_study"/>
+                            <field name="partner_id" readonly="locked or not can_edit_case_study"/>
+                            <field name="user_id" readonly="locked or not can_edit_case_study"/>
                             <!-- Assigned Employees: HR/Manager only - employees cannot see private hr fields -->
                             <field name="assigned_employee_ids"
                                    widget="many2many_tags"
@@ -272,10 +278,10 @@
                                    groups="hr.group_hr_user"/>
                         </group>
                         <group string="Schedule &amp; Hours">
-                            <field name="date_assign" readonly="locked"/>
-                            <field name="date_start" readonly="locked"/>
-                            <field name="date_end" readonly="locked"/>
-                            <field name="planned_hours" readonly="locked"/>
+                            <field name="date_assign" readonly="locked or not can_edit_case_study"/>
+                            <field name="date_start" readonly="locked or not can_edit_case_study"/>
+                            <field name="date_end" readonly="locked or not can_edit_case_study"/>
+                            <field name="planned_hours" readonly="locked or not can_edit_case_study"/>
                             <field name="total_hours" widget="progressbar"
                                    options="{'current_value': 'total_hours', 'max_value': 'planned_hours'}"/>
                         </group>
@@ -294,31 +300,31 @@
                             <separator string="Problem Statement"/>
                             <field name="problem_statement"
                                    placeholder="What problem/requirement did the client have?"
-                                   readonly="locked" nolabel="1"/>
+                                   readonly="locked or not can_edit_case_study" nolabel="1"/>
                             <separator string="Objective / Scope"/>
                             <field name="objective"
                                    placeholder="What exactly was analyzed / delivered?"
-                                   readonly="locked" nolabel="1"/>
+                                   readonly="locked or not can_edit_case_study" nolabel="1"/>
                             <separator string="Methodology / Approach"/>
                             <field name="methodology"
                                    placeholder="How was the work carried out?"
-                                   readonly="locked" nolabel="1"/>
+                                   readonly="locked or not can_edit_case_study" nolabel="1"/>
                             <separator string="Challenges Faced"/>
                             <field name="challenges"
                                    placeholder="Technical difficulties and how they were solved..."
-                                   readonly="locked" nolabel="1"/>
+                                   readonly="locked or not can_edit_case_study" nolabel="1"/>
                             <separator string="Results / Outcome"/>
                             <field name="results"
                                    placeholder="Key findings, improvements, numbers achieved..."
-                                   readonly="locked" nolabel="1"/>
+                                   readonly="locked or not can_edit_case_study" nolabel="1"/>
                             <separator string="Conclusion"/>
                             <field name="conclusion"
                                    placeholder="Summary and recommendations..."
-                                   readonly="locked" nolabel="1"/>
+                                   readonly="locked or not can_edit_case_study" nolabel="1"/>
                         </page>
 
                         <page string="Documents" name="documents">
-                            <field name="document_ids" readonly="locked">
+                            <field name="document_ids" readonly="locked or not can_edit_case_study">
                                 <list editable="bottom">
                                     <field name="name" string="Document Name"/>
                                     <field name="category" string="Category"/>
@@ -333,7 +339,7 @@
                         </page>
 
                         <page string="Timesheet" name="timesheet">
-                            <field name="timesheet_ids" readonly="locked">
+                            <field name="timesheet_ids" readonly="locked or not can_edit_case_study">
                                 <list editable="bottom">
                                     <field name="date"/>
                                     <field name="employee_id"/>
@@ -355,7 +361,8 @@
 
     <!-- ==================== ACTIONS ==================== -->
 
-    <!-- HR/Manager: All Case Studies -->
+    <!-- All Case Studies — now read-only browse for everyone (ir.rule
+         scopes write to assigned employees / HR), full edit for HR/Manager -->
     <record id="action_case_study" model="ir.actions.act_window">
         <field name="name">All Case Studies</field>
         <field name="res_model">case.study</field>
@@ -385,13 +392,16 @@
               action="action_case_study_my"
               sequence="5"/>
 
-    <!-- HR/Manager only: All Case Studies grouped by department -->
+    <!-- All Case Studies — opened up to every internal user for read-only
+         browsing now that the ir.rule grants read on every record;
+         actual editing inside is still gated per-record by
+         can_edit_case_study in the form view, and enforced server-side
+         by the write-scoped ir.rule. -->
     <menuitem id="menu_case_study_all"
               name="All Case Studies"
               parent="menu_case_study_root"
               action="action_case_study"
-              sequence="10"
-              groups="hr.group_hr_user"/>
+              sequence="10"/>
 
     <!-- HR/Manager: Browse by Department (Kanban) -->
     <menuitem id="menu_case_study_by_dept"
