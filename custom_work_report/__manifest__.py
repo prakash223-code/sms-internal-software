@@ -11,6 +11,7 @@
         'views/work_report_views.xml',
     ],
     'installable': True,
-    'application': False,
+    'application': True,
+    'web_icon': 'custom_expense,static/description/icon.png',
     'post_init_hook': 'post_init_hook',  # ← add this
 }
