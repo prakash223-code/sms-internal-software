@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ========== STAGE VIEWS ========== -->
+    <!-- ==================== STAGE ==================== -->
 
     <record id="case_study_stage_list" model="ir.ui.view">
         <field name="name">case.study.stage.list</field>
@@ -21,7 +21,7 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <!-- ========== DEPARTMENT VIEWS ========== -->
+    <!-- ==================== DEPARTMENT ==================== -->
 
     <record id="case_study_department_kanban" model="ir.ui.view">
         <field name="name">case.study.department.kanban</field>
@@ -35,19 +35,14 @@
                 <templates>
                     <t t-name="card">
                         <div class="p-3">
-                            <strong class="fs-5">
-                                <field name="name"/>
-                            </strong>
+                            <strong class="fs-5"><field name="name"/></strong>
                             <div class="text-muted" t-if="record.code.value">
                                 <field name="code"/>
                             </div>
                             <div class="mt-2">
-                                <!-- ✅ Click pannaa stages kaattum -->
-                                <button name="action_view_case_studies"
-                                        type="object"
+                                <button name="action_view_case_studies" type="object"
                                         class="btn btn-primary btn-sm">
-                                    <field name="case_study_count"/>
-                                    Case Studies
+                                    <field name="case_study_count"/> Case Studies
                                 </button>
                             </div>
                         </div>
@@ -77,23 +72,42 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="name"/>
+                        <field name="name" string="Name"/>
                         <field name="code"/>
-                        <field name="sequence"/>
+                        <field name="active"/>
+
+
                     </group>
                     <field name="description" placeholder="Description..."/>
+
+                    <separator string="Case Studies"/>
+                    <field name="case_study_ids">
+                        <list editable="bottom">
+                            <field name="code" readonly="1" string="CS No."/>
+                            <field name="date_assign" string="Date"/>
+                            <field name="name" string="Case Study Title" required="1"/>
+                            <field name="project_id" string="Project"/>
+                            <field name="assigned_employee_ids"
+                                   widget="many2many_tags"
+                                   string="Assigned Employees"
+                                   groups="hr.group_hr_user"/>
+                            <field name="stage_id" string="Stage"/>
+                            <field name="user_id" string="Responsible"/>
+                            <field name="total_hours" string="Hours" readonly="1"/>
+                        </list>
+                    </field>
                 </sheet>
             </form>
         </field>
     </record>
 
     <record id="action_case_study_department" model="ir.actions.act_window">
-        <field name="name">Departments</field>
+        <field name="name">Case Study</field>
         <field name="res_model">case.study.department</field>
         <field name="view_mode">kanban,list,form</field>
     </record>
 
-    <!-- ========== SOFTWARE VIEWS (dropdown list for Timesheet) ========== -->
+    <!-- ==================== SOFTWARE ==================== -->
 
     <record id="case_study_software_list" model="ir.ui.view">
         <field name="name">case.study.software.list</field>
@@ -113,7 +127,7 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <!-- ========== TAG VIEWS ========== -->
+    <!-- ==================== TAGS ==================== -->
 
     <record id="case_study_tag_list" model="ir.ui.view">
         <field name="name">case.study.tag.list</field>
@@ -132,34 +146,34 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <!-- ========== CASE STUDY VIEWS ========== -->
+    <!-- ==================== CASE STUDY KANBAN ==================== -->
 
     <record id="case_study_kanban" model="ir.ui.view">
         <field name="name">case.study.kanban</field>
         <field name="model">case.study</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="stage_id"
-                    quick_create="false"
-                    group_create="false">
+            <kanban default_group_by="stage_id" quick_create="false" group_create="false">
                 <field name="name"/>
+                <field name="code"/>
                 <field name="stage_id"/>
                 <field name="department_id"/>
                 <field name="user_id"/>
                 <field name="total_hours"/>
+                <field name="priority"/>
                 <field name="color"/>
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_global_click p-2">
-                            <strong>
-                                <field name="name"/>
-                            </strong>
-                            <div class="text-muted small">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted small"><field name="code"/></span>
+                                <field name="priority" widget="priority"/>
+                            </div>
+                            <strong><field name="name"/></strong>
+                            <div class="text-muted small mt-1">
                                 <field name="department_id"/>
                             </div>
-                            <div class="d-flex justify-content-between
-                                        align-items-center mt-2">
-                                <field name="user_id"
-                                       widget="many2one_avatar_user"/>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <field name="user_id" widget="many2one_avatar_user"/>
                                 <span class="badge bg-info small">
                                     <field name="total_hours"/> h
                                 </span>
@@ -171,6 +185,8 @@
         </field>
     </record>
 
+    <!-- ==================== CASE STUDY LIST ==================== -->
+
     <record id="case_study_list" model="ir.ui.view">
         <field name="name">case.study.list</field>
         <field name="model">case.study</field>
@@ -178,15 +194,20 @@
             <list>
                 <field name="code"/>
                 <field name="name"/>
-                <field name="partner_id"/>
                 <field name="department_id"/>
+                <field name="partner_id"/>
                 <field name="stage_id"/>
                 <field name="user_id"/>
+                <field name="assigned_employee_ids" widget="many2many_tags"
+                       string="Assigned Employees"
+                       groups="hr.group_hr_user"/>
                 <field name="priority" widget="priority"/>
                 <field name="total_hours" sum="Total Hours"/>
             </list>
         </field>
     </record>
+
+    <!-- ==================== CASE STUDY FORM ==================== -->
 
     <record id="case_study_form" model="ir.ui.view">
         <field name="name">case.study.form</field>
@@ -194,20 +215,21 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <!-- ✅ Confirm = left side (locks the record) -->
+                    <!-- Confirm & Draft buttons: HR/Manager only -->
                     <button name="action_confirm" type="object"
                             string="Confirm" class="btn-primary"
-                            invisible="locked"/>
+                            invisible="locked"
+                            groups="hr.group_hr_user"/>
                     <button name="action_draft" type="object"
                             string="Set to Draft"
-                            invisible="not locked"/>
-                    <!-- statusbar auto-aligns to the right -->
-                    <field name="stage_id"
-                           widget="statusbar"
-                           options="{'clickable': '1'}"/>
+                            invisible="not locked"
+                            groups="hr.group_hr_user"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
                     <field name="locked" invisible="1"/>
+
+                    <!-- Smart Button: Open Project -->
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_project" type="object"
                                 class="oe_stat_button" icon="fa-folder-open-o"
@@ -218,30 +240,39 @@
                             </div>
                         </button>
                     </div>
+
+                    <!-- Title area -->
                     <div class="oe_title">
                         <span class="o_form_label text-muted">
                             <field name="code" readonly="1"/>
                         </span>
                         <h1 class="d-flex align-items-center gap-2">
-                            <field name="name" placeholder="Case Study Title"
-                                   readonly="locked"/>
-                            <field name="priority" widget="priority"
-                                   readonly="locked"/>
+                            <field name="name" placeholder="Case Study Title" readonly="locked"/>
+                            <field name="priority" widget="priority" readonly="locked"
+                                   groups="hr.group_hr_user"/>
                         </h1>
                         <field name="tag_ids" widget="many2many_tags"
                                options="{'color_field': 'color'}"
-                               placeholder="Tags..." readonly="locked"/>
+                               placeholder="Tags..." readonly="locked"
+                               groups="hr.group_hr_user"/>
                     </div>
+
+                    <!-- Main Fields -->
                     <group>
-                        <group>
+                        <group string="General Info">
                             <field name="department_id" readonly="locked"/>
                             <field name="project_id" readonly="locked"/>
                             <field name="partner_id" readonly="locked"/>
                             <field name="user_id" readonly="locked"/>
-                            <field name="team_user_ids" widget="many2many_tags_avatar"
-                                   readonly="locked"/>
+                            <!-- Assigned Employees: HR/Manager only - employees cannot see private hr fields -->
+                            <field name="assigned_employee_ids"
+                                   widget="many2many_tags"
+                                   string="Assigned Employees"
+                                   readonly="locked"
+                                   groups="hr.group_hr_user"/>
                         </group>
-                        <group>
+                        <group string="Schedule &amp; Hours">
+                            <field name="date_assign" readonly="locked"/>
                             <field name="date_start" readonly="locked"/>
                             <field name="date_end" readonly="locked"/>
                             <field name="planned_hours" readonly="locked"/>
@@ -249,14 +280,17 @@
                                    options="{'current_value': 'total_hours', 'max_value': 'planned_hours'}"/>
                         </group>
                     </group>
+
+                    <!-- Tabs -->
                     <notebook>
-                        <page string="Description" name="description">
+
+                        <page string="Overview" name="description">
                             <field name="description"
                                    placeholder="Short overview of the case study..."
                                    readonly="locked"/>
                         </page>
 
-                        <page string="Case Study" name="case_study_details">
+                        <page string="Case Study Details" name="case_study_details">
                             <separator string="Problem Statement"/>
                             <field name="problem_statement"
                                    placeholder="What problem/requirement did the client have?"
@@ -267,11 +301,11 @@
                                    readonly="locked" nolabel="1"/>
                             <separator string="Methodology / Approach"/>
                             <field name="methodology"
-                                   placeholder="How was the work carried out - steps, standards, simulation type..."
+                                   placeholder="How was the work carried out?"
                                    readonly="locked" nolabel="1"/>
                             <separator string="Challenges Faced"/>
                             <field name="challenges"
-                                   placeholder="Any technical/practical difficulties and how they were solved..."
+                                   placeholder="Technical difficulties and how they were solved..."
                                    readonly="locked" nolabel="1"/>
                             <separator string="Results / Outcome"/>
                             <field name="results"
@@ -289,11 +323,9 @@
                                     <field name="name" string="Document Name"/>
                                     <field name="category" string="Category"/>
                                     <field name="type" string="Type" readonly="1"/>
-                                    <field name="file_data" filename="file_name"
-                                           string="File"/>
+                                    <field name="file_data" filename="file_name" string="File"/>
                                     <field name="file_name" invisible="1"/>
-                                    <field name="preview" widget="image"
-                                           string="Preview"
+                                    <field name="preview" widget="image" string="Preview"
                                            options="{'size': [40, 40]}"/>
                                     <field name="uploaded_on" string="Uploaded On"/>
                                 </list>
@@ -313,6 +345,7 @@
                                 </list>
                             </field>
                         </page>
+
                     </notebook>
                 </sheet>
                 <chatter/>
@@ -320,33 +353,60 @@
         </field>
     </record>
 
+    <!-- ==================== ACTIONS ==================== -->
+
+    <!-- HR/Manager: All Case Studies -->
     <record id="action_case_study" model="ir.actions.act_window">
-        <field name="name">Case Studies</field>
+        <field name="name">All Case Studies</field>
         <field name="res_model">case.study</field>
         <field name="view_mode">kanban,list,form</field>
     </record>
 
-    <!-- ========== MENUS ========== -->
+    <!-- Employee: Only assigned case studies - READ ONLY via security CSV -->
+    <record id="action_case_study_my" model="ir.actions.act_window">
+        <field name="name">My Case Studies</field>
+        <field name="res_model">case.study</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('assigned_employee_ids.user_id', '=', uid)]</field>
+    </record>
 
+    <!-- ==================== MENUS ==================== -->
+
+    <!-- Single root menu - everyone sees the Case Study app -->
     <menuitem id="menu_case_study_root"
               name="Case Study"
-              action="action_case_study_department"
               sequence="50"
               web_icon="case_study,static/description/icon.png"/>
 
-    <!-- ✅ HR & Manager ku mattum - department vaariya illama, ella
-         case studies-um one list la kaattum -->
+    <!-- Employee: My Case Studies (assigned to them only) -->
+    <menuitem id="menu_case_study_my"
+              name="My Case Studies"
+              parent="menu_case_study_root"
+              action="action_case_study_my"
+              sequence="5"/>
+
+    <!-- HR/Manager only: All Case Studies grouped by department -->
     <menuitem id="menu_case_study_all"
               name="All Case Studies"
               parent="menu_case_study_root"
               action="action_case_study"
-              sequence="5"
-              groups="hr.group_hr_user,hr.group_hr_manager"/>
+              sequence="10"
+              groups="hr.group_hr_user"/>
 
+    <!-- HR/Manager: Browse by Department (Kanban) -->
+    <menuitem id="menu_case_study_by_dept"
+              name="By Department"
+              parent="menu_case_study_root"
+              action="action_case_study_department"
+              sequence="15"
+              groups="hr.group_hr_user"/>
+
+    <!-- Configuration: HR/Manager only -->
     <menuitem id="menu_case_study_config"
               name="Configuration"
               parent="menu_case_study_root"
-              sequence="100"/>
+              sequence="100"
+              groups="hr.group_hr_user"/>
 
     <menuitem id="menu_case_study_dept"
               name="Departments"

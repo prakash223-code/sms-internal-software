@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Employees can only read/write their own assigned case studies -->
+        <record id="rule_case_study_employee" model="ir.rule">
+            <field name="name">Case Study: Employee sees only assigned</field>
+            <field name="model_id" ref="model_case_study"/>
+            <field name="domain_force">
+                [('assigned_employee_ids.user_id', '=', user.id)]
+            </field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- HR/Manager sees all case studies - no restriction -->
+        <record id="rule_case_study_hr" model="ir.rule">
+            <field name="name">Case Study: HR sees all</field>
+            <field name="model_id" ref="model_case_study"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- Timesheet: Employee edits only their own lines -->
+        <record id="rule_case_study_timesheet_employee" model="ir.rule">
+            <field name="name">Case Study Timesheet: Employee own lines only</field>
+            <field name="model_id" ref="model_case_study_timesheet"/>
+            <field name="domain_force">
+                [('case_study_id.assigned_employee_ids.user_id', '=', user.id)]
+            </field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>
