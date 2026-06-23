@@ -7,10 +7,16 @@
 }
 
 body.o_sms_login {
-    min-height: 100vh;
+    height: 100vh;
     background: linear-gradient(135deg, var(--sms-green-900) 0%, var(--sms-green-700) 45%, var(--sms-green-500) 100%);
+    background-attachment: fixed;
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    box-sizing: border-box;
 
     &::before, &::after {
         content: "";
@@ -39,6 +45,9 @@ body.o_sms_login {
     background: rgba(255, 255, 255, 0.94) !important;
     backdrop-filter: blur(10px);
     border-radius: 1.25rem !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 100%;           
     box-shadow: 0 1.5rem 3rem rgba(11, 61, 46, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.5);
     max-width: 380px !important;
