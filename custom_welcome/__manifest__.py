@@ -9,14 +9,14 @@
         'hr',
         'hr_attendance',
         'hr_holidays',
-        'custom_attendance',   # action_toggle_attendance + company.holiday
+        'custom_attendance',  # action_toggle_attendance + company.holiday
     ],
     'data': [
         'security/ir.model.access.csv',
         'data/welcome.quote.csv',
         'views/welcome_views.xml',
-        'views/announcement_views.xml',
         'views/welcome_menu.xml',
+        'views/announcement_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
