@@ -10,14 +10,14 @@
    CSS VARIABLES (light + dark aware)
 ───────────────────────────────────────────────────────────── */
 :root {
-    --o-cp-teal-50:  #f0fdfa;
+    --o-cp-teal-50: #f0fdfa;
     --o-cp-teal-100: #ccfbf1;
     --o-cp-teal-400: #2dd4bf;
     --o-cp-teal-600: #0d9488;
     --o-cp-teal-700: #0f766e;
     --o-cp-teal-900: #134e4a;
 
-    --o-cp-slate-50:  #f8fafc;
+    --o-cp-slate-50: #f8fafc;
     --o-cp-slate-100: #f1f5f9;
     --o-cp-slate-200: #e2e8f0;
     --o-cp-slate-400: #94a3b8;
@@ -25,31 +25,31 @@
     --o-cp-slate-700: #334155;
     --o-cp-slate-900: #0f172a;
 
-    --o-cp-amber-50:  #fffbeb;
+    --o-cp-amber-50: #fffbeb;
     --o-cp-amber-100: #fef3c7;
     --o-cp-amber-600: #d97706;
     --o-cp-amber-900: #78350f;
 
-    --o-cp-red-50:  #fef2f2;
+    --o-cp-red-50: #fef2f2;
     --o-cp-red-100: #fee2e2;
     --o-cp-red-600: #dc2626;
     --o-cp-red-900: #7f1d1d;
 
-    --o-cp-blue-50:  #eff6ff;
+    --o-cp-blue-50: #eff6ff;
     --o-cp-blue-100: #dbeafe;
     --o-cp-blue-600: #2563eb;
     --o-cp-blue-900: #1e3a8a;
 
-    --o-cp-green-50:  #f0fdf4;
+    --o-cp-green-50: #f0fdf4;
     --o-cp-green-100: #dcfce7;
     --o-cp-green-600: #16a34a;
     --o-cp-green-900: #14532d;
 
     --o-cp-radius-sm: 6px;
-    --o-cp-radius:    8px;
+    --o-cp-radius: 8px;
     --o-cp-radius-lg: 12px;
-    --o-cp-shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-    --o-cp-shadow-md: 0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -2px rgba(0,0,0,.05);
+    --o-cp-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .05);
+    --o-cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .08), 0 2px 4px -2px rgba(0, 0, 0, .05);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -66,6 +66,7 @@
     align-items: center;
     gap: 5px;
 }
+
 .o_cp_section_label .fa {
     font-size: 10px;
     opacity: 0.75;
@@ -84,7 +85,12 @@
     gap: 10px;
     margin-bottom: 0;
 }
-.o_cp_banner .fa { margin-top: 2px; flex-shrink: 0; font-size: 14px; }
+
+.o_cp_banner .fa {
+    margin-top: 2px;
+    flex-shrink: 0;
+    font-size: 14px;
+}
 
 /* ── Read-only task banner — shown when can_edit_task is False ── */
 .o_cp_banner_readonly {
@@ -94,6 +100,7 @@
     color: var(--o-cp-amber-900);
     font-weight: 500;
 }
+
 .o_cp_banner_readonly .fa {
     color: var(--o-cp-amber-600);
 }
@@ -110,7 +117,10 @@
     margin-bottom: 12px;
     font-weight: 600;
 }
-.o_cp_req_banner .fa { flex-shrink: 0; }
+
+.o_cp_req_banner .fa {
+    flex-shrink: 0;
+}
 
 .o_cp_req_banner_pending {
     background: var(--o-cp-amber-50);
@@ -118,12 +128,14 @@
     border-left: 4px solid var(--o-cp-amber-600);
     color: var(--o-cp-amber-900);
 }
+
 .o_cp_req_banner_approved {
     background: var(--o-cp-green-50);
     border: 1px solid var(--o-cp-green-100);
     border-left: 4px solid var(--o-cp-green-600);
     color: var(--o-cp-green-900);
 }
+
 .o_cp_req_banner_rejected {
     background: var(--o-cp-red-50);
     border: 1px solid var(--o-cp-red-100);
@@ -142,6 +154,7 @@
     box-shadow: var(--o-cp-shadow);
     transition: box-shadow .15s ease, border-color .15s ease;
 }
+
 .o_cp_team_card:hover {
     box-shadow: var(--o-cp-shadow-md);
     border-color: var(--o-cp-teal-400);
@@ -172,6 +185,7 @@
     flex: 1;
     min-width: 0;
 }
+
 .o_cp_team_title strong {
     display: block;
     font-size: 14px;
@@ -190,6 +204,7 @@
     align-items: center;
     gap: 4px;
 }
+
 .o_cp_lead_star {
     color: var(--o-cp-amber-600);
     font-size: 10px;
@@ -215,11 +230,13 @@
     padding: 3px 8px;
     border-radius: 20px;
 }
+
 .o_cp_badge_members {
     background: var(--o-cp-blue-50);
     color: var(--o-cp-blue-600);
     border: 1px solid var(--o-cp-blue-100);
 }
+
 .o_cp_badge_tasks {
     background: var(--o-cp-teal-50);
     color: var(--o-cp-teal-700);
@@ -237,6 +254,7 @@
     box-shadow: var(--o-cp-shadow);
     transition: box-shadow .15s ease, border-color .15s ease;
 }
+
 .o_cp_task_card:hover {
     box-shadow: var(--o-cp-shadow-md);
     border-color: var(--o-cp-teal-400);
@@ -265,6 +283,7 @@
     gap: 3px;
     margin-bottom: 10px;
 }
+
 .o_cp_task_meta_item {
     font-size: 11.5px;
     color: var(--o-cp-slate-500);
@@ -275,6 +294,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .o_cp_task_meta_item .fa {
     font-size: 10px;
     color: var(--o-cp-slate-400);
@@ -304,6 +324,7 @@
     gap: 6px;
     transition: box-shadow .15s ease;
 }
+
 .o_cp_req_card:hover {
     box-shadow: var(--o-cp-shadow-md);
 }
@@ -354,9 +375,17 @@
 }
 
 /* Kanban column colour coding by state group header */
-.o_kanban_group[data-id="pending"]  > .o_column_title { border-top: 3px solid var(--o-cp-amber-600); }
-.o_kanban_group[data-id="approved"] > .o_column_title { border-top: 3px solid var(--o-cp-green-600); }
-.o_kanban_group[data-id="rejected"] > .o_column_title { border-top: 3px solid var(--o-cp-red-600);   }
+.o_kanban_group[data-id="pending"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-amber-600);
+}
+
+.o_kanban_group[data-id="approved"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-green-600);
+}
+
+.o_kanban_group[data-id="rejected"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-red-600);
+}
 
 /* ─────────────────────────────────────────────────────────────
    EMPLOYEE FORM — Team Lead badge
@@ -374,6 +403,7 @@
     border-radius: 20px;
     margin: 4px 0 8px;
 }
+
 .o_cp_lead_star_badge {
     color: var(--o-cp-amber-600);
     font-size: 11px;
@@ -382,40 +412,232 @@
 /* ─────────────────────────────────────────────────────────────
    TASK KANBAN STATE COLUMN HEADERS
 ───────────────────────────────────────────────────────────── */
-.o_kanban_group[data-id="draft"]       > .o_column_title { border-top: 3px solid var(--o-cp-slate-400);  }
-.o_kanban_group[data-id="assigned"]    > .o_column_title { border-top: 3px solid var(--o-cp-blue-600);   }
-.o_kanban_group[data-id="in_progress"] > .o_column_title { border-top: 3px solid var(--o-cp-teal-600);   }
-.o_kanban_group[data-id="completed"]   > .o_column_title { border-top: 3px solid var(--o-cp-amber-600);  }
-.o_kanban_group[data-id="verified"]    > .o_column_title { border-top: 3px solid var(--o-cp-green-600);  }
-.o_kanban_group[data-id="closed"]      > .o_column_title { border-top: 3px solid var(--o-cp-slate-700);  }
+.o_kanban_group[data-id="draft"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-slate-400);
+}
+
+.o_kanban_group[data-id="assigned"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-blue-600);
+}
+
+.o_kanban_group[data-id="in_progress"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-teal-600);
+}
+
+.o_kanban_group[data-id="completed"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-amber-600);
+}
+
+.o_kanban_group[data-id="verified"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-green-600);
+}
+
+.o_kanban_group[data-id="closed"] > .o_column_title {
+    border-top: 3px solid var(--o-cp-slate-700);
+}
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
-    .o_cp_team_card     { padding: 11px 13px; }
-    .o_cp_team_icon     { width: 32px; height: 32px; font-size: 14px; }
-    .o_cp_task_card     { padding: 10px 12px; }
-    .o_cp_req_card      { padding: 10px 12px; }
-    .o_cp_req_banner    { padding: 9px 12px; font-size: 12.5px; }
-    .o_cp_section_label { font-size: 10px; }
+    .o_cp_team_card {
+        padding: 11px 13px;
+    }
+
+    .o_cp_team_icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .o_cp_task_card {
+        padding: 10px 12px;
+    }
+
+    .o_cp_req_card {
+        padding: 10px 12px;
+    }
+
+    .o_cp_req_banner {
+        padding: 9px 12px;
+        font-size: 12.5px;
+    }
+
+    .o_cp_section_label {
+        font-size: 10px;
+    }
 }
 
 @media (max-width: 575px) {
-    .o_cp_team_card_footer  { flex-direction: column; gap: 5px; }
-    .o_cp_task_card_top     { flex-direction: column; gap: 5px; }
-    .o_cp_badge_team_lead   { font-size: 11px; padding: 2px 8px; }
+    .o_cp_team_card_footer {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .o_cp_task_card_top {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .o_cp_badge_team_lead {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
 }
 
 @media (min-width: 1280px) {
-    .o_cp_team_card  { padding: 16px 18px; }
-    .o_cp_team_icon  { width: 42px; height: 42px; font-size: 18px; border-radius: 9px; }
-    .o_cp_task_card  { padding: 14px 16px; }
-    .o_cp_req_card   { padding: 13px 15px; }
+    .o_cp_team_card {
+        padding: 16px 18px;
+    }
+
+    .o_cp_team_icon {
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+        border-radius: 9px;
+    }
+
+    .o_cp_task_card {
+        padding: 14px 16px;
+    }
+
+    .o_cp_req_card {
+        padding: 13px 15px;
+    }
 }
 
 @media (hover: none) and (pointer: coarse) {
     .o_cp_team_card:active,
     .o_cp_task_card:active,
-    .o_cp_req_card:active { opacity: 0.95; }
+    .o_cp_req_card:active {
+        opacity: 0.95;
+    }
+}
+
+/* ── State-accent left border on task cards (mirrors kanban column colors) ── */
+.o_cp_task_card {
+    border-left: 3px solid var(--o-cp-slate-200);
+}
+
+.o_cp_state_draft {
+    border-left-color: var(--o-cp-slate-400);
+}
+
+.o_cp_state_assigned {
+    border-left-color: var(--o-cp-blue-600);
+}
+
+.o_cp_state_in_progress {
+    border-left-color: var(--o-cp-teal-600);
+}
+
+.o_cp_state_completed {
+    border-left-color: var(--o-cp-amber-600);
+}
+
+.o_cp_state_verified {
+    border-left-color: var(--o-cp-green-600);
+}
+
+.o_cp_state_closed {
+    border-left-color: var(--o-cp-slate-700);
+}
+
+/* ── Meta pills row (project / team) ── */
+/* ── Meta row (project / team) — plain text, no pill background ── */
+.o_cp_task_card_meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.o_cp_task_pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.o_cp_task_pill .fa {
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.o_cp_pill_project {
+    color: var(--o-cp-teal-700);
+}
+
+.o_cp_pill_team {
+    color: var(--o-cp-blue-600);
+}
+
+/* ── Divider before footer ── */
+.o_cp_task_card_divider {
+    border-top: 1px solid var(--o-cp-slate-100);
+    margin: 2px 0 8px;
+}
+
+/* ── Footer: assignee + due date ── */
+.o_cp_task_card_footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border-top: none;
+    padding-top: 0;
+}
+
+.o_cp_task_assignee {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.o_cp_task_avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--o-cp-slate-200);
+}
+
+.o_cp_task_assignee_name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--o-cp-slate-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_cp_task_unassigned {
+    font-size: 12px;
+    color: var(--o-cp-slate-400);
+    font-style: italic;
+}
+
+.o_cp_task_due {
+    font-size: 11px;
+    color: var(--o-cp-slate-500);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.o_cp_task_due .fa {
+    font-size: 10px;
+    color: var(--o-cp-slate-400);
 }

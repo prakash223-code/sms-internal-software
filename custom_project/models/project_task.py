@@ -3,6 +3,7 @@ import logging
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Domain
+from markupsafe import Markup
 
 _logger = logging.getLogger(__name__)
 
@@ -157,14 +158,26 @@ class ProjectTask(models.Model):
         When a project is locked (completed), no one may create or edit
         tasks under it except a Manager. This applies even to HR and
         Team Leads, unlike _is_privileged() / _check_edit_access().
+
+        Reads project.is_locked / project.name via sudo(). This method is
+        an internal authorization gate — it should work the same way
+        regardless of whether the current user happens to have ir.rule
+        read access to the project record itself. Without sudo(), an
+        employee with valid task-level access (e.g. cross-team assigned
+        via an approved task.assignment.request) but who is NOT a member
+        of the project's own team trips project.project's "team members
+        see own team only" rule the instant we touch project.is_locked —
+        turning a routine task save into an unrelated AccessError instead
+        of either passing cleanly or raising our own clear UserError.
         """
         if self.env.su or self._is_completion_manager():
             return
-        if project and project.is_locked:
+        project_sudo = project.sudo() if project else project
+        if project_sudo and project_sudo.is_locked:
             raise UserError(
                 _('"%s" is locked as completed. Tasks cannot be created '
                   'or edited until a Manager reopens the project.')
-                % project.name
+                % project_sudo.name
             )
 
     def _check_state_transition_access(self):
@@ -196,6 +209,8 @@ class ProjectTask(models.Model):
                     )
                 )
 
+    _ASSIGNEE_EDITABLE_FIELDS = {'task_state', 'timesheet_ids'}
+
     def _check_edit_access(self, vals):
         """
         Enforce creator-only editing for regular employees.
@@ -203,12 +218,13 @@ class ProjectTask(models.Model):
         • Managers, Team Leads, and HR: unrestricted — may edit any task.
         • Regular employees: may edit any field ONLY on tasks they
           personally created (create_uid == current user).
-        • Exception: the employee a task is assigned to may still update
-          task_state alone (via the Start/Complete/Verify/Close buttons),
-          even if they didn't create the task — this preserves the core
-          task-progression workflow. That narrower check is layered on
-          top of (not instead of) _check_state_transition_access, which
-          already validates the assigned_to match.
+        • Exception: the employee a task is assigned to may still write
+          to _ASSIGNEE_EDITABLE_FIELDS (task_state, timesheet_ids) even
+          if they didn't create the task — this preserves the core
+          task-progression workflow AND timesheet logging. That narrower
+          check is layered on top of (not instead of)
+          _check_state_transition_access, which already validates the
+          assigned_to match for task_state changes specifically.
 
         Internal/system writes (sudo, e.g. assignment-request approval)
         bypass this check entirely via self.env.su.
@@ -221,14 +237,14 @@ class ProjectTask(models.Model):
             return
 
         current_employee = self._get_current_employee()
-        state_only = set(vals.keys()) <= {'task_state'}
+        assignee_editable_only = set(vals.keys()) <= self._ASSIGNEE_EDITABLE_FIELDS
 
         for task in self:
             if task.create_uid.id == self.env.uid:
                 continue  # creator may edit freely
 
-            if state_only and current_employee and task.assigned_to == current_employee:
-                continue  # assignee may still progress task state
+            if assignee_editable_only and current_employee and task.assigned_to == current_employee:
+                continue  # assignee may still progress state / log timesheets
 
             raise UserError(
                 _('You can only edit tasks you created. "%s" was created '
@@ -528,14 +544,21 @@ class ProjectTask(models.Model):
         self.message_notify(
             partner_ids=[partner.id],
             subject=_('Task Assigned to You: %s') % self.name,
-            body=_(
+            # Markup() marks the static <p>/<b> template as trusted-safe HTML.
+            # The %-substitution still escapes each dynamic value
+            # individually (employee.name, task name, project name), so
+            # this stays safe even if one of those ever contains '<' or
+            # '&'. Without Markup(), message_notify can't tell this body
+            # apart from plain text and HTML-escapes the whole thing,
+            # which is why the tags were showing up literally instead of
+            # being rendered.
+            body=Markup(
                 '<p>Hi %s,</p>'
                 '<p>You have been assigned to task <b>%s</b>.</p>'
                 '<p>Project: %s</p>'
             ) % (
-                     employee.name,
-                     self.name,
-                     self.project_id.name if self.project_id else _('N/A'),
-                 ),
-            # record_name=self.name,   ← REMOVED: not supported in Odoo 19
+                employee.name,
+                self.name,
+                self.project_id.name if self.project_id else _('N/A'),
+            ),
         )
