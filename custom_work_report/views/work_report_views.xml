@@ -128,6 +128,11 @@
                                nolabel="1"
                                placeholder="Describe what was accomplished today..."/>
                     </group>
+                    <group string="Attachments">
+                        <field name="attachment_ids"
+                               widget="attachment_preview"
+                               nolabel="1"/>
+                    </group>
                 </sheet>
             </form>
         </field>

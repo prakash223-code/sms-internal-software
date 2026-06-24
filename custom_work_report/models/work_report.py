@@ -21,7 +21,7 @@ class WorkReport(models.Model):
         'hr.employee',
         string='Employee',
         required=True,
-        readonly=True,          # ← always readonly, set by system
+        readonly=True,
         default=lambda self: self._default_employee()
     )
     project_id = fields.Many2one(
@@ -35,13 +35,19 @@ class WorkReport(models.Model):
     hours_spent = fields.Float(
         string='Hours Spent'
     )
+    attachment_ids = fields.Many2many(
+        'ir.attachment',
+        'work_report_attachment_rel',
+        'report_id',
+        'attachment_id',
+        string='Attachments',
+    )
     state = fields.Selection([
         ('draft', 'Draft'),
         ('submitted', 'Submitted'),
     ], default='draft', string='Status', readonly=True)
 
     def _default_employee(self):
-        # Find employee linked to current user
         employee = self.env['hr.employee'].search(
             [('user_id', '=', self.env.uid)], limit=1
         )
@@ -54,7 +60,6 @@ class WorkReport(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'work.report.seq'
                 ) or 'New'
-            # Force employee to current user's employee record
             if not vals.get('employee_id'):
                 employee = self.env['hr.employee'].search(
                     [('user_id', '=', self.env.uid)], limit=1

@@ -10,8 +10,13 @@
         'security/ir.model.access.csv',
         'views/work_report_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'custom_work_report/static/src/js/attachment_preview_widget.js',
+        ],
+    },
     'installable': True,
     'application': True,
-    'web_icon': 'custom_expense,static/description/icon.png',
-    'post_init_hook': 'post_init_hook',  # ← add this
+    'web_icon': 'custom_work_report,static/description/icon.png',
+    'post_init_hook': 'post_init_hook',
 }
