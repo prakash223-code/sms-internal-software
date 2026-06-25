@@ -543,6 +543,35 @@
     border-left-color: var(--o-cp-slate-700);
 }
 
+/* ── Closed tasks: greyed-out / done look ──
+   task_state='closed' already adds o_cp_state_closed via the kanban
+   template's t-attf-class; this layers the rest of the "done" visual
+   on top of the existing border-left-color treatment. ── */
+.o_cp_task_card.o_cp_state_closed {
+    opacity: 0.65;
+    background: var(--o-cp-slate-50);
+}
+
+.o_cp_task_card.o_cp_state_closed:hover {
+    opacity: 0.85;
+}
+
+.o_cp_state_closed .o_cp_task_name {
+    color: var(--o-cp-slate-500);
+    text-decoration: line-through;
+}
+
+.o_cp_state_closed .o_cp_pill_project,
+.o_cp_state_closed .o_cp_pill_team,
+.o_cp_state_closed .o_cp_task_assignee_name,
+.o_cp_state_closed .o_cp_task_due {
+    color: var(--o-cp-slate-400);
+}
+
+.o_cp_state_closed .o_cp_task_avatar {
+    filter: grayscale(60%);
+}
+
 /* ── Meta pills row (project / team) ── */
 /* ── Meta row (project / team) — plain text, no pill background ── */
 .o_cp_task_card_meta {
@@ -640,4 +669,13 @@
 .o_cp_task_due .fa {
     font-size: 10px;
     color: var(--o-cp-slate-400);
+}
+
+.o_kanban_record:has(> .o_cp_task_card),
+.o_kanban_record:has(> .o_cp_req_card) {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 10px;
 }

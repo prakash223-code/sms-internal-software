@@ -2,6 +2,7 @@ import logging
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from markupsafe import Markup
 
 _logger = logging.getLogger(__name__)
 
@@ -112,15 +113,29 @@ class ProjectProject(models.Model):
                 )
 
     def write(self, vals):
-        # Allow the lock/unlock flow itself (set via sudo() from the
-        # completion request / reopen action) to go through, but block
-        # everyone else from writing to an already-locked project,
-        # regardless of which fields they're touching (including kanban
-        # drag-and-drop stage changes, which route through this same
-        # write() via the web_save RPC).
+        # Capture each project's current team BEFORE the write, so after
+        # super().write() we can tell whether team_id actually changed (and
+        # to what) — needed to fire the notification exactly once, only on a
+        # real change to a non-empty team.
+        team_changing = 'team_id' in vals
+        old_team_by_project = (
+            {project.id: project.team_id.id for project in self}
+            if team_changing else {}
+        )
+
         if not self.env.su and not self._is_completion_manager():
             self._check_lock_access()
-        return super().write(vals)
+
+        result = super().write(vals)
+
+        if team_changing:
+            new_team_id = vals.get('team_id')
+            if new_team_id:
+                for project in self:
+                    if new_team_id != old_team_by_project.get(project.id):
+                        project._notify_team_project_assigned()
+
+        return result
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -135,15 +150,23 @@ class ProjectProject(models.Model):
                 existing = vals.get('type_ids') or []
                 has_real_stages = any(
                     isinstance(cmd, (list, tuple)) and (
-                        (cmd[0] == 6 and cmd[2])
-                        or cmd[0] == 4
+                            (cmd[0] == 6 and cmd[2])
+                            or cmd[0] == 4
                     )
                     for cmd in existing
                 )
                 if not has_real_stages:
                     vals['type_ids'] = [(6, 0, stage_ids)]
 
-        return super().create(vals_list)
+        projects = super().create(vals_list)
+
+        # Notify the team lead + members for any project created with a team
+        # already set (e.g. picked on the creation form before first save).
+        for project in projects:
+            if project.team_id:
+                project._notify_team_project_assigned()
+
+        return projects
 
     # ── Actions ───────────────────────────────────────────────────────────────
 
@@ -204,3 +227,43 @@ class ProjectProject(models.Model):
             'domain': [('project_id', '=', self.id)],
             'context': {'default_project_id': self.id},
         }
+
+    # ── Team notification ────────────────────────────────────────────────────
+
+    def _notify_team_project_assigned(self):
+        """
+        Notify the team lead and every member of project.team_id that this
+        project has been assigned to their team. Fired from create() (when a
+        project is created with a team already set) and from write() (when
+        team_id is changed to a new, non-empty value).
+
+        sudo() on member_ids / team_lead_id mirrors team.py's
+        _compute_member_count pattern: hr.employee._check_private_fields()
+        can raise an AccessError for non-HR users even on this simple
+        Many2many read, so we resolve the roster under sudo and only use it
+        to collect partner ids — no extra employee data is exposed beyond
+        what message_notify already shows.
+        """
+        for project in self:
+            team = project.team_id
+            if not team:
+                continue
+
+            employees = team.sudo().member_ids
+            if team.team_lead_id:
+                employees |= team.sudo().team_lead_id
+
+            partners = employees.mapped('user_id.partner_id').filtered(lambda p: p)
+            if not partners:
+                continue
+
+            project.message_subscribe(partner_ids=partners.ids)
+            project.message_notify(
+                partner_ids=partners.ids,
+                subject=_('Project Assigned to Your Team: %s') % project.name,
+                body=Markup(
+                    '<p>Hi,</p>'
+                    '<p>The project <b>%s</b> has been assigned to your '
+                    'team <b>%s</b>.</p>'
+                ) % (project.name, team.name),
+            )

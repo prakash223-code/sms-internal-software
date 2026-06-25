@@ -209,7 +209,7 @@ class ProjectTask(models.Model):
                     )
                 )
 
-    _ASSIGNEE_EDITABLE_FIELDS = {'task_state', 'timesheet_ids'}
+    _ASSIGNEE_EDITABLE_FIELDS = {'task_state', 'timesheet_ids', 'state'}
 
     def _check_edit_access(self, vals):
         """
@@ -507,13 +507,27 @@ class ProjectTask(models.Model):
         self._check_state_transition_access()
         for task in self:
             if task.task_state == 'verified':
-                task.task_state = 'closed'
+                # 'state' is Odoo's own native field driving the kanban ball
+                # widget and the fade-out/Open-filter exclusion seen when a
+                # task is marked Done — setting it here piggybacks on that
+                # built-in behavior instead of reimplementing it. task_state
+                # stays the source of truth for our own workflow/permissions.
+                task.write({
+                    'task_state': 'closed',
+                    'state': '1_done',
+                })
 
     def action_reset_to_draft(self):
         if not self._is_manager():
             raise UserError(_('Only managers can reset a task to Draft.'))
         for task in self:
-            task.task_state = 'draft'
+            # Symmetric reset — otherwise a reopened task still shows as
+            # natively "Done" (faded, hidden from Open filter) even though
+            # our own task_state says Draft.
+            task.write({
+                'task_state': 'draft',
+                'state': '01_in_progress',
+            })
 
     def action_view_assignment_requests(self):
         self.ensure_one()
