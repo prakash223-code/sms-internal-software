@@ -1,8 +1,9 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 class WorkReport(models.Model):
     _name = 'work.report'
+    _inherit = ['mail.thread']
     _description = 'Daily Work Report'
     _order = 'date desc, id desc'
 
@@ -73,7 +74,41 @@ class WorkReport(models.Model):
             if rec.state != 'draft':
                 raise ValidationError("Only draft reports can be submitted.")
             rec.state = 'submitted'
+            rec._notify_managers_on_submit()
 
     def action_reset_draft(self):
         for rec in self:
             rec.state = 'draft'
+
+    # ------------------------------------------------------------------
+    # NOTIFICATIONS
+    # ------------------------------------------------------------------
+
+    def _notify_managers_on_submit(self):
+        """
+        Pushes an Inbox notification to every user in the Work Report
+        Manager group when an employee submits their report.
+        """
+        self.ensure_one()
+        manager_group = self.env.ref(
+            'custom_work_report.group_work_report_manager',
+            raise_if_not_found=False,
+        )
+        if not manager_group:
+            return
+
+        manager_partners = manager_group.user_ids.mapped('partner_id')
+        manager_partners = manager_partners - self.env.user.partner_id
+        if not manager_partners:
+            return
+
+        body = _('%(employee)s submitted a work report for %(date)s.') % {
+            'employee': self.employee_id.name,
+            'date': self.date,
+        }
+        self.message_notify(
+            partner_ids=manager_partners.ids,
+            subject=_('Work Report Submitted'),
+            body=body,
+            subtype_xmlid='mail.mt_comment',
+        )

@@ -4,7 +4,7 @@
     'summary': 'Employee daily work reporting with submit workflow',
     'author': 'Your Company',
     'license': 'LGPL-3',
-    'depends': ['hr', 'project'],
+    'depends': ['hr', 'project', 'mail'],
     'data': [
         'security/work_report_security.xml',
         'security/ir.model.access.csv',

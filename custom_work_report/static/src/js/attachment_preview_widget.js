@@ -3,20 +3,21 @@
 /**
  * AttachmentPreviewWidget — fully self-contained.
  *
- * Replaces Many2ManyBinaryField entirely so there are zero download-forcing
- * <a ?download=true> links anywhere in the widget.
+ * Shows a compact card per attachment with a "Preview" button that opens
+ * the file in a NEW BROWSER TAB (via our own inline-serving controller),
+ * instead of embedding the file inline in the form or letting Odoo force
+ * a download via /web/content.
  *
- * Upload  → FileUploader → creates ir.attachment via ORM → adds to M2M list
- * Image   → rendered inline via /web/image/{id}
- * PDF     → embedded via <embed type="application/pdf"> (browser PDF viewer,
- *           no Content-Disposition:attachment because we don't pass ?download)
- * Other   → download button only (Word, Excel, zip, etc. can't render in-browser)
+ * Odoo 19: standardFieldProps no longer exposes `value`. The field's
+ * current static list lives at this.props.record.data[this.props.name],
+ * and mutations go through useX2ManyCrud() (saveRecord / removeRecord).
  */
 
 import {registry} from "@web/core/registry";
 import {many2ManyBinaryField} from "@web/views/fields/many2many_binary/many2many_binary_field";
 import {FileUploader} from "@web/views/fields/file_handler";
 import {standardFieldProps} from "@web/views/fields/standard_field_props";
+import {useX2ManyCrud} from "@web/views/fields/relational_utils";
 import {useService} from "@web/core/utils/hooks";
 import {Component, xml} from "@odoo/owl";
 
@@ -40,14 +41,14 @@ export class AttachmentPreviewWidget extends Component {
 
         <!-- ── Empty state ── -->
         <t t-if="records.length === 0">
-            <span class="text-muted fst-italic">No attachments</span>
+            <div><span class="text-muted fst-italic">No attachments</span></div>
         </t>
 
         <!-- ── Attachment cards ── -->
         <div class="d-flex flex-wrap gap-3">
-            <t t-foreach="records" t-as="rec" t-key="rec.resId or rec.virtualId">
+            <t t-foreach="records" t-as="rec" t-key="rec.resId or rec.id">
                 <div class="border rounded overflow-hidden bg-white"
-                     style="width:280px; box-shadow:0 1px 4px rgba(0,0,0,.08);">
+                     style="width:220px; box-shadow:0 1px 4px rgba(0,0,0,.08);">
 
                     <!-- Header: icon + filename + remove -->
                     <div class="d-flex align-items-center gap-1 px-2 py-1 border-bottom"
@@ -67,50 +68,35 @@ export class AttachmentPreviewWidget extends Component {
                         </t>
                     </div>
 
-                    <!-- Preview area -->
-                    <div class="d-flex align-items-center justify-content-center"
-                         style="min-height:150px; background:#fafafa;">
+                    <!-- Body: big icon + Preview / Download buttons -->
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3"
+                         style="min-height:120px; background:#fafafa;">
 
                         <!-- Uploading spinner (no resId yet) -->
                         <t t-if="!rec.resId">
-                            <div class="text-muted text-center p-3">
-                                <i class="fa fa-spinner fa-spin fa-2x d-block mb-1"/>
-                                <small>Uploading…</small>
-                            </div>
+                            <i class="fa fa-spinner fa-spin fa-2x mb-1 text-muted"/>
+                            <small class="text-muted">Uploading…</small>
                         </t>
 
-                        <!-- Image — rendered via /web/image (always inline) -->
-                        <t t-elif="isImage(rec.data.mimetype)">
-                            <img t-attf-src="/web/image/{{ rec.resId }}"
-                                 class="img-fluid"
-                                 style="max-height:220px; object-fit:contain; width:100%;"
-                                 t-att-alt="rec.data.name"/>
-                        </t>
-
-                        <!--
-                            PDF — use &lt;embed&gt; with explicit type so the browser
-                            activates its built-in PDF viewer directly without going
-                            through a redirect.  No ?download param → server returns
-                            Content-Disposition: inline.
-                        -->
-                        <t t-elif="isPdf(rec.data.mimetype)">
-                            <embed t-attf-src="/web/content/{{ rec.resId }}"
-                                   type="application/pdf"
-                                   style="width:280px; height:240px; border:none;"/>
-                        </t>
-
-                        <!-- Anything else → explicit download button -->
                         <t t-else="">
-                            <div class="text-center p-3 text-muted">
-                                <i t-att-class="getIcon(rec.data.mimetype) + ' fa-2x d-block mb-2'"/>
-                                <a t-attf-href="/web/content/{{ rec.resId }}?download=true"
+                            <i t-att-class="getIcon(rec.data.mimetype) + ' fa-3x mb-2 text-muted'"/>
+                            <div class="d-flex gap-2">
+                                <!-- Opens in a NEW TAB via our inline-serving controller -->
+                                <a t-attf-href="/work_report/attachment/preview/{{ rec.resId }}"
                                    target="_blank"
-                                   class="btn btn-sm btn-outline-secondary">
-                                    <i class="fa fa-download me-1"/>Download
+                                   rel="noopener"
+                                   class="btn btn-sm btn-outline-primary"
+                                   onclick="event.stopPropagation()">
+                                    <i class="fa fa-eye me-1"/>Preview
+                                </a>
+                                <!-- Explicit force-download, for anyone who actually wants to save it -->
+                                <a t-attf-href="/web/content/{{ rec.resId }}?download=true"
+                                   class="btn btn-sm btn-outline-secondary"
+                                   onclick="event.stopPropagation()">
+                                    <i class="fa fa-download"/>
                                 </a>
                             </div>
                         </t>
-
                     </div>
                 </div>
             </t>
@@ -121,18 +107,14 @@ export class AttachmentPreviewWidget extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.operations = useX2ManyCrud(
+            () => this.props.record.data[this.props.name],
+            true // isMany2Many
+        );
     }
 
     get records() {
-        return this.props.value?.records || [];
-    }
-
-    isImage(mimetype) {
-        return !!mimetype && mimetype.startsWith("image/");
-    }
-
-    isPdf(mimetype) {
-        return mimetype === "application/pdf";
+        return this.props.record.data[this.props.name]?.records || [];
     }
 
     getIcon(mimetype) {
@@ -145,26 +127,21 @@ export class AttachmentPreviewWidget extends Component {
         return "fa fa-file-o";
     }
 
-    /**
-     * Called by FileUploader when the user picks a file.
-     * 1. Creates the ir.attachment record via ORM (same pattern as core many2many_binary).
-     * 2. Adds it to the StaticList via addAndUnlink so OWL re-renders immediately.
-     */
     async onFileUploaded({name, size: file_size, type: mimetype, data: datas}) {
         const attId = await this.orm.call("ir.attachment", "create", [{
             name,
             datas,
             res_model: "ir.ui.view",
         }]);
-        await this.props.value.addAndUnlink(attId, {name, file_size, mimetype});
+        await this.operations.saveRecord([attId]);
     }
 
     async removeRecord(record) {
-        await this.props.value.delete(record);
+        this.operations.removeRecord(record);
     }
 }
 
 registry.category("fields").add("attachment_preview", {
-    ...many2ManyBinaryField,   // keeps relatedFields: name, file_size, mimetype
+    ...many2ManyBinaryField,
     component: AttachmentPreviewWidget,
 });
