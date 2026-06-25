@@ -67,7 +67,36 @@ class WorkReport(models.Model):
                 )
                 if employee:
                     vals['employee_id'] = employee.id
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        records._reparent_attachments()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'attachment_ids' in vals:
+            self._reparent_attachments()
+        return res
+
+    def _reparent_attachments(self):
+        """
+        Attachments are uploaded with res_model='ir.ui.view' / no res_id
+        (the standard many2many_binary upload trick), which means Odoo's
+        own ir.attachment access check only allows the *creator* to read
+        them - everyone else, including HR/Manager, gets silently filtered
+        out. Re-pointing res_model/res_id at the actual work.report record
+        makes them fall under work.report's own ir.rule instead, so
+        Manager/HR see all and employees see their own, same as the
+        report itself.
+        """
+        for rec in self:
+            stray = rec.attachment_ids.filtered(
+                lambda a: a.res_model != 'work.report' or a.res_id != rec.id
+            )
+            if stray:
+                stray.sudo().write({
+                    'res_model': 'work.report',
+                    'res_id': rec.id,
+                })
 
     def action_submit(self):
         for rec in self:
