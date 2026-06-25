@@ -130,22 +130,53 @@ class CustomExpense(models.Model):
                     'custom.expense')
         return super().create(vals_list)
 
+    # ── Notification Helpers ──────────────────────────────────────────────────
+    def _get_approver_partners(self):
+        """Partners of all HR + Manager users, for notifying them on submission.
+        Excludes the submitter's own partner (in case they themselves are
+        HR/Manager) to avoid self-notification. Searches res.users directly by
+        group_ids rather than going through res.groups' inverse relation, since
+        that field name changed in Odoo 19."""
+        self.ensure_one()
+        group_xml_ids = ['hr.group_hr_user', 'hr.group_hr_manager']
+        group_ids = []
+        for xml_id in group_xml_ids:
+            group = self.env.ref(xml_id, raise_if_not_found=False)
+            if group:
+                group_ids.append(group.id)
+        if not group_ids:
+            return self.env['res.partner']
+        users = self.env['res.users'].sudo().search([('group_ids', 'in', group_ids)])
+        partners = users.mapped('partner_id')
+        submitter_partner = self.submitted_by.user_id.partner_id
+        if submitter_partner:
+            partners -= submitter_partner
+        return partners
+
     # ── State Transitions ─────────────────────────────────────────────────────
     def action_submit(self):
-        """Manager submits the expense."""
+        """Employee submits the expense; notifies HR and Manager users."""
         for rec in self:
             if rec.state != 'draft':
                 raise UserError('Only Draft expenses can be submitted.')
             rec.state = 'submitted'
-            rec.message_post(body='Expense submitted for approval.')
+            partners = rec._get_approver_partners()
+            rec.message_post(
+                body=f'Expense submitted for approval by {rec.submitted_by.name}.',
+                partner_ids=partners.ids,
+            )
 
     def action_approve(self):
-        """Manager approves the expense."""
+        """Manager approves the expense; notifies the submitter."""
         for rec in self:
             if rec.state != 'submitted':
                 raise UserError('Only Submitted expenses can be approved.')
             rec.state = 'approved'
-            rec.message_post(body='Expense approved.')
+            submitter_partner = rec.submitted_by.user_id.partner_id
+            rec.message_post(
+                body='Expense approved.',
+                partner_ids=submitter_partner.ids,
+            )
 
     def action_reject(self):
         """Opens rejection wizard to capture mandatory reason."""

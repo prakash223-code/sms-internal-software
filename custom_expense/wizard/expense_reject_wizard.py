@@ -21,15 +21,18 @@ class CustomExpenseRejectWizard(models.TransientModel):
     )
 
     def action_confirm_reject(self):
-        """Applies rejection reason and sets expense to Rejected."""
+        """Applies rejection reason, sets expense to Rejected, and notifies the submitter."""
         self.ensure_one()
         if not self.rejection_reason or not self.rejection_reason.strip():
             raise ValidationError('Rejection reason cannot be empty.')
+        reason = self.rejection_reason.strip()
         self.expense_id.write({
             'state': 'rejected',
-            'rejection_reason': self.rejection_reason.strip(),
+            'rejection_reason': reason,
         })
+        submitter_partner = self.expense_id.submitted_by.user_id.partner_id
         self.expense_id.message_post(
-            body=f'Expense rejected. Reason: {self.rejection_reason.strip()}'
+            body=f'Expense rejected. Reason: {reason}',
+            partner_ids=submitter_partner.ids,
         )
         return {'type': 'ir.actions.act_window_close'}
