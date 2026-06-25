@@ -2,6 +2,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from datetime import timedelta
+from markupsafe import Markup
 import pytz
 
 
@@ -45,7 +46,7 @@ class HrLeave(models.Model):
                 tz = pytz.timezone('Asia/Kolkata')
 
             date_from = leave.date_from
-            date_to   = leave.date_to
+            date_to = leave.date_to
 
             if date_from.tzinfo is None:
                 date_from = pytz.utc.localize(date_from)
@@ -53,10 +54,10 @@ class HrLeave(models.Model):
                 date_to = pytz.utc.localize(date_to)
 
             date_from_local = date_from.astimezone(tz).date()
-            date_to_local   = date_to.astimezone(tz).date()
+            date_to_local = date_to.astimezone(tz).date()
 
             # Walk each day in the requested range
-            holiday_days       = []
+            holiday_days = []
             valid_working_days = []
             current = date_from_local
 
@@ -84,6 +85,131 @@ class HrLeave(models.Model):
                     '%s\n\n'
                     'Please select working days only.'
                 ) % day_list)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        leaves = super().create(vals_list)
+        for leave in leaves:
+            if leave.state in ('confirm', 'validate1'):
+                leave.sudo()._notify_leave_request_submitted()
+        return leaves
+
+    def write(self, vals):
+        old_states = {}
+        if 'state' in vals:
+            old_states = {leave.id: leave.state for leave in self}
+
+        res = super().write(vals)
+
+        if 'state' in vals:
+            for leave in self:
+                old_state = old_states.get(leave.id)
+                new_state = leave.state
+                if old_state == new_state:
+                    continue
+                if new_state == 'validate':
+                    leave.sudo()._notify_leave_decision('approved')
+                elif new_state == 'refuse':
+                    leave.sudo()._notify_leave_decision('refused')
+
+        return res
+
+    # ------------------------------------------------------------------
+    # NOTIFICATION HELPERS
+    # ------------------------------------------------------------------
+
+    def _get_leave_notification_recipients(self):
+        """HR group users + employees with employee_role = 'manager'.
+        Excludes the requesting employee themselves."""
+        self.ensure_one()
+
+        hr_group = self.env.ref('hr.group_hr_user')
+        hr_users = self.env['res.users'].sudo().search([
+            ('group_ids', 'in', [hr_group.id]),
+        ])
+
+        manager_employees = self.env['hr.employee'].sudo().search([
+            ('employee_role', '=', 'manager'),
+            ('user_id', '!=', False),
+            ('active', '=', True),
+        ])
+        manager_users = manager_employees.mapped('user_id')
+
+        requester_user_id = self.employee_id.user_id.id
+        all_users = (hr_users | manager_users).filtered(
+            lambda u: u.id != requester_user_id
+        )
+
+        return all_users.mapped('partner_id')
+
+    def _notify_leave_request_submitted(self):
+        self.ensure_one()
+        recipients = self._get_leave_notification_recipients()
+        if not recipients:
+            return
+
+        date_from = self.date_from.strftime('%d %b %Y') if self.date_from else ''
+        date_to = self.date_to.strftime('%d %b %Y') if self.date_to else ''
+
+        body = Markup(
+            '<p><strong>%s</strong> has requested time off and is awaiting approval.</p>'
+            '<ul>'
+            '<li>Leave Type: %s</li>'
+            '<li>From: %s</li>'
+            '<li>To: %s</li>'
+            '<li>Days: %s</li>'
+            '</ul>'
+        ) % (
+                   self.employee_id.name,
+                   self.holiday_status_id.name,
+                   date_from,
+                   date_to,
+                   self.number_of_days,
+               )
+
+        self.message_notify(
+            partner_ids=recipients.ids,
+            subject=_('Time Off Request: %s') % self.employee_id.name,
+            body=body,
+            subtype_xmlid='mail.mt_comment',
+        )
+
+    def _notify_leave_decision(self, decision):
+        self.ensure_one()
+        partner = self.employee_id.user_id.partner_id
+        if not partner:
+            return
+
+        date_from = self.date_from.strftime('%d %b %Y') if self.date_from else ''
+        date_to = self.date_to.strftime('%d %b %Y') if self.date_to else ''
+
+        if decision == 'approved':
+            subject = _('Time Off Request Approved')
+            status_label = 'approved'
+        else:
+            subject = _('Time Off Request Refused')
+            status_label = 'refused'
+
+        body = Markup(
+            '<p>Your time off request has been <strong>%s</strong>.</p>'
+            '<ul>'
+            '<li>Leave Type: %s</li>'
+            '<li>From: %s</li>'
+            '<li>To: %s</li>'
+            '</ul>'
+        ) % (
+                   status_label,
+                   self.holiday_status_id.name,
+                   date_from,
+                   date_to,
+               )
+
+        self.message_notify(
+            partner_ids=[partner.id],
+            subject=subject,
+            body=body,
+            subtype_xmlid='mail.mt_comment',
+        )
 
     @staticmethod
     def _day_name(d):
