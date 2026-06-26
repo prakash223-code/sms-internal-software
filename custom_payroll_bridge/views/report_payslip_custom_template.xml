@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         Overrides bi_hr_payroll's default payslip print format with
+         SMS Enterprises' official layout. Replaces the entire
+         <div class="page"> body — letterhead (logo/company name/address)
+         still comes from web.external_layout via Settings > Document
+         Layout, unchanged.
+    ══════════════════════════════════════════════════════════════════════ -->
+    <template id="report_payslip_sms_format" inherit_id="bi_hr_payroll.report_payslip">
+        <xpath expr="//div[hasclass('page')]" position="replace">
+            <div class="page">
+
+                <h2 class="text-center mb-4">Pay Slip</h2>
+
+                <!-- ── Info block: Pay Date / Period / Days ←→ Employee ── -->
+                <table class="table table-sm table-bordered mb-4">
+                    <tr>
+                        <td style="width:18%;"><strong>Pay Date</strong></td>
+                        <td style="width:32%;">
+                            <span t-if="o.confirmed_date" t-field="o.confirmed_date"/>
+                            <span t-else="">—</span>
+                        </td>
+                        <td style="width:18%;"><strong>Employee Name</strong></td>
+                        <td style="width:32%;"><span t-field="o.employee_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pay Period</strong></td>
+                        <td><span t-esc="o._get_pay_period_label()"/></td>
+                        <td><strong>Employee ID</strong></td>
+                        <td><span t-field="o.employee_id.employee_code"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Worked Days</strong></td>
+                        <td>
+                            <span t-if="o.attendance_summary_id" t-field="o.attendance_summary_id.present_days"/>
+                            <span t-else="">—</span>
+                        </td>
+                        <td><strong>Designation</strong></td>
+                        <td><span t-field="o.employee_id.job_id.name"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Working Days</strong></td>
+                        <td>
+                            <span t-if="o.attendance_summary_id" t-field="o.attendance_summary_id.working_days"/>
+                            <span t-else="">—</span>
+                        </td>
+                        <td><strong>Department</strong></td>
+                        <td><span t-field="o.employee_id.department_id.name"/></td>
+                    </tr>
+                </table>
+
+                <!-- ── Earnings / Deductions ──────────────────────────────── -->
+                <table class="table table-sm table-bordered mb-4">
+                    <thead>
+                        <tr class="table-light">
+                            <th>Earnings</th>
+                            <th class="text-end">Amount</th>
+                            <th>Deductions</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Basic Salary</td>
+                            <td class="text-end">
+                                <span t-esc="o._fmt_amount(o._get_salary_line_amount('BASIC'))"/>
+                            </td>
+                            <td>Deduction (Leave)</td>
+                            <td class="text-end">
+                                <span t-esc="o._fmt_amount(o._get_salary_line_amount('ABSENT_DED'))"/>
+                            </td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td>Total Earnings (Gross Salary)</td>
+                            <td class="text-end">
+                                <span t-esc="o._fmt_amount(o._get_salary_line_amount('GROSS'))"/>
+                            </td>
+                            <td>Total Deductions</td>
+                            <td class="text-end">
+                                <span t-esc="o._fmt_amount(o._get_salary_category_amount('DED'))"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ── Net Pay summary ────────────────────────────────────── -->
+                <h5>Net Pay</h5>
+                <table class="table table-sm table-bordered" style="width: 55%;">
+                    <tr class="table-light">
+                        <th>Description</th>
+                        <th class="text-end">Amount (₹)</th>
+                    </tr>
+                    <tr>
+                        <td>Gross Salary</td>
+                        <td class="text-end">
+                            <span t-esc="o._fmt_amount(o._get_salary_line_amount('GROSS'))"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="table table-sm table-bordered mb-4" style="width: 55%;">
+                    <tr class="table-light">
+                        <th>Description</th>
+                        <th class="text-end">Amount (₹)</th>
+                    </tr>
+                    <tr>
+                        <td>Total Deductions</td>
+                        <td class="text-end">
+                            <span t-esc="o._fmt_amount(o._get_salary_category_amount('DED'))"/>
+                        </td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td>Net Pay (Take-Home Salary)</td>
+                        <td class="text-end">
+                            <span t-esc="o._fmt_amount(o._get_salary_line_amount('NET'))"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <p class="mb-1"><strong>Net Pay in Words:</strong></p>
+                <p class="mb-4">
+                    <span t-esc="o._get_amount_in_words(o._get_salary_line_amount('NET'))"/>
+                </p>
+
+                <h6>Notes</h6>
+                <ul>
+                    <li>This is a <strong>computer-generated payslip</strong> and does not require a physical signature.</li>
+                    <li>Salary credited via bank transfer</li>
+                </ul>
+
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

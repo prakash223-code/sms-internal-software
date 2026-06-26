@@ -29,6 +29,7 @@
         'views/employee_payslip_menu.xml',
         'views/employee_defaults_view.xml',
         'views/create_user_password_view.xml',
+        'views/report_payslip_custom_template.xml',
         # REVERTED: automatic role-group resync on every upgrade was removed
         # after it stripped groups from the Administrator account on a live
         # system. Role groups are now ONLY applied via the manual

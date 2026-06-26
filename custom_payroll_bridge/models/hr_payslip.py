@@ -5,11 +5,18 @@ import logging
 import calendar
 from datetime import date
 
+try:
+    from num2words import num2words
+    NUM2WORDS_AVAILABLE = True
+except ImportError:
+    NUM2WORDS_AVAILABLE = False
+
 _logger = logging.getLogger(__name__)
 
 
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
+
     slip_month = fields.Selection(
         selection=[
             ('1', 'January'), ('2', 'February'), ('3', 'March'),
@@ -58,6 +65,25 @@ class HrPayslip(models.Model):
         string='Unpaid Absent Days',
         readonly=True,
     )
+
+    # ── Print format: date the payslip was actually confirmed ──────────────
+    # Distinct from date_from/date_to (the pay PERIOD) — this is "Pay Date"
+    # on the printed payslip per SMS Enterprises' official format. Stamped
+    # the moment action_payslip_done() succeeds; stays blank for draft/verify
+    # payslips, which is intentional — an unconfirmed payslip has no real
+    # "pay date" yet.
+    confirmed_date = fields.Date(
+        string='Confirmed Date',
+        readonly=True,
+        copy=False,
+    )
+
+    def action_payslip_done(self):
+        res = super().action_payslip_done()
+        for slip in self:
+            if not slip.confirmed_date:
+                slip.confirmed_date = fields.Date.context_today(self)
+        return res
 
     def compute_sheet(self):
         """Sync absent days input BEFORE payslip lines are computed."""
@@ -152,3 +178,61 @@ class HrPayslip(models.Model):
             'Payslip %s: ABSENT_DAYS=%s, WORKING_DAYS=%s injected',
             self.id, unpaid_days, working_days,
         )
+
+    # ── Print template helpers ──────────────────────────────────────────────
+    # All amounts the printed payslip needs are pulled live from the
+    # confirmed salary rule lines (line_ids) rather than recomputed here —
+    # line_ids IS the source of truth for what was actually calculated for
+    # this payslip. If a rule hasn't fired yet (payslip not computed), these
+    # safely return 0.0 instead of raising.
+
+    def _get_salary_line_amount(self, code):
+        """Total for a single salary rule, identified by its rule code
+        (e.g. 'BASIC', 'GROSS', 'NET', 'ABSENT_DED')."""
+        self.ensure_one()
+        line = self.line_ids.filtered(lambda l: l.code == code)
+        return line.total if line else 0.0
+
+    def _get_salary_category_amount(self, category_code):
+        """Summed total across every salary rule line under a given
+        category code (e.g. 'DED' — covers ALL deduction rules combined,
+        not just ABSENT_DED, so this stays correct if another deduction
+        rule is added later)."""
+        self.ensure_one()
+        lines = self.line_ids.filtered(lambda l: l.category_id.code == category_code)
+        return sum(lines.mapped('total'))
+
+    def _get_pay_period_label(self):
+        """e.g. 'May 2026' — derived from slip_month / slip_year."""
+        self.ensure_one()
+        if not self.slip_month or not self.slip_year:
+            return ''
+        month_label = dict(self._fields['slip_month'].selection).get(self.slip_month, '')
+        return f'{month_label} {self.slip_year}'
+
+    @staticmethod
+    def _fmt_amount(value):
+        """Plain comma-grouped integer, no currency symbol, no decimals —
+        matches the official payslip format exactly (e.g. '12,000')."""
+        return '{:,.0f}'.format(value or 0.0)
+
+    def _get_amount_in_words(self, amount):
+        """'Rupees Twelve Thousand Only' — matches the official format.
+
+        KNOWN LIMITATION: uses standard English (thousand/million) numbering
+        via num2words, not the Indian lakh/crore system. For amounts under
+        ₹1,00,000 both systems produce identical wording (e.g. 12,000 is
+        'twelve thousand' either way), so this is safe at current salary
+        levels. If Net Pay ever exceeds ₹99,999, this will NOT say
+        'one lakh' — swap in a lakh-aware converter if/when that happens.
+        """
+        self.ensure_one()
+        if not NUM2WORDS_AVAILABLE:
+            _logger.warning(
+                'Payslip %s: num2words not installed — amount-in-words '
+                'left blank on printed payslip.', self.id
+            )
+            return ''
+        words = num2words(int(round(amount or 0.0)), lang='en')
+        words = words.replace('-', ' ').title()
+        return f'Rupees {words} Only'
