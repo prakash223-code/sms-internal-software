@@ -60,7 +60,12 @@
                     <group>
 
                         <group string="Project">
-                            <field name="project_id" readonly="1"/>
+                            <!--
+                                readonly="id": editable only when creating a NEW record
+                                (id is False/0). Once saved, the project cannot be
+                                changed — same pattern used across this module.
+                            -->
+                            <field name="project_id" readonly="id"/>
                             <field name="project_stage_id"/>
                             <field name="requesting_team_id" readonly="1"/>
                         </group>
@@ -68,17 +73,21 @@
                         <group string="Request Details">
                             <field name="requested_by"
                                    widget="many2one_avatar_employee"
-                                   readonly="1"/>
+                                   readonly="id"/>
                         </group>
 
                     </group>
 
-                    <group string="Decision" invisible="state == 'pending'">
-                        <field name="approved_by"
-                               widget="many2one_avatar_employee"
-                               readonly="1"
-                               string="Decided By"/>
-                        <field name="decision_date" readonly="1"/>
+                    <group>
+
+                        <group string="Decision" invisible="state == 'pending'">
+                            <field name="approved_by"
+                                   widget="many2one_avatar_employee"
+                                   readonly="1"
+                                   string="Decided By"/>
+                            <field name="decision_date" readonly="1"/>
+                        </group>
+
                     </group>
 
                     <group string="Reason">
@@ -197,7 +206,7 @@
     <!-- ══ Actions ════════════════════════════════════════════════════════ -->
 
     <!-- My requests — visible to all employees (Python create() still
-         restricts who can actually submit one to the project's Team Lead) -->
+         restricts who can actually submit one to Team Lead / HR / Manager) -->
     <record id="action_my_completion_requests" model="ir.actions.act_window">
         <field name="name">My Completion Requests</field>
         <field name="res_model">project.completion.request</field>
@@ -210,9 +219,9 @@
                 No project completion requests yet.
             </p>
             <p>
-                As a Team Lead, you can request that a project be marked
-                complete from the project's form view. Once approved, the
-                project moves to Done and is locked for everyone except
+                Team Leads, HR, and Managers can request that a project be
+                marked complete from the project's form view. Once approved,
+                the project moves to Done and is locked for everyone except
                 Managers.
             </p>
         </field>

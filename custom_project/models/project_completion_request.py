@@ -108,13 +108,44 @@ class ProjectCompletionRequest(models.Model):
 
     def _check_requester(self, project, vals=None):
         """
-        Only the project's own Team Lead (project.team_id.team_lead_id) may
-        request completion for that project. Superuser (internal/system
-        writes) bypasses this check.
+        Who may submit a completion request:
+          • custom_project.group_team_manager  — Managers (unrestricted)
+          • hr.group_hr_user                   — HR officers (unrestricted)
+          • The project's own Team Lead        — scoped to their project
+
+        Plain employees (group_team_employee / group_team_lead of OTHER teams)
+        are blocked here with a clear UserError.
+
+        Common guards (locked, duplicate pending) apply to everyone.
         """
         if self.env.su:
             return
 
+        is_manager = self.env.user.has_group('custom_project.group_team_manager')
+        is_hr = self.env.user.has_group('hr.group_hr_user')
+
+        # ── Common guards (apply to all roles) ───────────────────────────────
+        if project and project.is_locked:
+            raise UserError(
+                _('This project is already locked as completed.')
+            )
+
+        if project:
+            existing_pending = self.search_count([
+                ('project_id', '=', project.id),
+                ('state', '=', 'pending'),
+            ])
+            if existing_pending:
+                raise UserError(
+                    _('There is already a pending completion request for '
+                      'this project.')
+                )
+
+        # ── Managers and HR: no further restrictions ─────────────────────────
+        if is_manager or is_hr:
+            return
+
+        # ── Team Lead: must be lead of this project's team ───────────────────
         if not project or not project.team_id:
             raise UserError(
                 _('This project has no team assigned, so a completion '
@@ -126,23 +157,9 @@ class ProjectCompletionRequest(models.Model):
         )
         if not current_employee or project.team_id.team_lead_id != current_employee:
             raise UserError(
-                _('Only the Team Lead of "%s" can request completion '
-                  'for this project.') % project.team_id.name
-            )
-
-        if project.is_locked:
-            raise UserError(
-                _('This project is already locked as completed.')
-            )
-
-        existing_pending = self.search_count([
-            ('project_id', '=', project.id),
-            ('state', '=', 'pending'),
-        ])
-        if existing_pending:
-            raise UserError(
-                _('There is already a pending completion request for '
-                  'this project.')
+                _('Only the Team Lead of "%s", an HR officer, or a Manager '
+                  'can request completion for this project.')
+                % project.team_id.name
             )
 
     def _is_approver(self):

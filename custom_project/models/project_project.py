@@ -79,17 +79,42 @@ class ProjectProject(models.Model):
 
     @api.depends_context('uid')
     def _compute_can_request_completion(self):
+        """
+        Show "Request Completion" button to:
+          • The project's own Team Lead
+          • HR officers (hr.group_hr_user)
+          • Managers (custom_project.group_team_manager)
+
+        Plain employees (group_team_employee) never see the button.
+        The button is also hidden when the project is already locked or
+        has a pending request outstanding.
+        """
+        user = self.env.user
+        is_manager = user.has_group('custom_project.group_team_manager')
+        is_hr = user.has_group('hr.group_hr_user')
         employee = self.env['hr.employee'].search(
             [('user_id', '=', self.env.uid)], limit=1
         )
+
         for project in self:
-            project.can_request_completion = bool(
+            # Common blockers — apply to all roles
+            if project.is_locked or project.has_pending_completion_request:
+                project.can_request_completion = False
+                continue
+
+            # Managers and HR: always eligible (project-level checks still
+            # apply in Python create() — e.g. duplicate pending detection)
+            if is_manager or is_hr:
+                project.can_request_completion = True
+                continue
+
+            # Team Lead: only for their own project's team
+            is_team_lead = bool(
                 employee
                 and project.team_id
                 and project.team_id.team_lead_id == employee
-                and not project.is_locked
-                and not project.has_pending_completion_request
             )
+            project.can_request_completion = is_team_lead
 
     # ── Access guard ──────────────────────────────────────────────────────────
 
