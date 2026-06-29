@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         The company-wide default paperformat reserves margin_top=52mm +
+         margin_bottom=32mm (84mm total — ~28% of an A4 page) as physical
+         space for web.external_layout's header band / footer. Since
+         report_payslip_sms_format bypasses that layout entirely and
+         draws its own logo/header inside the body, that 84mm was just
+         dead space — and once font/logo sizing grew to match the
+         official format, content stopped fitting in the remaining
+         ~74% of the page, spilling the Notes section onto a second
+         sheet.
+
+         This paperformat is scoped ONLY to the payslip print action —
+         it does not touch the company default, so invoices and other
+         reports are unaffected.
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="paperformat_payslip_sms" model="report.paperformat">
+        <field name="name">SMS Enterprises Payslip (No Header Reserve)</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="disable_shrinking" eval="False"/>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Assign it to the existing bi_hr_payroll print action — same
+         "override by re-declaring the external ID" pattern already
+         used in views/payslip_kanban_fix.xml for the kanban view_mode
+         fix. Does not create a duplicate action, just updates this
+         one field on the existing record. -->
+    <record id="bi_hr_payroll.action_report_payslip" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_payslip_sms"/>
+    </record>
+
+</odoo>
