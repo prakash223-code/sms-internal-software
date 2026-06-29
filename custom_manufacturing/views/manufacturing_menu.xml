@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Assembly Orders -->
+    <menuitem id="menu_mrp_assembly"
+              name="Assembly Orders"
+              parent="mrp.menu_mrp_root"
+              action="action_mrp_assembly"
+              sequence="5"
+              groups="custom_manufacturing.group_mrp_custom_user"/>
+
+    <!-- Production Orders -->
+    <menuitem id="menu_mrp_production_custom"
+              name="Production Orders"
+              parent="mrp.menu_mrp_root"
+              action="action_mrp_production_orders"
+              sequence="6"
+              groups="custom_manufacturing.group_mrp_custom_user"/>
+
+    <!-- Warranties root -->
+    <menuitem id="menu_mrp_warranty_root"
+              name="Warranties"
+              parent="mrp.menu_mrp_root"
+              sequence="50"
+              groups="custom_manufacturing.group_mrp_custom_user"/>
+
+    <menuitem id="menu_mrp_warranty_all"
+              name="All Warranties"
+              parent="menu_mrp_warranty_root"
+              action="action_mrp_warranty"
+              sequence="1"/>
+
+    <menuitem id="menu_mrp_warranty_active"
+              name="Active"
+              parent="menu_mrp_warranty_root"
+              action="action_mrp_warranty_active"
+              sequence="2"/>
+
+    <menuitem id="menu_mrp_warranty_expiring"
+              name="Expiring Soon"
+              parent="menu_mrp_warranty_root"
+              action="action_mrp_warranty_expiring"
+              sequence="3"/>
+
+</odoo>

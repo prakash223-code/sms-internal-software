@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mrp_bom_custom_form" model="ir.ui.view">
+        <field name="name">mrp.bom.custom.form</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+
+            <!-- Custom reference + manufacturing type before the product field -->
+            <field name="product_tmpl_id" position="before">
+                <field name="custom_bom_ref" readonly="1"/>
+                <field name="manufacturing_type"
+                       widget="radio"
+                       options="{'horizontal': true}"/>
+                <field name="warranty_years"/>
+            </field>
+
+            <!-- Extra notebook pages -->
+            <notebook position="inside">
+
+                <page string="Assembly Info"
+                      name="assembly_info"
+                      invisible="manufacturing_type == 'production'">
+                    <group>
+                        <field name="estimated_hours"/>
+                        <field name="assembly_notes"/>
+                    </group>
+                </page>
+
+                <page string="Production Info"
+                      name="production_info"
+                      invisible="manufacturing_type == 'assembly'">
+                    <group>
+                        <field name="production_notes"/>
+                    </group>
+                </page>
+
+            </notebook>
+
+            <!-- Extra columns on the BOM line list -->
+            <xpath expr="//field[@name='bom_line_ids']/list/field[@name='product_id']"
+                   position="after">
+                <field name="component_type"/>
+                <field name="is_critical"/>
+                <field name="component_notes"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

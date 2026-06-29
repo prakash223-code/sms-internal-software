@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mrp_warranty_user,mrp.warranty user,custom_manufacturing.model_mrp_warranty,custom_manufacturing.group_mrp_custom_user,1,1,1,0
+access_mrp_warranty_manager,mrp.warranty manager,custom_manufacturing.model_mrp_warranty,custom_manufacturing.group_mrp_custom_manager,1,1,1,1
+access_mrp_warranty_mrp_user,mrp.warranty mrp user,custom_manufacturing.model_mrp_warranty,mrp.group_mrp_user,1,1,1,0
+access_mrp_warranty_mrp_manager,mrp.warranty mrp manager,custom_manufacturing.model_mrp_warranty,mrp.group_mrp_manager,1,1,1,1
+access_mrp_serial_user,mrp.production.serial user,custom_manufacturing.model_mrp_production_serial,custom_manufacturing.group_mrp_custom_user,1,1,1,0
+access_mrp_serial_manager,mrp.production.serial manager,custom_manufacturing.model_mrp_production_serial,custom_manufacturing.group_mrp_custom_manager,1,1,1,1
+access_mrp_serial_mrp_user,mrp.production.serial mrp user,custom_manufacturing.model_mrp_production_serial,mrp.group_mrp_user,1,1,1,0
+access_mrp_serial_mrp_manager,mrp.production.serial mrp manager,custom_manufacturing.model_mrp_production_serial,mrp.group_mrp_manager,1,1,1,1
+access_mrp_serial_wizard_user,mrp.serial.wizard user,custom_manufacturing.model_mrp_serial_wizard,custom_manufacturing.group_mrp_custom_user,1,1,1,1
+access_mrp_serial_wizard_manager,mrp.serial.wizard manager,custom_manufacturing.model_mrp_serial_wizard,custom_manufacturing.group_mrp_custom_manager,1,1,1,1
+access_mrp_serial_wizard_mrp_user,mrp.serial.wizard mrp user,custom_manufacturing.model_mrp_serial_wizard,mrp.group_mrp_user,1,1,1,1
+access_mrp_serial_wizard_mrp_manager,mrp.serial.wizard mrp manager,custom_manufacturing.model_mrp_serial_wizard,mrp.group_mrp_manager,1,1,1,1
+access_mrp_serial_wizard_line_user,mrp.serial.wizard.line user,custom_manufacturing.model_mrp_serial_wizard_line,custom_manufacturing.group_mrp_custom_user,1,1,1,1
+access_mrp_serial_wizard_line_manager,mrp.serial.wizard.line manager,custom_manufacturing.model_mrp_serial_wizard_line,custom_manufacturing.group_mrp_custom_manager,1,1,1,1
+access_mrp_serial_wizard_line_mrp_user,mrp.serial.wizard.line mrp user,custom_manufacturing.model_mrp_serial_wizard_line,mrp.group_mrp_user,1,1,1,1
+access_mrp_serial_wizard_line_mrp_manager,mrp.serial.wizard.line mrp manager,custom_manufacturing.model_mrp_serial_wizard_line,mrp.group_mrp_manager,1,1,1,1

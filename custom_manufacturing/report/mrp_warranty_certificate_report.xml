@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_warranty_certificate" model="ir.actions.report">
+        <field name="name">Warranty Certificate</field>
+        <field name="model">mrp.warranty</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_manufacturing.report_mrp_warranty_certificate</field>
+        <field name="report_file">custom_manufacturing.report_mrp_warranty_certificate</field>
+        <!-- ✅ Fixed: added module prefix -->
+        <field name="binding_model_id" ref="custom_manufacturing.model_mrp_warranty"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_mrp_warranty_certificate">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <div class="text-center mb32">
+                            <h2>WARRANTY CERTIFICATE</h2>
+                            <p class="text-muted">
+                                Serial No: <strong t-field="o.serial_number"/>
+                            </p>
+                        </div>
+
+                        <div class="row mb16">
+                            <div class="col-6">
+                                <h5>Product Details</h5>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Product</strong></td>
+                                        <td><span t-field="o.product_id.display_name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Serial Number</strong></td>
+                                        <td><span t-field="o.serial_number"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Manufacturing Order</strong></td>
+                                        <td><span t-field="o.production_id.name"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <h5>Client Details</h5>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Client</strong></td>
+                                        <td><span t-field="o.client_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Address</strong></td>
+                                        <td><span t-field="o.client_id.contact_address"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mb16">
+                            <div class="col-12">
+                                <h5>Warranty Period</h5>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Warranty Start</strong></td>
+                                        <td><span t-field="o.warranty_start"/></td>
+                                        <td><strong>Warranty End</strong></td>
+                                        <td><span t-field="o.warranty_end"/></td>
+                                        <td><strong>Duration</strong></td>
+                                        <td>
+                                            <span t-field="o.warranty_years"/> year(s)
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <t t-if="o.notes">
+                            <h5>Notes</h5>
+                            <p t-field="o.notes"/>
+                        </t>
+
+                        <div class="row mt32">
+                            <div class="col-6 text-center">
+                                <p>___________________________</p>
+                                <p>Authorised Signature</p>
+                            </div>
+                            <div class="col-6 text-center">
+                                <p>___________________________</p>
+                                <p>Company Seal</p>
+                            </div>
+                        </div>
+
+                        <p class="text-muted text-center mt16" style="font-size:10px;">
+                            This certificate is valid only for the product and
+                            serial number mentioned above.
+                        </p>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mrp_production_custom_form" model="ir.ui.view">
+        <field name="name">mrp.production.custom.form</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+
+            <!-- Header buttons -->
+            <xpath expr="//header" position="inside">
+                <!--button name="action_validate_mo"
+                        string="Validate"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state not in ('confirmed', 'progress')"/-->
+                <button name="action_print_job_card"
+                        string="Print Job Card"
+                        type="object"
+                        invisible="state == 'draft'"/>
+            </xpath>
+
+            <!-- Badge fields after the MO name -->
+            <field name="name" position="after">
+                <field name="custom_production_ref"
+                       string="Ref"
+                       readonly="1"
+                       widget="badge"
+                       decoration-info="custom_production_ref != False"/>
+                <field name="manufacturing_type"
+                       string="Type"
+                       readonly="1"
+                       widget="badge"
+                       decoration-success="manufacturing_type == 'assembly'"
+                       decoration-warning="manufacturing_type == 'production'"
+                       decoration-info="manufacturing_type == 'both'"/>
+            </field>
+
+            <!-- Stat buttons -->
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_check_components"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-cubes">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="available_components"/>/<field name="total_components"/>
+                        </span>
+                        <span class="o_stat_text">Components</span>
+                    </div>
+                </button>
+
+                <button name="action_open_serial_wizard"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-barcode">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="serial_count"/>
+                        </span>
+                        <span class="o_stat_text">Serials</span>
+                    </div>
+                </button>
+
+                <button name="action_view_warranties"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-shield">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="warranty_ids" widget="statinfo" nolabel="1"/>
+                        </span>
+                        <span class="o_stat_text">Warranties</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- Client + component status after product_id -->
+            <field name="product_id" position="after">
+                <field name="client_id" string="Client"/>
+                <field name="component_status"
+                       string="Component Status"
+                       readonly="1"
+                       widget="badge"
+                       decoration-success="component_status == 'ready'"
+                       decoration-warning="component_status == 'partial'"
+                       decoration-danger="component_status == 'pending'"/>
+            </field>
+
+            <!-- Extra notebook pages -->
+            <notebook position="inside">
+
+                <page string="Cost Analysis" name="cost_analysis">
+                    <group>
+                        <group string="Cost Breakdown">
+                            <field name="total_component_cost"/>
+                            <field name="labour_cost"/>
+                            <field name="overhead_cost"/>
+                            <field name="total_production_cost"/>
+                        </group>
+                        <group string="Profit / Loss">
+                            <field name="selling_price"/>
+                            <field name="profit_amount"/>
+                            <field name="profit_percentage"/>
+                            <field name="profit_status"
+                                   widget="badge"
+                                   readonly="1"
+                                   decoration-success="profit_status == 'profit'"
+                                   decoration-danger="profit_status == 'loss'"
+                                   decoration-warning="profit_status == 'breakeven'"/>
+                        </group>
+                    </group>
+                </page>
+
+                <page string="Serial Numbers" name="serial_numbers">
+                    <field name="serial_number_ids">
+                        <list>
+                            <field name="serial_number" string="Serial No"/>
+                            <field name="product_id" string="Product"/>
+                            <field name="client_id" string="Client"/>
+                            <field name="notes" string="Notes"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Warranty" name="warranty">
+                    <field name="warranty_ids">
+                        <list decoration-danger="warranty_status == 'expired'"
+                              decoration-warning="warranty_status == 'expiring'"
+                              decoration-success="warranty_status == 'active'">
+                            <field name="serial_number" string="Serial No"/>
+                            <field name="product_id" string="Product"/>
+                            <field name="client_id" string="Client"/>
+                            <field name="warranty_start" string="Start"/>
+                            <field name="warranty_end" string="End"/>
+                            <field name="warranty_years" string="Years"/>
+                            <field name="days_remaining" string="Days Left"/>
+                            <field name="warranty_status"
+                                   string="Status"
+                                   widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Assembly Details" name="assembly_details"
+                      invisible="manufacturing_type == 'production'">
+                    <group>
+                        <group string="Schedule">
+                            <field name="assembly_start_date"/>
+                            <field name="assembly_end_date"/>
+                        </group>
+                        <group string="Client">
+                            <field name="client_requirements"/>
+                        </group>
+                    </group>
+                    <field name="assembly_notes"
+                           placeholder="Step-by-step assembly instructions..."/>
+                </page>
+
+                <page string="Production Details" name="production_details"
+                      invisible="manufacturing_type == 'assembly'">
+                    <group>
+                        <group string="Schedule">
+                            <field name="production_start_date"/>
+                            <field name="production_end_date"/>
+                        </group>
+                    </group>
+                    <field name="production_notes"
+                           placeholder="Production process notes..."/>
+                </page>
+
+                <!--page string="Quality" name="quality">
+                    <group>
+                        <field name="quality_checked"/>
+                        <field name="quality_notes"
+                               invisible="not quality_checked"
+                               placeholder="Describe quality inspection results..."/>
+                    </group>
+                </page-->
+
+            </notebook>
+
+        </field>
+    </record>
+
+</odoo>
