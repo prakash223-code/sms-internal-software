@@ -24,6 +24,9 @@ _ROLE_GROUPS = {
         'project.group_project_user',  # view assigned tasks
         'custom_work_report.group_work_report_employee',  # submit daily work reports
         'hr_timesheet.group_hr_timesheet_user',
+        # NOTE: manufacturing group is NOT listed here for all employees.
+        # It is granted selectively in _assign_role_groups() to employees
+        # whose department name contains "manufacturing" (case-insensitive).
     ],
     'hr': [
         # ── Base ──────────────────────────────────────────────────────────────
@@ -46,6 +49,19 @@ _ROLE_GROUPS = {
         # ── CRM (query to project conversion) ─────────────────────────────────
         'sales_team.group_sale_salesman_all_leads',  # view all leads/opportunities
         'hr_timesheet.group_hr_timesheet_approver',  # ← all timesheets
+        # ── Sales ─────────────────────────────────────────────────────────────
+        # group_sale_salesman_all_leads (already listed above) implies
+        # group_sale_salesman, but we list the base group explicitly so the
+        # Sales menu and sale order creation are always guaranteed even if
+        # Odoo ever changes the implied_ids chain.
+        'sales_team.group_sale_salesman',
+        # ── Purchase ──────────────────────────────────────────────────────────
+        # HR needs visibility into purchase orders for budget / vendor oversight.
+        'purchase.group_purchase_user',
+        # ── Manufacturing ─────────────────────────────────────────────────────
+        # HR must be able to view manufacturing orders, BOMs, warranties, and
+        # serial numbers for workforce / production oversight.
+        'custom_manufacturing.group_mrp_custom_user',
         # NOTE: custom_project.group_team_manager is intentionally NOT
         # granted to the HR role. Per spec, project completion-request
         # approval/rejection and editing a locked (completed) project are
@@ -75,6 +91,12 @@ _ROLE_GROUPS = {
         # ── CRM (full control) ────────────────────────────────────────────────
         'sales_team.group_sale_salesman_all_leads',
         'sales_team.group_sale_manager',  # CRM administrator
+        # Sales menu — base group listed explicitly (implied by the groups
+        # above, but explicit is safer against future Odoo implied_ids changes)
+        'sales_team.group_sale_salesman',
+        # ── Purchase ──────────────────────────────────────────────────────────
+        # Manager has full purchase control — approve orders, manage vendors.
+        'purchase.group_purchase_manager',
         # ── Project ───────────────────────────────────────────────────────────
         'project.group_project_manager',  # full project visibility
         'hr_timesheet.group_timesheet_manager',
@@ -89,8 +111,30 @@ _ROLE_GROUPS = {
         # tiers (see custom_project/security/security_groups.xml), so
         # listing those separately here isn't necessary.
         'custom_project.group_team_manager',
+        # ── Manufacturing ─────────────────────────────────────────────────────
+        # Manager needs full visibility across manufacturing: orders, BOMs,
+        # cost analysis, warranties, serial numbers.
+        # group_mrp_custom_manager implied_ids already pulls in
+        # group_mrp_custom_user, so all menus/views are covered.
+        'custom_manufacturing.group_mrp_custom_manager',
     ],
 }
+
+# ── Department-based manufacturing access ────────────────────────────────────
+# Any department whose name contains one of these strings (case-insensitive)
+# will automatically receive custom_manufacturing.group_mrp_custom_user,
+# regardless of employee_role.  This means an employee-role user in the
+# Manufacturing department will see the manufacturing menu just like an HR or
+# Manager user would — without being promoted to a higher role.
+_MANUFACTURING_DEPT_KEYWORDS = ['manufacturing']
+
+
+def _is_manufacturing_dept(department):
+    """Return True if the department name contains any manufacturing keyword."""
+    if not department:
+        return False
+    name_lower = (department.name or '').lower()
+    return any(kw in name_lower for kw in _MANUFACTURING_DEPT_KEYWORDS)
 
 
 class HrEmployeeDefaults(models.Model):
@@ -133,6 +177,11 @@ class HrEmployeeDefaults(models.Model):
         only the groups for the current role — ensures clean role switching
         with no leftover permissions from a previous role.
 
+        Additionally, employees whose department name contains "manufacturing"
+        (case-insensitive) receive custom_manufacturing.group_mrp_custom_user
+        regardless of their role.  This is additive — the department check
+        never removes groups that the role already granted.
+
         SAFETY: Administrator / superuser accounts are NEVER touched by this
         method, regardless of their employee_role value. Role-based group
         management is meant for ordinary employee/hr/manager accounts only —
@@ -152,6 +201,17 @@ class HrEmployeeDefaults(models.Model):
                     all_managed_ids.add(self.env.ref(xml_id).id)
                 except Exception:
                     pass
+
+        # Also treat the manufacturing groups as managed so they are stripped
+        # cleanly when an employee moves out of the manufacturing department.
+        for xml_id in (
+            'custom_manufacturing.group_mrp_custom_user',
+            'custom_manufacturing.group_mrp_custom_manager',
+        ):
+            try:
+                all_managed_ids.add(self.env.ref(xml_id).id)
+            except Exception:
+                pass
 
         for employee in self:
             user = employee.user_id
@@ -182,6 +242,32 @@ class HrEmployeeDefaults(models.Model):
                     skipped.append(xml_id)
                     _logger.warning(
                         'Role groups: group not found — %s (skipped)', xml_id
+                    )
+
+            # ── Department-based manufacturing access ─────────────────────
+            # Grant group_mrp_custom_user to any employee whose department
+            # name contains "manufacturing" (case-insensitive), even if
+            # their role is plain 'employee'.  HR already has this group
+            # via _ROLE_GROUPS; Manager gets group_mrp_custom_manager
+            # (which implies user), so this extra step is a no-op for them
+            # but harmless.
+            if _is_manufacturing_dept(employee.department_id):
+                try:
+                    mfg_group_id = self.env.ref(
+                        'custom_manufacturing.group_mrp_custom_user'
+                    ).id
+                    target_ids.add(mfg_group_id)
+                    _logger.info(
+                        'Role groups: granting manufacturing access to "%s" '
+                        '(department: "%s")',
+                        employee.name,
+                        employee.department_id.name,
+                    )
+                except Exception:
+                    _logger.warning(
+                        'Role groups: custom_manufacturing.group_mrp_custom_user '
+                        'not found — manufacturing department access skipped for "%s".',
+                        employee.name,
                     )
 
             # Current groups on user
@@ -249,13 +335,18 @@ class HrEmployeeDefaults(models.Model):
         employees.filtered('user_id')._assign_role_groups()
         return employees
 
-    # ── Auto-assign when user_id is linked later ──────────────────────────────
+    # ── Auto-assign when user_id or department_id changes ────────────────────
     def write(self, vals):
-        password = vals.pop('new_password', None)  # ← add this line
+        password = vals.pop('new_password', None)
         res = super().write(vals)
+        # Re-apply groups whenever the linked user OR the department changes,
+        # so that moving an employee into/out of Manufacturing automatically
+        # grants/revokes the manufacturing menu access.
         if 'user_id' in vals and vals['user_id']:
             self._assign_role_groups()
-        if password:  # ← add this block
+        elif 'department_id' in vals:
+            self.filtered('user_id')._assign_role_groups()
+        if password:
             for emp in self:
                 if emp.user_id:
                     emp.user_id.sudo().write({'password': password})
@@ -289,12 +380,16 @@ class HrEmployeeDefaults(models.Model):
         role_labels = dict(self._fields['employee_role'].selection)
         role_label = role_labels.get(self.employee_role, 'Employee')
 
+        dept_note = ''
+        if _is_manufacturing_dept(self.department_id):
+            dept_note = ' Manufacturing menu access granted (department match).'
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': 'Permissions Updated',
-                'message': f'{role_label} permissions assigned to {self.name}.',
+                'message': f'{role_label} permissions assigned to {self.name}.{dept_note}',
                 'type': 'success',
                 'sticky': False,
             },
