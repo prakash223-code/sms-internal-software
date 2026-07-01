@@ -1,4 +1,5 @@
 import mimetypes
+from markupsafe import Markup
 from odoo import _, api, fields, models
 
 
@@ -233,6 +234,13 @@ class CaseStudy(models.Model):
             'res_id': self.project_id.id,
         }
 
+    def action_assign_employees(self):
+        """Header button: saves the form (Odoo auto-saves dirty fields
+        before calling a type='object' button method) and re-fires
+        notifications for any newly added assigned employees via write()."""
+        self.ensure_one()
+        return True
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -240,4 +248,33 @@ class CaseStudy(models.Model):
                 vals['code'] = (
                         self.env['ir.sequence'].next_by_code('case.study') or _('New')
                 )
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.assigned_employee_ids:
+                rec._notify_assigned_employees(rec.assigned_employee_ids)
+        return records
+
+    def write(self, vals):
+        old_assignees = {rec.id: rec.assigned_employee_ids for rec in self} \
+            if 'assigned_employee_ids' in vals else {}
+        res = super().write(vals)
+        if 'assigned_employee_ids' in vals:
+            for rec in self:
+                newly_added = rec.assigned_employee_ids - old_assignees.get(rec.id, self.env['hr.employee'])
+                if newly_added:
+                    rec._notify_assigned_employees(newly_added)
+        return res
+
+    def _notify_assigned_employees(self, employees):
+        self.ensure_one()
+        partners = employees.mapped('user_id.partner_id')
+        if not partners:
+            return
+        body = Markup(
+            "<p>You have been assigned to the case study <strong>%s</strong> (%s).</p>"
+        ) % (self.name, self.code or _('New'))
+        self.message_notify(
+            subject=_('You have been assigned to a Case Study: %s') % self.name,
+            body=body,
+            partner_ids=partners.ids,
+        )

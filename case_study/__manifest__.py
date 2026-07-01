@@ -6,8 +6,8 @@
     'description': 'A module to manage case studies',
     'category': 'Custom',
     'author': 'Your Name',
-    'depends': ['base', 'mail','hr','project',
-        'hr_timesheet',],
+    'depends': ['base', 'mail', 'hr', 'project',
+                'hr_timesheet', ],
     'data': [
         'security/ir.model.access.csv',
         'security/case_study_rules.xml',
@@ -15,6 +15,11 @@
         'data/case_study_stages_data.xml',
         'views/case_study_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'case_study/static/src/css/kanban.css',
+        ],
+    },
     'installable': True,
     'application': True,
 }

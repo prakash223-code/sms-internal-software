@@ -1,0 +1,103 @@
+.o_case_study_kanban .o_kanban_record {
+    border-radius: 12px !important;
+    overflow: hidden;
+    border: 1px solid var(--border-color, #e0e0e0);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.o_case_study_kanban .o_kanban_record:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.o_case_study_kanban.o_kanban_dashboard .o_kanban_record {
+    border: none !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: none;
+    background: transparent;
+    padding: 0 !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.o_case_study_kanban.o_kanban_dashboard .o_kanban_record:hover {
+    transform: translateY(-1px);
+}
+
+.o_cs_dept_card {
+    position: relative;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px 18px 16px;
+    min-height: 140px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e8eaed;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.o_cs_dept_card:hover {
+    border-color: #d4d8dd;
+    box-shadow: 0 4px 14px rgba(20, 30, 40, 0.07);
+}
+
+.o_cs_dept_card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3px;
+    background: #14b8a6;
+}
+
+.o_cs_dept_card:hover {
+    border-color: #d4d8dd;
+    box-shadow: 0 4px 14px rgba(20, 30, 40, 0.07);
+    transform: translateY(-1px);
+}
+
+.o_cs_dept_badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #0f9488;
+    background: rgba(20, 184, 166, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.o_cs_dept_name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 26px 0;
+}
+
+.o_cs_dept_count {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.o_cs_dept_count_wrap.o_cs_empty .o_cs_dept_count {
+    color: #c2c7ce;
+}
+
+.o_cs_dept_btn {
+    background: #1f2937;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 5px 12px;
+    border: none;
+}
+
+.o_cs_dept_btn:hover {
+    background: #111827;
+    color: #fff;
+}
