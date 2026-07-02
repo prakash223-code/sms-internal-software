@@ -22,5 +22,14 @@
             <field name="implementation">no_gap</field>
         </record>
 
+        <record id="seq_project_project" model="ir.sequence">
+            <field name="name">Project Reference</field>
+            <field name="code">project.project.code</field>
+            <field name="prefix">PRJ</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
     </data>
 </odoo>

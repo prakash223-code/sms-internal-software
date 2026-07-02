@@ -18,6 +18,14 @@ class ProjectProject(models.Model):
              'Tasks created under this project will inherit this team.',
     )
 
+    project_code = fields.Char(
+        string='Project ID',
+        copy=False,
+        readonly=True,
+        default=lambda self: 'New',
+        index=True,
+    )
+
     # ── Completion lock ───────────────────────────────────────────────────────
 
     is_locked = fields.Boolean(
@@ -65,6 +73,10 @@ class ProjectProject(models.Model):
         compute='_compute_can_request_completion',
         string='Can Request Completion',
     )
+
+    _sql_constraints = [
+        ('project_code_unique', 'unique(project_code)', 'Project ID must be unique!')
+    ]
 
     # ── Computes ──────────────────────────────────────────────────────────────
 
@@ -164,6 +176,17 @@ class ProjectProject(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # 1. Assign a Project ID from the sequence for any record that
+        #    doesn't already have one (mirrors the standard Odoo idiom
+        #    used by sale.order / purchase.order, etc.).
+        for vals in vals_list:
+            if vals.get('project_code', 'New') == 'New':
+                vals['project_code'] = self.env['ir.sequence'].next_by_code(
+                    'project.project.code'
+                ) or 'New'
+
+        # 2. Force default stages onto any project that wasn't given
+        #    explicit stages on the creation form.
         default_stages = self.env['project.task.type'].sudo().search(
             [('is_default_stage', '=', True)],
             order='sequence asc',
@@ -185,8 +208,9 @@ class ProjectProject(models.Model):
 
         projects = super().create(vals_list)
 
-        # Notify the team lead + members for any project created with a team
-        # already set (e.g. picked on the creation form before first save).
+        # 3. Notify the team lead + members for any project created with a
+        #    team already set (e.g. picked on the creation form before
+        #    first save).
         for project in projects:
             if project.team_id:
                 project._notify_team_project_assigned()

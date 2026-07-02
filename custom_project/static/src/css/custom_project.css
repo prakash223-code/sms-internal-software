@@ -679,3 +679,45 @@
     padding: 0;
     margin: 10px;
 }
+/* Project ID */
+/* Wrapper — controls symmetric top/bottom spacing */
+.o_cp_project_code_wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/* "Project ID:" label */
+.o_cp_project_code_label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b6b6b;
+}
+
+/* The PRJ0001 badge itself */
+.o_cp_project_code {
+    display: inline-block !important;
+    width: 100px !important;
+    text-align: center;
+    vertical-align: middle;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 2.8;
+    color: #714B67;
+    background-color: #f0eaf2;
+    border: 1px solid #d9c8de;
+    border-radius: 12px;
+    padding: 2px 10px;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.o_cp_project_code input {
+    width: 100% !important;
+    text-align: center;
+    background: transparent;
+    border: none;
+}

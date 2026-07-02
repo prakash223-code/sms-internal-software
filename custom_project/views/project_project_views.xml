@@ -8,6 +8,29 @@
           • completion-request workflow: Request Completion button,
             Completion Requests smart button, lock banner, Reopen button
     -->
+    <record id="view_project_project_form_inherit" model="ir.ui.view">
+        <field name="name">project.project.form.inherit.custom</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <div class="o_cp_project_code_wrap">
+                    <field name="project_code" class="o_cp_project_code"/>
+                </div>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_project_project_tree_inherit" model="ir.ui.view">
+        <field name="name">project.project.tree.inherit.custom</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="project_code"/>
+            </field>
+        </field>
+    </record>
     <record id="view_project_form_team_and_stages" model="ir.ui.view">
         <field name="name">project.project.form.team.and.stages</field>
         <field name="model">project.project</field>
@@ -23,7 +46,8 @@
                     <i class="fa fa-lock" title="Locked"/>
                     <span>
                         This project is completed and locked. Only Managers
-                        can edit it or its tasks. Use <strong>Reopen</strong>
+                        can edit it or its tasks. Use
+                        <strong>Reopen</strong>
                         to unlock it.
                     </span>
                 </div>
