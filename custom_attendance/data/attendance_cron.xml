@@ -56,4 +56,17 @@
         <field name="nextcall">2025-01-01 01:30:00</field>
     </record>
 
+    <record id="cron_generate_permission_allocation" model="ir.cron">
+        <field name="name">Attendance: Generate Monthly Permission Allocation</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_generate_monthly_permission_allocation()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">months</field>
+        <field name="active">True</field>
+        <field name="priority">12</field>
+        <field name="nextcall">2025-01-01 00:15:00</field>
+    </record>
+
 </odoo>

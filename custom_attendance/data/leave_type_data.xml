@@ -31,4 +31,15 @@
         <field name="color" eval="1"/>
     </record>
 
+    <record id="leave_type_permission" model="hr.leave.type">
+        <field name="name">Permission</field>
+        <field name="request_unit">hour</field>
+        <field name="requires_allocation" eval="True"/>
+        <field name="employee_requests" eval="True"/>
+        <field name="allocation_validation_type">no_validation</field>
+        <field name="leave_validation_type">hr</field>
+        <field name="unpaid" eval="False"/>
+        <field name="color" eval="7"/>
+    </record>
+
 </odoo>

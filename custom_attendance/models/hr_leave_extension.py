@@ -9,6 +9,16 @@ import pytz
 class HrLeave(models.Model):
     _inherit = 'hr.leave'
 
+    is_auto_permission = fields.Boolean(
+        string='Auto-Generated (Permission Deduction)',
+        default=False,
+        copy=False,
+        help='True only for Permission leave records created automatically '
+             'by a late check-in. Manual employee-submitted Permission '
+             'requests are always False — this is how the double-deduction '
+             'guard tells them apart.',
+    )
+
     @api.constrains('date_from', 'state')
     def _check_no_past_leave_request(self):
         today = fields.Date.context_today(self)
