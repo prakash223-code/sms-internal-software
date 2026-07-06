@@ -11,9 +11,9 @@ _logger = logging.getLogger(__name__)
 # CL carry-forward capped at 50% of quota (company policy).
 # EL / ML carry forward in full — cap == quota, i.e. no extra ceiling.
 LEAVE_POLICY = {
-    'casual':  {'xmlid': 'custom_attendance.leave_type_casual',  'quota': 12.0, 'carry_cap': 6.0},
-    'earned':  {'xmlid': 'custom_attendance.leave_type_earned',  'quota': 3.0,  'carry_cap': 3.0},
-    'medical': {'xmlid': 'custom_attendance.leave_type_medical', 'quota': 3.0,  'carry_cap': 3.0},
+    'casual': {'xmlid': 'custom_attendance.leave_type_casual', 'quota': 12.0, 'carry_cap': 6.0},
+    'earned': {'xmlid': 'custom_attendance.leave_type_earned', 'quota': 3.0, 'carry_cap': 3.0},
+    'medical': {'xmlid': 'custom_attendance.leave_type_medical', 'quota': 3.0, 'carry_cap': 3.0},
 }
 
 # XML IDs of the three managed leave types — used in monthly_summary.py
@@ -69,6 +69,10 @@ class HrEmployeeLeavePolicy(models.Model):
                 Allocation.create(self._allocation_vals(
                     employee, leave_type, cycle_start, policy['quota']
                 ))
+                new_alloc = Allocation.create(self._allocation_vals(
+                    employee, leave_type, cycle_start, policy['quota']
+                ))
+                new_alloc.action_validate()
                 _logger.info(
                     'Leave policy: initial allocation — %s — %s — %s days from %s',
                     employee.name, leave_type.name, policy['quota'], cycle_start,
@@ -134,6 +138,10 @@ class HrEmployeeLeavePolicy(models.Model):
             Allocation.create(self._allocation_vals(
                 self, leave_type, cycle_start, quota + carry_forward
             ))
+            new_alloc = Allocation.create(self._allocation_vals(
+                employee, leave_type, cycle_start, policy['quota']
+            ))
+            new_alloc.action_validate()
 
             _logger.info(
                 'Leave carry-forward: %s — %s — quota=%s carry=%s -> new allocation=%s',
@@ -192,7 +200,7 @@ class HrEmployeeLeavePolicy(models.Model):
             'number_of_days': number_of_days,
             'date_from': date_from,
             'date_to': date_to,
-            'state': 'confirm',   # Odoo auto-validates for no_validation leave types
+            'state': 'confirm',  # Odoo auto-validates for no_validation leave types
         }
 
     @staticmethod

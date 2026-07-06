@@ -29,6 +29,7 @@
     'assets': {
         'web.assets_backend': [
             'custom_attendance/static/src/css/attendance.css',
+            'custom_attendance/static/src/js/time_off_hour_format.js',
         ],
     },
     'post_init_hook': 'post_init_hook',

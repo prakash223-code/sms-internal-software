@@ -52,6 +52,9 @@ class HrAttendancePermissionDeduction(models.Model):
             self._create_auto_permission_leave(
                 employee, leave_type, local_date, consumed_hours, auto_start_offset_hours
             )
+            self._notify_permission_deducted(
+                employee, self.late_minutes, consumed_hours, remaining_hours - consumed_hours
+            )
 
         self.permission_overflow_minutes = overflow_minutes
 
@@ -144,6 +147,7 @@ class HrAttendancePermissionDeduction(models.Model):
             'request_hour_from': hour_from,
             'request_hour_to': hour_to,
             'is_auto_permission': True,
+            'name': _('Late Arrival — Auto Deduction (%s min late)') % self.late_minutes,
         })
         leave.action_approve()
 
@@ -181,6 +185,33 @@ class HrAttendancePermissionDeduction(models.Model):
         self.message_notify(
             partner_ids=[employee.user_id.partner_id.id],
             subject=_('Permission Balance Exhausted'),
+            body=body,
+            subtype_xmlid='mail.mt_comment',
+        )
+
+    def _notify_permission_deducted(self, employee, late_minutes, consumed_hours, remaining_hours):
+        """Fired on every late-arrival deduction, regardless of threshold —
+        gives the employee visibility into what happened and why, instead
+        of silence unless they happen to cross the low/exhausted markers."""
+        from markupsafe import Markup
+        if not employee.user_id:
+            return
+
+        consumed_minutes = round(consumed_hours * 60)
+        remaining_minutes = round(remaining_hours * 60)
+        remaining_h = remaining_minutes // 60
+        remaining_m = remaining_minutes % 60
+        remaining_label = f'{remaining_h}h {remaining_m}m' if remaining_h else f'{remaining_m}m'
+
+        body = Markup(
+            '<p>You checked in <strong>%s minutes</strong> late today (after 9:30 AM).</p>'
+            '<p><strong>%s minutes</strong> have been deducted from your Permission balance.</p>'
+            '<p>Remaining Permission balance this month: <strong>%s</strong>.</p>'
+        ) % (late_minutes, consumed_minutes, remaining_label)
+
+        self.message_notify(
+            partner_ids=[employee.user_id.partner_id.id],
+            subject=_('Late Arrival — Permission Balance Deducted'),
             body=body,
             subtype_xmlid='mail.mt_comment',
         )

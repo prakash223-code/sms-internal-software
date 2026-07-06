@@ -100,6 +100,8 @@ class HrLeave(models.Model):
     def create(self, vals_list):
         leaves = super().create(vals_list)
         for leave in leaves:
+            if leave.is_auto_permission:
+                continue
             if leave.state in ('confirm', 'validate1'):
                 leave.sudo()._notify_leave_request_submitted()
         return leaves
@@ -116,6 +118,14 @@ class HrLeave(models.Model):
                 old_state = old_states.get(leave.id)
                 new_state = leave.state
                 if old_state == new_state:
+                    continue
+                # Auto-generated Permission deductions (late-arrival buffer)
+                # are never employee-submitted requests, so the standard
+                # "Your time off request has been approved" notification is
+                # misleading here — skip it. A dedicated late-arrival
+                # notification is handled separately in permission_deduction.py
+                # (_notify_permission_low / _notify_permission_exhausted).
+                if leave.is_auto_permission:
                     continue
                 if new_state == 'validate':
                     leave.sudo()._notify_leave_decision('approved')
