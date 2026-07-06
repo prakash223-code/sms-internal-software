@@ -2,6 +2,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 import pytz
+import calendar
 from datetime import datetime, time
 
 
@@ -183,7 +184,7 @@ class CustomAttendance(models.Model):
             'check_in': now,
         })
         new_record._apply_permission_deduction()
-        
+
         return {
             'status': 'checked_in',
             'check_in': now,
@@ -324,3 +325,19 @@ class CustomAttendance(models.Model):
             ('check_in', '<=', last_day),
             ('is_late', '=', True),
         ])
+
+    @api.model
+    def get_permission_overflow_minutes(self, employee_id, year, month):
+        """Sum of permission_overflow_minutes across all attendance
+        records in the given month — feeds the monthly summary, which
+        in turn feeds the payroll deduction."""
+        first_day = datetime(year, month, 1, 0, 0, 0)
+        last_day_num = calendar.monthrange(year, month)[1]
+        last_day = datetime(year, month, last_day_num, 23, 59, 59)
+
+        records = self.search([
+            ('employee_id', '=', employee_id),
+            ('check_in', '>=', first_day),
+            ('check_in', '<=', last_day),
+        ])
+        return sum(records.mapped('permission_overflow_minutes'))

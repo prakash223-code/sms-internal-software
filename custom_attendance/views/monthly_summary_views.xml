@@ -22,6 +22,7 @@
                 <field name="late_days" string="Late"/>
                 <field name="absent_days" string="Absent"/>
                 <field name="unpaid_absent_days" string="Unpaid Absent"/>
+                <field name="permission_overflow_minutes" string="Perm. Overflow (min)" optional="show"/>
                 <field name="state" widget="badge" string="Status"
                        decoration-success="state == 'confirmed'"
                        decoration-warning="state == 'draft'"/>
@@ -173,6 +174,20 @@
                         <div class="o_att_payroll_note">
                             Absent Days + Unpaid Leave Days.
                             Used for salary deduction calculation.
+                        </div>
+                    </div>
+
+                    <div class="o_att_payroll_card" invisible="permission_overflow_minutes == 0">
+                        <span class="o_att_payroll_label">
+                            <i class="fa fa-clock-o" title="Overflow"/>
+                            Permission Overflow Minutes
+                        </span>
+                        <div class="o_att_payroll_value">
+                            <field name="permission_overflow_minutes" readonly="1" nolabel="1"/>
+                        </div>
+                        <div class="o_att_payroll_note">
+                            Late minutes beyond the monthly 240-min Permission pool.
+                            Deducted from salary at the minute rate.
                         </div>
                     </div>
 

@@ -89,6 +89,15 @@ class AttendanceMonthlySummary(models.Model):
         help='absent_days + unpaid_leave_days — used for payroll deduction.',
     )
 
+    permission_overflow_minutes = fields.Integer(
+        string='Permission Overflow (Minutes)',
+        readonly=True,
+        default=0,
+        help='Total late minutes this month that exceeded the employee\'s '
+             'Permission pool (manual + auto combined). Feeds the payroll '
+             'overflow deduction salary rule.',
+    )
+
     state = fields.Selection(
         selection=[
             ('draft', 'Draft'),
@@ -193,6 +202,11 @@ class AttendanceMonthlySummary(models.Model):
         # --- 3. Late days ---
         late_days_count = attendance_model.get_late_days(employee.id, year, month)
 
+        # --- 3b. Permission overflow minutes ---
+        permission_overflow_count = attendance_model.get_permission_overflow_minutes(
+            employee.id, year, month
+        )
+
         # --- 4. Leave days ---
         leave_days_count, unpaid_leave_days_count, leave_date_set = \
             self._get_leave_data(employee, year, month, working_day_dates, tz)
@@ -215,6 +229,7 @@ class AttendanceMonthlySummary(models.Model):
             'unpaid_leave_days': unpaid_leave_days_count,
             'absent_days': absent_days_count,
             'unpaid_absent_days': unpaid_absent_days_count,
+            'permission_overflow_minutes': permission_overflow_count,
         })
 
     # ------------------------------------------------------------------
@@ -235,9 +250,9 @@ class AttendanceMonthlySummary(models.Model):
         declared holidays AND 2nd/4th Saturdays, so we call it once and
         subtract the full holiday set.
         """
-        num_days   = calendar.monthrange(year, month)[1]
-        date_from  = date(year, month, 1)
-        date_to    = date(year, month, num_days)
+        num_days = calendar.monthrange(year, month)[1]
+        date_from = date(year, month, 1)
+        date_to = date(year, month, num_days)
 
         # Fetch all holidays for the month (declared + 2nd/4th Saturdays)
         holiday_dates = self.env['company.holiday'].get_holidays_in_range(
@@ -247,9 +262,9 @@ class AttendanceMonthlySummary(models.Model):
         working_dates = set()
         for day in range(1, num_days + 1):
             d = date(year, month, day)
-            if d.weekday() == 6:        # Sunday — always off
+            if d.weekday() == 6:  # Sunday — always off
                 continue
-            if d in holiday_dates:      # declared holiday or 2nd/4th Saturday
+            if d in holiday_dates:  # declared holiday or 2nd/4th Saturday
                 continue
             working_dates.add(d)
 
@@ -267,9 +282,9 @@ class AttendanceMonthlySummary(models.Model):
         are excluded from leave consumption — the employee should not lose a
         leave day for a day that was already a holiday.
         """
-        num_days  = calendar.monthrange(year, month)[1]
+        num_days = calendar.monthrange(year, month)[1]
         first_day = date(year, month, 1)
-        last_day  = date(year, month, num_days)
+        last_day = date(year, month, num_days)
 
         # Fetch all holidays in the month once (declared + 2nd/4th Saturdays)
         holiday_dates = self.env['company.holiday'].get_holidays_in_range(
@@ -278,17 +293,17 @@ class AttendanceMonthlySummary(models.Model):
 
         hr_leaves = self.env['hr.leave'].search([
             ('employee_id', '=', employee.id),
-            ('state',       '=', 'validate'),
-            ('date_from',   '<=', datetime(year, month, num_days, 23, 59, 59)),
-            ('date_to',     '>=', datetime(year, month, 1, 0, 0, 0)),
+            ('state', '=', 'validate'),
+            ('date_from', '<=', datetime(year, month, num_days, 23, 59, 59)),
+            ('date_to', '>=', datetime(year, month, 1, 0, 0, 0)),
         ])
 
-        leave_date_set        = set()
+        leave_date_set = set()
         unpaid_leave_date_set = set()
 
         for leave in hr_leaves:
             date_from_utc = leave.date_from
-            date_to_utc   = leave.date_to
+            date_to_utc = leave.date_to
 
             if date_from_utc.tzinfo is None:
                 date_from_utc = pytz.utc.localize(date_from_utc)
@@ -296,11 +311,11 @@ class AttendanceMonthlySummary(models.Model):
                 date_to_utc = pytz.utc.localize(date_to_utc)
 
             date_from_local = date_from_utc.astimezone(tz).date()
-            date_to_local   = date_to_utc.astimezone(tz).date()
+            date_to_local = date_to_utc.astimezone(tz).date()
 
             # Clamp to the current month
             date_from_local = max(date_from_local, first_day)
-            date_to_local   = min(date_to_local,   last_day)
+            date_to_local = min(date_to_local, last_day)
 
             is_unpaid = bool(leave.holiday_status_id.unpaid)
 
@@ -321,9 +336,9 @@ class AttendanceMonthlySummary(models.Model):
                 current = date.fromordinal(current.toordinal() + 1)
 
         # Intersect with working days only
-        leave_working        = leave_date_set        & working_day_dates
+        leave_working = leave_date_set & working_day_dates
         unpaid_leave_working = unpaid_leave_date_set & working_day_dates
-        paid_leave_working   = leave_working - unpaid_leave_working
+        paid_leave_working = leave_working - unpaid_leave_working
 
         return len(paid_leave_working), len(unpaid_leave_working), leave_date_set
 
@@ -342,18 +357,18 @@ class AttendanceMonthlySummary(models.Model):
 
         if today.month == 1:
             target_month = 12
-            target_year  = today.year - 1
+            target_year = today.year - 1
         else:
             target_month = today.month - 1
-            target_year  = today.year
+            target_year = today.year
 
         active_employees = self.env['hr.employee'].search([('active', '=', True)])
 
         for employee in active_employees:
             existing = self.search([
                 ('employee_id', '=', employee.id),
-                ('month',       '=', str(target_month)),
-                ('year',        '=', target_year),
+                ('month', '=', str(target_month)),
+                ('year', '=', target_year),
             ], limit=1)
 
             if existing:
@@ -363,8 +378,8 @@ class AttendanceMonthlySummary(models.Model):
             else:
                 new_record = self.create({
                     'employee_id': employee.id,
-                    'month':       str(target_month),
-                    'year':        target_year,
-                    'state':       'draft',
+                    'month': str(target_month),
+                    'year': target_year,
+                    'state': 'draft',
                 })
                 new_record._compute_summary()
