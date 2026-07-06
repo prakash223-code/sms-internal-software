@@ -7,6 +7,7 @@ from datetime import date
 
 try:
     from num2words import num2words
+
     NUM2WORDS_AVAILABLE = True
 except ImportError:
     NUM2WORDS_AVAILABLE = False
@@ -79,6 +80,18 @@ class HrPayslip(models.Model):
     )
 
     def action_payslip_done(self):
+        # Safety net: bi_hr_payroll only assigns `number` inside
+        # compute_sheet() (see bi_hr_payroll/models/hr_payslip.py ~line 145).
+        # Any payslip that reaches 'done' without a clean compute_sheet()
+        # run — e.g. refund_sheet()'s
+        # with_context(without_compute_sheet=True).action_payslip_done(),
+        # or a sibling payslip failing mid-batch and rolling back the
+        # whole compute_sheet() transaction — ends up with number=False
+        # forever, since nothing else ever retries it. Stamp it here too.
+        for slip in self:
+            if not slip.number:
+                slip.number = self.env['ir.sequence'].next_by_code('salary.slip')
+
         res = super().action_payslip_done()
         for slip in self:
             if not slip.confirmed_date:
@@ -127,6 +140,7 @@ class HrPayslip(models.Model):
             )
 
         unpaid_days = summary.unpaid_absent_days if summary else 0.0
+        overflow_minutes = summary.permission_overflow_minutes if summary else 0.0
 
         # working_days comes from the confirmed monthly summary — it already
         # excludes Sundays, 2nd/4th Saturdays, and any declared company.holiday
@@ -153,7 +167,7 @@ class HrPayslip(models.Model):
         # ── Remove stale inputs ────────────────────────────────────────
         Input.search([
             ('payslip_id', '=', self.id),
-            ('code', 'in', ['ABSENT_DAYS', 'WORKING_DAYS']),
+            ('code', 'in', ['ABSENT_DAYS', 'WORKING_DAYS', 'PERMISSION_OVERFLOW']),
         ]).unlink()
 
         # ── Inject fresh inputs ──────────────────────────────────────────
@@ -172,6 +186,14 @@ class HrPayslip(models.Model):
             'contract_id': self.contract_id.id,
             'payslip_id': self.id,
             'sequence': 6,
+        })
+        Input.create({
+            'name': 'Permission Overflow (Minutes)',
+            'code': 'PERMISSION_OVERFLOW',
+            'amount': overflow_minutes,
+            'contract_id': self.contract_id.id,
+            'payslip_id': self.id,
+            'sequence': 7,
         })
 
         _logger.info(

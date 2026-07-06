@@ -10,13 +10,27 @@
         <field name="amount_select">code</field>
         <field name="amount_python_compute">working_days = inputs.WORKING_DAYS.amount if (inputs.WORKING_DAYS and inputs.WORKING_DAYS.amount > 0) else 30.0
 absent_days = inputs.ABSENT_DAYS.amount if inputs.ABSENT_DAYS else 0.0
-result = -(contract.wage / working_days * absent_days)
-        </field>
+result = -(contract.wage / working_days * absent_days)</field>
+        <field name="appears_on_payslip" eval="True"/>
+    </record>
+
+    <record id="hr_salary_rule_permission_overflow_deduction" model="hr.salary.rule">
+        <field name="name">Permission Overflow Deduction</field>
+        <field name="code">PERM_OVERFLOW_DED</field>
+        <field name="sequence" eval="115"/>
+        <field name="category_id" ref="bi_hr_payroll.DED"/>
+        <field name="condition_select">none</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">working_days = inputs.WORKING_DAYS.amount if (inputs.WORKING_DAYS and inputs.WORKING_DAYS.amount > 0) else 30.0
+overflow_minutes = inputs.PERMISSION_OVERFLOW.amount if inputs.PERMISSION_OVERFLOW else 0.0
+day_rate = contract.wage / working_days
+minute_rate = day_rate / 540.0
+result = -(minute_rate * overflow_minutes)</field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
 
     <record id="bi_hr_payroll.structure_base" model="hr.payroll.structure">
-        <field name="rule_ids" eval="[(4, ref('hr_salary_rule_absent_deduction'))]"/>
+        <field name="rule_ids" eval="[(4, ref('hr_salary_rule_absent_deduction')), (4, ref('hr_salary_rule_permission_overflow_deduction'))]"/>
     </record>
 
 </odoo>

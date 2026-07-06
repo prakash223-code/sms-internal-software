@@ -125,6 +125,14 @@
                                 <span t-esc="o._fmt_amount(o._get_salary_line_amount('ABSENT_DED'))"/>
                             </td>
                         </tr>
+                        <tr>
+                            <td style="border:1px solid #000; padding:8px;"> </td>
+                            <td style="border:1px solid #000; padding:8px;"> </td>
+                            <td style="border:1px solid #000; padding:8px;">Deduction (Permission Overflow)</td>
+                            <td style="border:1px solid #000; padding:8px; text-align:right;">
+                                <span t-esc="o._fmt_amount(o._get_salary_line_amount('PERM_OVERFLOW_DED'))"/>
+                            </td>
+                        </tr>
                         <tr style="font-weight:bold;">
                             <td style="border:1px solid #000; padding:8px;">Total Earnings (Gross Salary)</td>
                             <td style="border:1px solid #000; padding:8px; text-align:right;">
