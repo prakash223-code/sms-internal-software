@@ -2,7 +2,7 @@ import logging
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.fields import Domain
+from odoo.fields import Command, Domain
 from markupsafe import Markup
 
 _logger = logging.getLogger(__name__)
@@ -21,8 +21,15 @@ class ProjectTask(models.Model):
         readonly=True,
     )
 
-    assigned_to = fields.Many2one(
+    # CHANGED: was a Many2one (single employee). Now a Many2many so a task
+    # can be assigned to more than one employee at once. Every place that
+    # used to compare `task.assigned_to == employee` now checks
+    # `employee in task.assigned_to_ids`.
+    assigned_to_ids = fields.Many2many(
         'hr.employee',
+        'project_task_assigned_employee_rel',
+        'task_id',
+        'employee_id',
         string='Assigned To',
         copy=False,
         tracking=True,
@@ -89,13 +96,15 @@ class ProjectTask(models.Model):
                 'task.assignment.request'
             ].sudo().search_count([('task_id', '=', task.id)])
 
-    @api.depends('assigned_to')
+    @api.depends('assigned_to_ids')
     @api.depends_context('uid')
     def _compute_can_change_state(self):
         is_priv = self._is_privileged()
         employee = self._get_current_employee()
         for task in self:
-            task.can_change_state = is_priv or (task.assigned_to == employee)
+            task.can_change_state = is_priv or bool(
+                employee and employee in task.assigned_to_ids
+            )
 
     @api.depends('create_uid')
     @api.depends_context('uid')
@@ -182,29 +191,23 @@ class ProjectTask(models.Model):
 
     def _check_state_transition_access(self):
         """
-        Only the employee assigned to a task may advance its state.
+        Only an employee the task is assigned to may advance its state.
         Managers, Team Leads, and HR are exempt.
         """
         if self._is_privileged():
-            _logger.warning("STATE CHECK: uid=%s is privileged — bypassing", self.env.uid)
             return
         current_employee = self._get_current_employee()
-        _logger.warning("STATE CHECK: uid=%s employee=%s", self.env.uid, current_employee)
         if not current_employee:
             raise UserError(
                 _('Your user account is not linked to an employee record.')
             )
         for task in self:
-            _logger.warning(
-                "STATE CHECK: task=%s assigned_to=%s match=%s",
-                task.name, task.assigned_to, task.assigned_to == current_employee
-            )
-            if task.assigned_to != current_employee:
+            if current_employee not in task.assigned_to_ids:
                 raise UserError(
-                    _('Only the assigned employee (%s) can change '
-                      'the state of task "%s".')
+                    _('Only an employee this task is assigned to (%s) can '
+                      'change the state of task "%s".')
                     % (
-                        task.assigned_to.name if task.assigned_to else _('nobody'),
+                        ', '.join(task.assigned_to_ids.mapped('name')) or _('nobody'),
                         task.name,
                     )
                 )
@@ -218,13 +221,13 @@ class ProjectTask(models.Model):
         • Managers, Team Leads, and HR: unrestricted — may edit any task.
         • Regular employees: may edit any field ONLY on tasks they
           personally created (create_uid == current user).
-        • Exception: the employee a task is assigned to may still write
+        • Exception: an employee the task is assigned to may still write
           to _ASSIGNEE_EDITABLE_FIELDS (task_state, timesheet_ids) even
           if they didn't create the task — this preserves the core
           task-progression workflow AND timesheet logging. That narrower
           check is layered on top of (not instead of)
           _check_state_transition_access, which already validates the
-          assigned_to match for task_state changes specifically.
+          assigned_to_ids membership for task_state changes specifically.
 
         Internal/system writes (sudo, e.g. assignment-request approval)
         bypass this check entirely via self.env.su.
@@ -243,7 +246,11 @@ class ProjectTask(models.Model):
             if task.create_uid.id == self.env.uid:
                 continue  # creator may edit freely
 
-            if assignee_editable_only and current_employee and task.assigned_to == current_employee:
+            if (
+                    assignee_editable_only
+                    and current_employee
+                    and current_employee in task.assigned_to_ids
+            ):
                 continue  # assignee may still progress state / log timesheets
 
             raise UserError(
@@ -265,7 +272,7 @@ class ProjectTask(models.Model):
                     '|', ('team_id', '=', False),
                     '|', ('team_id.member_ids', 'in', [employee.id]),
                     '|', ('team_id.team_lead_id', '=', employee.id),
-                    '|', ('assigned_to', '=', employee.id),
+                    '|', ('assigned_to_ids', 'in', [employee.id]),
                     '|', ('assigned_by', '=', employee.id),
                     ('create_uid', '=', self.env.uid),
                 ]
@@ -287,45 +294,100 @@ class ProjectTask(models.Model):
             return self.team_id
         return False
 
-    def _handle_cross_team_assignment(self, vals, current_employee):
-        assigned_to_id = vals.get('assigned_to')
-        if not assigned_to_id:
-            return vals, None
+    # ── Many2many command helper ────────────────────────────────────────────
+
+    @api.model
+    def _resolve_m2m_ids(self, commands, current_ids):
+        """
+        Apply a standard Odoo (6,0,ids)/(4,id)/(3,id)/(2,id)/(5,) command
+        list on top of `current_ids` and return the resulting set of ids.
+        Used to figure out what an assigned_to_ids write is *actually*
+        going to end up containing, without needing to perform the write
+        first.
+        """
+        ids = set(current_ids or [])
+        for cmd in commands or []:
+            if not isinstance(cmd, (list, tuple)):
+                continue
+            op = cmd[0]
+            if op == 6:
+                ids = set(cmd[2] or [])
+            elif op == 5:
+                ids = set()
+            elif op == 4:
+                ids.add(cmd[1])
+            elif op in (3, 2):
+                ids.discard(cmd[1])
+            elif op == 1:
+                ids.add(cmd[1])
+            # op == 0 (inline create) is not used for hr.employee here
+        return ids
+
+    def _handle_cross_team_assignment(self, vals, current_employee, current_ids):
+        """
+        Looks at which employees are newly being added to assigned_to_ids
+        and, for each one:
+          • if they're on the task's own team (or the current user is a
+            Manager) → immediate assignment, no approval needed.
+          • otherwise → a task.assignment.request is queued for that
+            employee; they stay visible on the task (task_state does not
+            flip to 'assigned' just for them) until a Manager/HR approves
+            or rejects the request.
+
+        Returns (vals, pending_list) where pending_list is a list of
+        dicts (one per employee needing approval) ready to be handed to
+        _create_assignment_request().
+        """
+        if 'assigned_to_ids' not in vals:
+            return vals, []
+
+        new_ids = self._resolve_m2m_ids(vals['assigned_to_ids'], current_ids)
+        newly_added = new_ids - set(current_ids or [])
+
+        if not newly_added:
+            return vals, []
 
         if self._is_manager():
+            # Managers can assign across teams freely.
             if 'task_state' not in vals:
                 vals['task_state'] = 'assigned'
-            return vals, None
+            return vals, []
 
         if not current_employee:
-            return vals, None
+            return vals, []
 
-        target_emp = self.env['hr.employee'].browse(assigned_to_id)
         task_team = self._resolve_task_team(vals)
-        assignee_teams = self._get_employee_teams(target_emp)
+        assigner_teams = self._get_employee_teams(current_employee)
+
+        pending_list = []
+        any_immediate = False
+
+        for emp_id in newly_added:
+            target_emp = self.env['hr.employee'].browse(emp_id)
+            assignee_teams = self._get_employee_teams(target_emp)
+
+            if task_team and task_team in assignee_teams:
+                any_immediate = True
+            else:
+                pending_list.append({
+                    'target_employee_id': emp_id,
+                    'assigner_teams': assigner_teams,
+                    'assignee_teams': assignee_teams,
+                    'task_team': task_team,
+                })
 
         vals['assigned_by'] = current_employee.id
-
         if task_team and not vals.get('team_id'):
             vals['team_id'] = task_team.id
 
-        if task_team and task_team in assignee_teams:
-            vals['task_state'] = 'assigned'
-            return vals, None
+        # DO NOT strip the pending employees back out of vals — keep them
+        # visible on the task (as "pending") while the request awaits a
+        # decision. task_state is the signal: 'assigned' only if at least
+        # one employee could be assigned immediately, 'draft' otherwise.
+        if 'task_state' not in vals:
+            vals['task_state'] = 'assigned' if any_immediate else 'draft'
 
-        else:
-            assigner_teams = self._get_employee_teams(current_employee)
-            pending_info = {
-                'target_employee_id': assigned_to_id,
-                'assigner_teams': assigner_teams,
-                'assignee_teams': assignee_teams,
-                'task_team': task_team,
-            }
-            # DO NOT clear assigned_to — keep it visible so the creator
-            # can see who the task is intended for while approval is pending.
-            # task_state = 'draft' is the signal that it's not yet confirmed.
-            vals['task_state'] = 'draft'
-            return vals, pending_info
+        return vals, pending_list
 
     def _create_assignment_request(self, task, pending_info, current_employee):
         assigner_teams = pending_info['assigner_teams']
@@ -354,7 +416,7 @@ class ProjectTask(models.Model):
                     self._check_project_lock_access(project)
 
         current_employee = self._get_current_employee()
-        pending_requests = []
+        pending_requests = []  # list of (vals_list index, pending_info)
 
         for i, vals in enumerate(vals_list):
             if current_employee and not vals.get('assigned_by'):
@@ -366,29 +428,27 @@ class ProjectTask(models.Model):
                 if project_team:
                     vals['team_id'] = project_team.id
 
-            # Bridge user_ids (quick-create "Assignees") → assigned_to
-            if 'user_ids' in vals and not vals.get('assigned_to'):
-                user_id = None
+            # Bridge user_ids (quick-create "Assignees") → assigned_to_ids
+            if 'user_ids' in vals and not vals.get('assigned_to_ids'):
+                user_ids = []
                 for cmd in (vals['user_ids'] or []):
                     if isinstance(cmd, (list, tuple)):
                         if cmd[0] == 6 and cmd[2]:
-                            user_id = cmd[2][0]
-                            break
+                            user_ids = list(cmd[2])
                         elif cmd[0] == 4:
-                            user_id = cmd[1]
-                            break
-                if user_id:
-                    emp = self.env['hr.employee'].search(
-                        [('user_id', '=', user_id)], limit=1
+                            user_ids.append(cmd[1])
+                if user_ids:
+                    emps = self.env['hr.employee'].search(
+                        [('user_id', 'in', user_ids)]
                     )
-                    if emp:
-                        vals['assigned_to'] = emp.id
+                    if emps:
+                        vals['assigned_to_ids'] = [Command.set(emps.ids)]
 
-            if 'assigned_to' in vals:
-                vals, pending_info = self._handle_cross_team_assignment(
-                    vals, current_employee
+            if 'assigned_to_ids' in vals:
+                vals, pending_list = self._handle_cross_team_assignment(
+                    vals, current_employee, []
                 )
-                if pending_info:
+                for pending_info in pending_list:
                     pending_requests.append((i, pending_info))
 
         tasks = super().create(vals_list)
@@ -400,9 +460,9 @@ class ProjectTask(models.Model):
 
         # Deferred notifications — fresh cursor to avoid dead-cursor issues
         notify_pairs = [
-            (task.id, task.assigned_to.id)
+            (task.id, emp.id)
             for task in tasks
-            if task.assigned_to
+            for emp in task.assigned_to_ids
         ]
         if notify_pairs:
             uid = self.env.uid
@@ -445,41 +505,49 @@ class ProjectTask(models.Model):
             if project_team:
                 vals['team_id'] = project_team.id
 
-        # Capture previous assigned_to before the write so we can detect changes
-        old_assigned = {task.id: task.assigned_to for task in self} \
-            if 'assigned_to' in vals else {}
-
-        if 'assigned_to' not in vals:
+        if 'assigned_to_ids' not in vals:
             return super().write(vals)
 
+        # assigned_to_ids changes need to be resolved PER TASK, because
+        # each task may belong to a different team and already carry a
+        # different set of employees — a single shared `vals` can't
+        # capture that, so each task gets its own copy of vals with its
+        # own cross-team decision applied.
         current_employee = self._get_current_employee()
-        vals, pending_info = self._handle_cross_team_assignment(
-            vals, current_employee
-        )
+        old_assigned = {task.id: set(task.assigned_to_ids.ids) for task in self}
+        pending_requests = []  # list of (task, pending_info)
+        per_task_vals = {}
 
-        result = super().write(vals)
+        for task in self:
+            task_vals = dict(vals)
+            task_vals, pending_list = self._handle_cross_team_assignment(
+                task_vals, current_employee, old_assigned[task.id]
+            )
+            per_task_vals[task.id] = task_vals
+            for pending_info in pending_list:
+                pending_requests.append((task, pending_info))
 
-        if pending_info:
-            for task in self:
-                self._create_assignment_request(
-                    task, pending_info, current_employee
-                )
+        result = True
+        for task in self:
+            result = super(ProjectTask, task).write(per_task_vals[task.id])
 
-        # Notify if assigned_to changed to a real employee
-        if old_assigned:
-            notify_pairs = [
-                (task.id, task.assigned_to.id)
-                for task in self
-                if task.assigned_to and task.assigned_to != old_assigned.get(task.id)
-            ]
-            if notify_pairs:
-                def _send():
-                    for task_id, emp_id in notify_pairs:
-                        t = self.env['project.task'].browse(task_id)
-                        emp = self.env['hr.employee'].browse(emp_id)
-                        t._notify_assigned_employee(emp)
+        for task, pending_info in pending_requests:
+            self._create_assignment_request(task, pending_info, current_employee)
 
-                self.env.cr.postcommit.add(_send)
+        # Notify only newly-added employees
+        notify_pairs = []
+        for task in self:
+            newly_added = set(task.assigned_to_ids.ids) - old_assigned.get(task.id, set())
+            notify_pairs.extend((task.id, emp_id) for emp_id in newly_added)
+
+        if notify_pairs:
+            def _send():
+                for task_id, emp_id in notify_pairs:
+                    t = self.env['project.task'].browse(task_id)
+                    emp = self.env['hr.employee'].browse(emp_id)
+                    t._notify_assigned_employee(emp)
+
+            self.env.cr.postcommit.add(_send)
 
         return result
 
@@ -539,11 +607,6 @@ class ProjectTask(models.Model):
             'domain': [('task_id', '=', self.id)],
             'context': {'default_task_id': self.id},
         }
-
-    # ── Notification helper ───────────────────────────────────────────────────
-
-    # In _notify_assigned_employee — remove message_subscribe entirely,
-    # just post the message (follower auto-add is less critical)
 
     # ── Notifications ─────────────────────────────────────────────────────────
 

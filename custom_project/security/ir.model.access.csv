@@ -10,3 +10,4 @@ access_task_type_team_manager,project.task.type team manager,project.model_proje
 access_task_type_hr,project.task.type hr,project.model_project_task_type,hr.group_hr_user,1,1,1,1
 access_completion_request_user,project.completion.request user,model_project_completion_request,base.group_user,1,1,1,0
 access_completion_request_manager,project.completion.request manager,model_project_completion_request,custom_project.group_team_manager,1,1,1,1
+access_hr_employee_team_employee,hr.employee all internal users (read only),hr.model_hr_employee,base.group_user,1,0,0,0

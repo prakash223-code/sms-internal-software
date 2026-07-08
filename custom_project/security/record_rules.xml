@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!--This XML file does not appear to have any style information associated with it. The document tree is shown below.-->
 <odoo>
     <data>
-
         <!--
-            Deactivate Odoo's built-in task visibility rules.
-        -->
+                    Deactivate Odoo's built-in task visibility rules.
+                 -->
         <record id="project.task_visibility_rule" model="ir.rule">
             <field name="active" eval="False"/>
         </record>
@@ -17,146 +16,193 @@
         <record id="project.project_manager_all_project_tasks_rule" model="ir.rule">
             <field name="active" eval="False"/>
         </record>
-
-        <!-- ══ task.assignment.request rules ══════════════════════════ -->
-
+        <!--  ══ task.assignment.request rules ══════════════════════════  -->
         <record id="rule_assignment_request_employee" model="ir.rule">
             <field name="name">Assignment Request: own records only</field>
             <field name="model_id" ref="model_task_assignment_request"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[
-                '|',
-                ('requested_by.user_id', '=', user.id),
-                ('target_employee_id.user_id', '=', user.id)
-            ]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="domain_force">[ '|', ('requested_by.user_id', '=', user.id), ('target_employee_id.user_id',
+                '=', user.id) ]
+            </field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="False"/>
         </record>
-
         <record id="rule_assignment_request_manager" model="ir.rule">
             <field name="name">Assignment Request: manager sees all</field>
             <field name="model_id" ref="model_task_assignment_request"/>
             <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
         </record>
-
         <record id="rule_assignment_request_hr" model="ir.rule">
             <field name="name">Assignment Request: HR sees all</field>
             <field name="model_id" ref="model_task_assignment_request"/>
             <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
         </record>
-
-        <!-- ══ project.completion.request rules ═══════════════════════ -->
-
-        <!--
-            Team Lead: sees requests for projects belonging to teams they
-            lead, OR requests they personally submitted. Regular employees
-            technically have model access too (read/write/create per the
-            access CSV), but create() itself is blocked in Python unless
-            they are the project's team_lead_id — this rule just scopes
-            visibility, it doesn't grant the ability to request.
-        -->
+        <!--  ══ project.completion.request rules ═══════════════════════  -->
         <record id="rule_completion_request_employee" model="ir.rule">
             <field name="name">Completion Request: own team's records only</field>
             <field name="model_id" ref="model_project_completion_request"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[
-                '|',
-                ('requested_by.user_id', '=', user.id),
-                ('project_id.team_id.team_lead_id.user_id', '=', user.id)
-            ]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="domain_force">[ '|', ('requested_by.user_id', '=', user.id),
+                ('project_id.team_id.team_lead_id.user_id', '=', user.id) ]
+            </field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="False"/>
         </record>
-
         <record id="rule_completion_request_manager" model="ir.rule">
             <field name="name">Completion Request: manager sees all</field>
             <field name="model_id" ref="model_project_completion_request"/>
             <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
         </record>
-
-        <!-- ══ project.task rules ═════════════════════════════════════ -->
-
-        <!--
-            Employee: own team's tasks only.
-
-            FIX: added ('create_uid', '=', user.id) as the final OR branch.
-
-            Without it, a task quick-created from the project kanban (where
-            only the name and stage_id are written — no assigned_to/by yet,
-            and team_id is set from the project) immediately vanishes after
-            save because none of the earlier OR branches match for the
-            creator.  This made it look like "Enter does nothing" and the
-            stage was never applied.
-
-            The ('assigned_by.user_id', '=', user.id) branch covers tasks
-            created via the full form (assigned_by is now always stamped in
-            project_task.py create()); create_uid is the safety net for any
-            path that skips the stamping (e.g. automated actions, imports).
-        -->
+        <!--  ══ project.task rules ═════════════════════════════════════  -->
         <record id="rule_project_task_employee" model="ir.rule">
             <field name="name">Task: team members see own team tasks only</field>
             <field name="model_id" ref="project.model_project_task"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">['|',
-                ('team_id', '=', False),
-                '|',
-                ('team_id.member_ids.user_id', '=', user.id),
-                '|',
-                ('team_id.team_lead_id.user_id', '=', user.id),
-                '|',
-                ('assigned_to.user_id', '=', user.id),
-                '|',
-                ('assigned_by.user_id', '=', user.id),
-                ('create_uid', '=', user.id)
-            ]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="domain_force">['|', ('team_id', '=', False), '|', ('team_id.member_ids.user_id', '=', user.id),
+                '|', ('team_id.team_lead_id.user_id', '=', user.id), '|', ('assigned_to_ids.user_id', '=', user.id),
+                '|', ('assigned_by.user_id', '=', user.id), ('create_uid', '=', user.id) ]
+            </field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="False"/>
         </record>
-
-        <!-- Manager: all tasks -->
         <record id="rule_project_task_manager" model="ir.rule">
             <field name="name">Task: manager sees all</field>
             <field name="model_id" ref="project.model_project_task"/>
             <field name="groups" eval="[(4, ref('custom_project.group_team_manager'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
         </record>
-
-        <!-- HR: all tasks -->
         <record id="rule_project_task_hr" model="ir.rule">
             <field name="name">Task: HR sees all</field>
             <field name="model_id" ref="project.model_project_task"/>
             <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="perm_read"   eval="True"/>
-            <field name="perm_write"  eval="True"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
         </record>
+        <!--  ══ account.analytic.line (Timesheet) rules ═══════════════════
 
+                     FINAL POLICY:
+                       • Employee: create/edit/delete their OWN entries only.
+                         View ALL employees' entries, company-wide — same
+                         unrestricted read access as Team Lead. Read-only on
+                         everyone else's.
+                       • HR and Manager: create/edit/delete ANY employee's entry
+                         (full override, for payroll/team corrections).
+                       • Team Lead: view-only on ALL entries — no edit bypass.
+                       • Admin/superuser: bypasses ir.rule entirely via env.su.
+
+                     rule_timesheet_employee_read: employees can view EVERY
+                     employee's timesheet, unconditionally — identical scope to
+                     rule_timesheet_team_lead_view_only below, just for the
+                     Employee group instead of Team Lead. This rule only grants
+                     perm_read — perm_write/create/unlink stay False here, so
+                     it can never expand edit rights; editing is still governed
+                     solely by rule_timesheet_own_write_global below (own
+                     entries only, except HR/Manager).
+
+                     IMPORTANT:
+                       1. The logged-in user must actually belong to the
+                          custom_project.group_team_employee group (otherwise
+                          this rule is skipped for them entirely and only
+                          Odoo's own base rules apply — the most common reason
+                          an employee still only sees their own entry).
+                       After changing this file, always do Settings → Apps →
+                       Custom Project → Upgrade AND a hard browser refresh —
+                       ir.rule domains are cached and a stale cache is the most
+                       common reason a rule change appears to "not take".
+
+                     rule_timesheet_team_lead_view_only: Team Lead — view all,
+                     perm_write/create/unlink all False.
+
+                     rule_timesheet_hr_manager_view: HR + Manager get full read
+                     here too (their actual edit bypass lives in the GLOBAL rule
+                     below, since it must be Global to reliably override the
+                     base hr_timesheet module's own permissive rule).
+
+                     rule_timesheet_own_write_global: the single source of write
+                     truth. GLOBAL (no <field name="groups">) — ANDs
+                     unconditionally on top of every other rule for EVERY user.
+                     HR and Manager are exempted to full access; everyone else
+                     (Employee, Team Lead) is restricted to their OWN entries.
+                ══════════════════════════════════════════════════════════════  -->
+        <record id="rule_timesheet_employee_read" model="ir.rule">
+            <field name="name">Timesheet: every internal user can view ALL timesheets (read-only)</field>
+            <field name="model_id" ref="analytic.model_account_analytic_line"/>
+            <!--  Switched from the custom_project.group_team_employee
+                             group to base.group_user (every internal login gets
+                             this automatically — no manual custom-group assignment
+                             needed, which had been the recurring point of failure).
+                             The account_analytic_line.py _apply_ir_rules override
+                             is the actual guarantee; this rule is kept as a
+                             documented, defense-in-depth backup for the same
+                             policy.  -->
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_timesheet_own_write_global" model="ir.rule">
+            <field name="name">Timesheet: GLOBAL — own entries only, except HR + Manager (full edit)</field>
+            <field name="model_id" ref="analytic.model_account_analytic_line"/>
+            <!--  Deliberately NO <field name="groups"> — must stay Global
+                             so it ANDs unconditionally over every other rule.  -->
+            <field name="domain_force">[(1, '=', 1)] if ( user.has_group('hr.group_hr_user') or
+                user.has_group('custom_project.group_team_manager') ) else [('employee_id.user_id', '=', user.id)]
+            </field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        <record id="rule_timesheet_team_lead_view_only" model="ir.rule">
+            <field name="name">Timesheet: Team Lead — view all, no edit bypass</field>
+            <field name="model_id" ref="analytic.model_account_analytic_line"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_team_lead'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_timesheet_hr_manager_view" model="ir.rule">
+            <field name="name">Timesheet: HR + Manager — full view access</field>
+            <field name="model_id" ref="analytic.model_account_analytic_line"/>
+            <field name="groups"
+                   eval="[ (4, ref('hr.group_hr_user')), (4, ref('custom_project.group_team_manager')), ]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
     </data>
 </odoo>

@@ -1,149 +1,102 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!--This XML file does not appear to have any style information associated with it. The document tree is shown below.-->
 <odoo>
-
-    <!-- ══ 1. Inherit project.task form ═══════════════════════════════════ -->
+    <!--  ══ 1. Inherit project.task form ═══════════════════════════════════  -->
     <record id="view_task_form_team_fields" model="ir.ui.view">
         <field name="name">project.task.form.team.fields</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
-
-            <!-- Read-only banner — shown to employees viewing a task they
-                 did not create (and are not the assignee progressing state) -->
+            <!--  Read-only banner — shown to employees viewing a task they
+                             did not create (and are not the assignee progressing state)  -->
             <xpath expr="//sheet" position="before">
                 <div class="o_cp_banner o_cp_banner_readonly" invisible="can_edit_task">
                     <i class="fa fa-lock" title="Read Only"/>
                     <div>
                         <strong>Read-only</strong>
-                        — you didn't create this task. Only the
-                        creator, your Team Lead, HR, or a Manager can edit its details.
-                        You can still update its state below if it's assigned to you.
+                        — you didn't create this task. Only the creator, your Team Lead, HR, or a Manager can edit its
+                        details. You can still update its state below if it's assigned to you.
                     </div>
                 </div>
             </xpath>
-
-            <!-- Smart button for assignment requests -->
+            <!--  Smart button for assignment requests  -->
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
-                <button name="action_view_assignment_requests"
-                        type="object"
-                        class="oe_stat_button"
-                        icon="fa-exchange"
+                <button name="action_view_assignment_requests" type="object" class="oe_stat_button" icon="fa-exchange"
                         invisible="assignment_request_count == 0">
-                    <field name="assignment_request_count"
-                           widget="statinfo"
-                           string="Requests"/>
+                    <field name="assignment_request_count" widget="statinfo" string="Requests"/>
                 </button>
             </xpath>
-
-            <!-- State bar -->
+            <!--  State bar  -->
             <xpath expr="//header" position="inside">
-                <field name="task_state"
-                       widget="statusbar"
+                <field name="task_state" widget="statusbar"
                        statusbar_visible="draft,assigned,in_progress,completed,verified,closed"/>
-
-                <button name="action_start_progress"
-                        string="Start"
-                        type="object"
-                        class="btn-primary"
+                <button name="action_start_progress" string="Start" type="object" class="btn-primary"
                         invisible="task_state != 'assigned' or not can_change_state"/>
-
-                <button name="action_mark_completed"
-                        string="Mark Complete"
-                        type="object"
-                        class="btn-primary"
+                <button name="action_mark_completed" string="Mark Complete" type="object" class="btn-primary"
                         invisible="task_state != 'in_progress' or not can_change_state"/>
-
-                <button name="action_verify"
-                        string="Verify"
-                        type="object"
-                        class="btn-primary"
+                <button name="action_verify" string="Verify" type="object" class="btn-primary"
                         invisible="task_state != 'completed' or not can_change_state"/>
-
-                <button name="action_close"
-                        string="Close"
-                        type="object"
-                        class="btn-primary"
+                <button name="action_close" string="Close" type="object" class="btn-primary"
                         invisible="task_state != 'verified' or not can_change_state"/>
-
-                <button name="action_reset_to_draft"
-                        string="Reset to Draft"
-                        type="object"
-                        groups="custom_project.group_team_manager"
-                        invisible="task_state == 'draft'"/>
-
+                <button name="action_reset_to_draft" string="Reset to Draft" type="object"
+                        groups="custom_project.group_team_manager" invisible="task_state == 'draft'"/>
             </xpath>
-
-            <!-- Native description — readonly unless creator/privileged.
-                 (This field is a safe anchor: it's already used elsewhere
-                 in this view for the "position=before" insertion below,
-                 confirming it exists as a unique match.) -->
+            <!--  Native description — readonly unless creator/privileged.
+                             (This field is a safe anchor: it's already used elsewhere
+                             in this view for the "position=before" insertion below,
+                             confirming it exists as a unique match.)  -->
             <xpath expr="//field[@name='description']" position="attributes">
                 <attribute name="readonly">not can_edit_task</attribute>
             </xpath>
-
-            <!-- Assignment fields -->
+            <!--  Assignment fields  -->
             <xpath expr="//field[@name='description']" position="before">
                 <separator string="Assignment"/>
                 <group>
                     <group>
-                        <field name="assigned_by"
-                               widget="many2one_avatar_employee"
-                               readonly="1"/>
+                        <field name="assigned_by" widget="many2one_avatar_employee" readonly="1"/>
                     </group>
                     <group>
-                        <field name="assigned_to"
-                               widget="many2one_avatar_employee"
-                               options="{'no_create_edit': True}"
-                               domain="[('active', '=', True)]"
-                               readonly="not can_edit_task"/>
-
+                        <field name="assigned_to_ids" widget="many2many_tags_avatar" options="{'no_create_edit': True}"
+                               domain="[('active', '=', True)]" readonly="not can_edit_task"/>
                     </group>
                 </group>
-
                 <field name="team_id" invisible="1"/>
                 <field name="assignment_request_count" invisible="1"/>
                 <field name="can_change_state" invisible="1"/>
                 <field name="can_edit_task" invisible="1"/>
             </xpath>
-
-            <!-- Hide native Assignees field -->
+            <!--  Hide native Assignees field  -->
             <xpath expr="//field[@name='user_ids']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
-
         </field>
     </record>
-
-    <!-- ══ 2. Kanban ══════════════════════════════════════════════════════
-         on_create is intentionally omitted (defaults to opening the full
-         form).  This removes the entire quick-create-card mechanism and
-         all its dropdown-dismissal problems.  Users click New → full form
-         opens → no stray dropdowns, no silent failures.
-    ══════════════════════════════════════════════════════════════════════ -->
+    <!--  ══ 2. Kanban ══════════════════════════════════════════════════════
+             on_create is intentionally omitted (defaults to opening the full
+             form).  This removes the entire quick-create-card mechanism and
+             all its dropdown-dismissal problems.  Users click New → full form
+             opens → no stray dropdowns, no silent failures.
+        ══════════════════════════════════════════════════════════════════════  -->
     <record id="view_task_kanban_team" model="ir.ui.view">
         <field name="name">project.task.kanban.team</field>
         <field name="model">project.task</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="task_state"
-                    class="o_kanban_small_column">
+            <kanban default_group_by="task_state" class="o_kanban_small_column">
                 <field name="name"/>
                 <field name="task_state"/>
-                <field name="assigned_to"/>
+                <field name="assigned_to_ids"/>
                 <field name="project_id"/>
                 <field name="team_id"/>
                 <field name="date_deadline"/>
                 <templates>
                     <t t-name="card">
                         <div t-attf-class="oe_kanban_global_click o_cp_task_card o_cp_state_#{record.task_state.raw_value}">
-
-                            <!-- Row 1: task name -->
+                            <!--  Row 1: task name  -->
                             <div class="o_cp_task_card_top">
                                 <span class="o_cp_task_name">
                                     <field name="name"/>
                                 </span>
                             </div>
-
-                            <!-- Row 2: project + team pills -->
+                            <!--  Row 2: project + team pills  -->
                             <div class="o_cp_task_card_meta">
                                 <span t-if="record.project_id.value" class="o_cp_task_pill o_cp_pill_project">
                                     <i class="fa fa-folder-o" title="Project"/>
@@ -154,18 +107,12 @@
                                     <t t-esc="record.team_id.value"/>
                                 </span>
                             </div>
-
                             <div class="o_cp_task_card_divider"/>
-
-                            <!-- Row 3: assignee + due date -->
+                            <!--  Row 3: assignee + due date  -->
                             <div class="o_cp_task_card_footer">
                                 <div class="o_cp_task_assignee">
-                                    <t t-if="record.assigned_to.raw_value">
-                                        <img t-att-src="'/web/image/hr.employee/' + record.assigned_to.raw_value + '/avatar_128'"
-                                             class="o_cp_task_avatar" alt="Avatar"/>
-                                        <span class="o_cp_task_assignee_name">
-                                            <field name="assigned_to"/>
-                                        </span>
+                                    <t t-if="record.assigned_to_ids.raw_value and record.assigned_to_ids.raw_value.length">
+                                        <field name="assigned_to_ids" widget="many2many_tags_avatar"/>
                                     </t>
                                     <t t-else="">
                                         <span class="o_cp_task_unassigned">
@@ -174,124 +121,118 @@
                                         </span>
                                     </t>
                                 </div>
-
                                 <span t-if="record.date_deadline.raw_value" class="o_cp_task_due">
                                     <i class="fa fa-calendar-o" title="Due"/>
                                     <field name="date_deadline"/>
                                 </span>
                             </div>
-
                         </div>
                     </t>
                 </templates>
             </kanban>
         </field>
     </record>
-
-    <!-- ══ 3. List ════════════════════════════════════════════════════════ -->
+    <!--  ══ 3. List ════════════════════════════════════════════════════════  -->
     <record id="view_task_list_team" model="ir.ui.view">
         <field name="name">project.task.list.team</field>
         <field name="model">project.task</field>
         <field name="arch" type="xml">
-            <list string="Tasks"
-                  decoration-success="task_state == 'closed'"
-                  decoration-info="task_state == 'in_progress'"
-                  decoration-warning="task_state == 'draft'">
+            <list string="Tasks" decoration-success="task_state == 'closed'"
+                  decoration-info="task_state == 'in_progress'" decoration-warning="task_state == 'draft'">
                 <field name="name" string="Task"/>
                 <field name="project_id" string="Project" optional="show"/>
-                <field name="assigned_by" string="Assigned By"
-                       widget="many2one_avatar_employee" optional="show"/>
-                <field name="assigned_to" string="Assigned To"
-                       widget="many2one_avatar_employee"/>
-                <field name="task_state" string="State"
-                       widget="badge"
+                <field name="assigned_by" string="Assigned By" widget="many2one_avatar_employee" optional="show"/>
+                <field name="assigned_to_ids" string="Assigned To" widget="many2many_tags_avatar"/>
+                <field name="task_state" string="State" widget="badge"
                        decoration-success="task_state in ('verified','closed')"
-                       decoration-info="task_state == 'in_progress'"
-                       decoration-warning="task_state == 'draft'"
+                       decoration-info="task_state == 'in_progress'" decoration-warning="task_state == 'draft'"
                        decoration-primary="task_state == 'assigned'"/>
             </list>
         </field>
     </record>
-
-    <!-- ══ 4. Search ══════════════════════════════════════════════════════ -->
+    <!--  ══ 4. Search ══════════════════════════════════════════════════════  -->
     <record id="view_task_search_team" model="ir.ui.view">
         <field name="name">project.task.search.team</field>
         <field name="model">project.task</field>
         <field name="arch" type="xml">
             <search string="Search Tasks">
                 <field name="name" string="Task Name"/>
-                <field name="assigned_to" string="Assigned To"/>
+                <field name="assigned_to_ids" string="Assigned To"/>
                 <field name="project_id" string="Project"/>
                 <separator/>
-                <filter string="Draft" name="draft"
-                        domain="[('task_state','=','draft')]"/>
-                <filter string="Assigned" name="assigned"
-                        domain="[('task_state','=','assigned')]"/>
-                <filter string="In Progress" name="in_progress"
-                        domain="[('task_state','=','in_progress')]"/>
-                <filter string="Completed" name="completed"
-                        domain="[('task_state','=','completed')]"/>
-                <filter string="Closed" name="closed"
-                        domain="[('task_state','=','closed')]"/>
+                <filter string="Draft" name="draft" domain="[('task_state','=','draft')]"/>
+                <filter string="Assigned" name="assigned" domain="[('task_state','=','assigned')]"/>
+                <filter string="In Progress" name="in_progress" domain="[('task_state','=','in_progress')]"/>
+                <filter string="Completed" name="completed" domain="[('task_state','=','completed')]"/>
+                <filter string="Closed" name="closed" domain="[('task_state','=','closed')]"/>
                 <separator/>
-                <filter string="My Tasks" name="my_tasks"
-                        domain="[('assigned_to.user_id','=',uid)]"/>
+                <filter string="My Tasks" name="my_tasks" domain="[('assigned_to_ids.user_id','=',uid)]"/>
                 <separator/>
-                <filter string="Group by State" name="grp_state"
-                        context="{'group_by': 'task_state'}"/>
-                <filter string="Group by Project" name="grp_project"
-                        context="{'group_by': 'project_id'}"/>
+                <filter string="Group by State" name="grp_state" context="{'group_by': 'task_state'}"/>
+                <filter string="Group by Project" name="grp_project" context="{'group_by': 'project_id'}"/>
             </search>
         </field>
     </record>
-
-    <!-- ══ 5. Action — My Tasks ══════════════════════════════════════════ -->
+    <!--  ══ 5. Action — My Tasks ══════════════════════════════════════════  -->
     <record id="action_my_tasks" model="ir.actions.act_window">
         <field name="name">My Tasks</field>
         <field name="res_model">project.task</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="view_ids" eval="[
-            (5, 0, 0),
-            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_task_kanban_team')}),
-            (0, 0, {'view_mode': 'list',   'view_id': ref('view_task_list_team')}),
-        ]"/>
-        <field name="domain">[('assigned_to.user_id','=', uid)]</field>
+        <field name="view_ids"
+               eval="[ (5, 0, 0), (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_task_kanban_team')}), (0, 0, {'view_mode': 'list', 'view_id': ref('view_task_list_team')}), ]"/>
+        <field name="domain">[('assigned_to_ids.user_id','=', uid)]</field>
         <field name="search_view_id" ref="view_task_search_team"/>
         <field name="context">{'search_default_my_tasks': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No tasks assigned to you yet.</p>
         </field>
     </record>
-
-    <!-- ══ 6. Action — All Tasks ════════════════════════════════════════= -->
+    <!--  ══ 6. Action — All Tasks ════════════════════════════════════════=  -->
     <record id="action_all_tasks" model="ir.actions.act_window">
         <field name="name">All Tasks</field>
         <field name="res_model">project.task</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="view_ids" eval="[
-            (5, 0, 0),
-            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_task_kanban_team')}),
-            (0, 0, {'view_mode': 'list',   'view_id': ref('view_task_list_team')}),
-        ]"/>
+        <field name="view_ids"
+               eval="[ (5, 0, 0), (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_task_kanban_team')}), (0, 0, {'view_mode': 'list', 'view_id': ref('view_task_list_team')}), ]"/>
         <field name="search_view_id" ref="view_task_search_team"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No tasks found.</p>
         </field>
     </record>
+    <!--  ══ 7. Timesheets tab: Software Used column + per-row edit lock ═══
+             can_edit_line is added as an invisible column purely so its value
+             is available in the row's evaluation context for the readonly
+             expressions on the fields below it — this is the standard Odoo
+             pattern for "readonly depends on another field on the SAME row".
 
-    <!-- ══ 7. Add Software Used column to task Timesheets tab ════════════ -->
+             NOTE: this single record replaces what was previously two
+             separate <record> blocks sharing the same id
+             (view_task_form_timesheet_software_used). Odoo would have let
+             the second one silently overwrite the first's arch at load
+             time, making the plain "just add the column" version dead code
+             — so it's been removed and only this complete version (column
+             + readonly lock) remains.
+        ══════════════════════════════════════════════════════════════════  -->
     <record id="view_task_form_timesheet_software_used" model="ir.ui.view">
         <field name="name">project.task.form.timesheet.software.used</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='timesheet_ids']//field[@name='unit_amount']"
-                   position="before">
-                <field name="software_used"
-                       string="Software Used"
-                       optional="show"/>
+            <xpath expr="//field[@name='timesheet_ids']/list" position="inside">
+                <field name="can_edit_line" column_invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='timesheet_ids']//field[@name='date']" position="attributes">
+                <attribute name="readonly">not can_edit_line</attribute>
+            </xpath>
+            <xpath expr="//field[@name='timesheet_ids']//field[@name='name']" position="attributes">
+                <attribute name="readonly">not can_edit_line</attribute>
+            </xpath>
+            <xpath expr="//field[@name='timesheet_ids']//field[@name='unit_amount']" position="before">
+                <field name="software_used" string="Software Used" optional="show" readonly="not can_edit_line"/>
+            </xpath>
+            <xpath expr="//field[@name='timesheet_ids']//field[@name='unit_amount']" position="attributes">
+                <attribute name="readonly">not can_edit_line</attribute>
             </xpath>
         </field>
     </record>
-
 </odoo>
