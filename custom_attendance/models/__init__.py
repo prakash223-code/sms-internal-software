@@ -6,4 +6,4 @@ from . import attendance_batch_wizard
 from . import hr_leave_extension
 from . import leave_policy
 from . import permission_deduction
-from . import hr_leave_allocation_extension
+from . import permission_policy

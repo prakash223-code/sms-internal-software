@@ -259,23 +259,15 @@ class CustomAttendance(models.Model):
 
     def _check_and_revert_conflicting_half_leave(self, employee, check_in_utc):
         """
-        If the employee checks in on a date where they have an APPROVED
-        AM-half leave, revert that leave (refuse it) since they clearly
-        intend to work today after all. This refunds the 0.5 day back to
-        their allocation automatically (Odoo's native validate->refuse
-        transition releases the reserved allocation days).
+        If the employee checks in DURING THE AM WINDOW on a date where they
+        have an approved AM-half leave, revert that leave (refuse it) since
+        they clearly intend to work today after all. This refunds the 0.5
+        day back to their allocation automatically.
 
-        No time-boundary check — any check-in during an AM-leave day
-        triggers the revert, regardless of what time it happens. Once
-        reverted, standard late-detection (_compute_is_late, 9:30 AM
-        threshold) applies normally, exactly as any other day.
-
-        IMPORTANT: is_late/late_minutes are STORED computed fields that
-        only depend on check_in/employee_id — refusing an unrelated leave
-        record does not trigger their recompute automatically. This method
-        must therefore explicitly force recomputation on self (the
-        attendance record being created) after reverting, or is_late will
-        be silently wrong (computed against the now-stale AM-leave state).
+        A check-in that happens at or after the PM start time is treated as
+        the employee legitimately showing up for their expected PM working
+        half — the AM leave stays intact in that case, and standard
+        _compute_is_late() PM-shifted-threshold logic applies instead.
 
         Returns True if a leave was reverted, False otherwise.
         """
@@ -285,8 +277,9 @@ class CustomAttendance(models.Model):
         except pytz.UnknownTimeZoneError:
             tz = pytz.timezone('Asia/Kolkata')
 
-        check_in_local_date = pytz.utc.localize(check_in_utc).astimezone(tz).date() \
-            if check_in_utc.tzinfo is None else check_in_utc.astimezone(tz).date()
+        check_in_local = pytz.utc.localize(check_in_utc).astimezone(tz) \
+            if check_in_utc.tzinfo is None else check_in_utc.astimezone(tz)
+        check_in_local_date = check_in_local.date()
 
         Leave = self.env['hr.leave'].sudo()
 
@@ -302,14 +295,20 @@ class CustomAttendance(models.Model):
         if not conflicting_leave:
             return False
 
-        conflicting_leave.action_refuse()
+        # Only revert if the check-in actually happened DURING the AM window
+        # — i.e., before the PM session starts. A check-in at or after PM
+        # start is the employee legitimately working their expected half.
+        pm_start_hour, pm_start_minute = self._get_pm_start_time(tz)
+        pm_start_local = tz.localize(
+            datetime.combine(check_in_local_date, time(pm_start_hour, pm_start_minute))
+        )
 
-        # Force is_late/late_minutes recompute on THIS attendance record —
-        # see docstring note above for why this can't be left to Odoo's
-        # automatic dependency tracking.
+        if check_in_local >= pm_start_local:
+            return False  # legitimate PM check-in — leave the AM leave alone
+
+        conflicting_leave.action_refuse()
         self._compute_is_late()
 
-        # Notify employee + HR — audit trail for the auto-revert
         partner = employee.user_id.partner_id
         recipients = partner.ids if partner else []
 
