@@ -66,13 +66,10 @@ class HrEmployeeLeavePolicy(models.Model):
                 if existing:
                     continue  # already has an allocation history — skip
 
-                Allocation.create(self._allocation_vals(
-                    employee, leave_type, cycle_start, policy['quota']
-                ))
                 new_alloc = Allocation.create(self._allocation_vals(
                     employee, leave_type, cycle_start, policy['quota']
                 ))
-                new_alloc.action_validate()
+                new_alloc.action_approve()
                 _logger.info(
                     'Leave policy: initial allocation — %s — %s — %s days from %s',
                     employee.name, leave_type.name, policy['quota'], cycle_start,
@@ -135,13 +132,10 @@ class HrEmployeeLeavePolicy(models.Model):
                 unused = max(prev_allocation.number_of_days - used, 0.0)
                 carry_forward = min(unused, carry_cap)
 
-            Allocation.create(self._allocation_vals(
+            new_alloc = Allocation.create(self._allocation_vals(
                 self, leave_type, cycle_start, quota + carry_forward
             ))
-            new_alloc = Allocation.create(self._allocation_vals(
-                employee, leave_type, cycle_start, policy['quota']
-            ))
-            new_alloc.action_validate()
+            new_alloc.action_approve()
 
             _logger.info(
                 'Leave carry-forward: %s — %s — quota=%s carry=%s -> new allocation=%s',

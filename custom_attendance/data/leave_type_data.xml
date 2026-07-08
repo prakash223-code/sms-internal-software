@@ -9,6 +9,7 @@
         <field name="leave_validation_type">hr</field>
         <field name="unpaid" eval="False"/>
         <field name="color" eval="4"/>
+        <field name="request_unit">half_day</field>
     </record>
 
     <record id="leave_type_earned" model="hr.leave.type">
@@ -19,6 +20,7 @@
         <field name="leave_validation_type">hr</field>
         <field name="unpaid" eval="False"/>
         <field name="color" eval="10"/>
+        <field name="request_unit">half_day</field>
     </record>
 
     <record id="leave_type_medical" model="hr.leave.type">
@@ -29,6 +31,7 @@
         <field name="leave_validation_type">hr</field>
         <field name="unpaid" eval="False"/>
         <field name="color" eval="1"/>
+        <field name="request_unit">half_day</field>
     </record>
 
     <record id="leave_type_permission" model="hr.leave.type">

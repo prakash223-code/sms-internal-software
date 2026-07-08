@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
+from markupsafe import Markup
 import pytz
 import calendar
 from datetime import datetime, time
@@ -47,7 +48,9 @@ class CustomAttendance(models.Model):
     @api.depends('check_in', 'employee_id')
     def _compute_is_late(self):
         LATE_HOUR = 9
-        LATE_MINUTE = 30  # After 09:30 AM = late
+        LATE_MINUTE = 30  # After 09:30 AM = late (standard, and AM-revert case)
+
+        Leave = self.env['hr.leave'].sudo()
 
         for record in self:
             if not record.check_in or not record.employee_id:
@@ -66,10 +69,30 @@ class CustomAttendance(models.Model):
                 check_in_utc = pytz.utc.localize(check_in_utc)
 
             check_in_local = check_in_utc.astimezone(tz)
+            check_in_date = check_in_local.date()
 
-            late_threshold = tz.localize(
-                datetime.combine(check_in_local.date(), time(LATE_HOUR, LATE_MINUTE))
-            )
+            # Check for a standing (non-reverted) approved AM-half leave on
+            # this date — if found, the employee was only expected to work
+            # the PM half, so the late threshold shifts to the PM start time
+            # instead of the standard 9:30 AM.
+            am_leave = Leave.search([
+                ('employee_id', '=', record.employee_id.id),
+                ('state', '=', 'validate'),
+                ('request_unit_half', '=', True),
+                ('request_date_from_period', '=', 'am'),
+                ('date_from', '>=', datetime.combine(check_in_date, time(0, 0, 0))),
+                ('date_from', '<=', datetime.combine(check_in_date, time(23, 59, 59))),
+            ], limit=1)
+
+            if am_leave:
+                pm_start_hour, pm_start_minute = record._get_pm_start_time(tz)
+                late_threshold = tz.localize(
+                    datetime.combine(check_in_date, time(pm_start_hour, pm_start_minute))
+                )
+            else:
+                late_threshold = tz.localize(
+                    datetime.combine(check_in_date, time(LATE_HOUR, LATE_MINUTE))
+                )
 
             if check_in_local > late_threshold:
                 record.is_late = True
@@ -183,7 +206,7 @@ class CustomAttendance(models.Model):
             'employee_id': employee.id,
             'check_in': now,
         })
-        new_record._apply_permission_deduction()
+        new_record._check_and_revert_conflicting_half_leave(employee, now)
 
         return {
             'status': 'checked_in',
@@ -233,6 +256,104 @@ class CustomAttendance(models.Model):
             ('employee_id', '=', employee.id),
             ('check_out', '=', False),
         ], limit=1)
+
+    def _check_and_revert_conflicting_half_leave(self, employee, check_in_utc):
+        """
+        If the employee checks in on a date where they have an APPROVED
+        AM-half leave, revert that leave (refuse it) since they clearly
+        intend to work today after all. This refunds the 0.5 day back to
+        their allocation automatically (Odoo's native validate->refuse
+        transition releases the reserved allocation days).
+
+        No time-boundary check — any check-in during an AM-leave day
+        triggers the revert, regardless of what time it happens. Once
+        reverted, standard late-detection (_compute_is_late, 9:30 AM
+        threshold) applies normally, exactly as any other day.
+
+        IMPORTANT: is_late/late_minutes are STORED computed fields that
+        only depend on check_in/employee_id — refusing an unrelated leave
+        record does not trigger their recompute automatically. This method
+        must therefore explicitly force recomputation on self (the
+        attendance record being created) after reverting, or is_late will
+        be silently wrong (computed against the now-stale AM-leave state).
+
+        Returns True if a leave was reverted, False otherwise.
+        """
+        tz_name = employee.tz or 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_name)
+        except pytz.UnknownTimeZoneError:
+            tz = pytz.timezone('Asia/Kolkata')
+
+        check_in_local_date = pytz.utc.localize(check_in_utc).astimezone(tz).date() \
+            if check_in_utc.tzinfo is None else check_in_utc.astimezone(tz).date()
+
+        Leave = self.env['hr.leave'].sudo()
+
+        conflicting_leave = Leave.search([
+            ('employee_id', '=', employee.id),
+            ('state', '=', 'validate'),
+            ('request_unit_half', '=', True),
+            ('request_date_from_period', '=', 'am'),
+            ('date_from', '>=', datetime.combine(check_in_local_date, time(0, 0, 0))),
+            ('date_from', '<=', datetime.combine(check_in_local_date, time(23, 59, 59))),
+        ], limit=1)
+
+        if not conflicting_leave:
+            return False
+
+        conflicting_leave.action_refuse()
+
+        # Force is_late/late_minutes recompute on THIS attendance record —
+        # see docstring note above for why this can't be left to Odoo's
+        # automatic dependency tracking.
+        self._compute_is_late()
+
+        # Notify employee + HR — audit trail for the auto-revert
+        partner = employee.user_id.partner_id
+        recipients = partner.ids if partner else []
+
+        hr_group = self.env.ref('hr.group_hr_user')
+        hr_users = self.env['res.users'].sudo().search([
+            ('group_ids', 'in', [hr_group.id]),
+        ])
+        recipients += hr_users.mapped('partner_id').ids
+
+        if recipients:
+            conflicting_leave.message_notify(
+                partner_ids=list(set(recipients)),
+                subject=_('Half-Day Leave Auto-Cancelled'),
+                body=Markup(
+                    '<p><strong>%s</strong>\'s approved AM half-day leave for '
+                    '%s was automatically cancelled because they checked in '
+                    'during that period.</p>'
+                ) % (employee.name, check_in_local_date.strftime('%d %b %Y')),
+                subtype_xmlid='mail.mt_comment',
+            )
+
+        return True
+
+    def _get_pm_start_time(self, tz):
+        """
+        Returns (hour, minute) for the company's weekday afternoon session
+        start, read from the resource calendar. Falls back to 14:00 (2:00 PM)
+        — matching the confirmed weekday pattern — if the calendar lookup
+        fails for any reason.
+        """
+        calendar = self.env.company.resource_calendar_id
+        if calendar:
+            afternoon_line = self.env['resource.calendar.attendance'].search([
+                ('calendar_id', '=', calendar.id),
+                ('day_period', '=', 'afternoon'),
+                ('dayofweek', 'in', ['0', '1', '2', '3', '4']),
+            ], limit=1)
+            if afternoon_line:
+                hour_from = afternoon_line.hour_from
+                hour = int(hour_from)
+                minute = int(round((hour_from - hour) * 60))
+                return hour, minute
+
+        return 14, 0  # fallback — matches confirmed weekday afternoon start
 
     # ------------------------------------------------------------------
     # CRON: Auto checkout at 19:00 employee local time

@@ -235,3 +235,40 @@ class HrLeave(models.Model):
     def _day_name(d):
         return ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
                 'Friday', 'Saturday', 'Sunday'][d.weekday()]
+
+    @api.constrains('date_from', 'date_to', 'state', 'employee_id',
+                    'request_unit_half', 'request_date_from_period', 'request_date_to_period')
+    def _check_no_overlapping_half_day_leave(self):
+        for leave in self:
+            if leave.state in ('refuse', 'cancel'):
+                continue
+            if not leave.date_from or not leave.date_to:
+                continue
+
+            # Find other active leaves for the same employee overlapping this date range
+            others = self.search([
+                ('id', '!=', leave.id),
+                ('employee_id', '=', leave.employee_id.id),
+                ('state', 'not in', ('refuse', 'cancel')),
+                ('date_from', '<=', leave.date_to),
+                ('date_to', '>=', leave.date_from),
+            ])
+
+            for other in others:
+                if leave.request_unit_half and other.request_unit_half:
+                    # Both half-day — only a conflict if same period (am/am or pm/pm)
+                    # on the same calendar date
+                    if (leave.request_date_from_period == other.request_date_from_period
+                            and leave.date_from.date() == other.date_from.date()):
+                        raise ValidationError(_(
+                            'This half-day leave conflicts with an existing '
+                            'leave request for %s on %s (%s).'
+                        ) % (leave.employee_id.name, leave.date_from.date(),
+                             dict(leave._fields['request_date_from_period'].selection).get(
+                                 leave.request_date_from_period)))
+                else:
+                    # At least one is a full-day leave — any date overlap is a conflict
+                    raise ValidationError(_(
+                        'This leave request overlaps with an existing leave for '
+                        '%s between %s and %s.'
+                    ) % (leave.employee_id.name, other.date_from.date(), other.date_to.date()))

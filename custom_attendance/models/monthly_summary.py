@@ -61,32 +61,32 @@ class AttendanceMonthlySummary(models.Model):
         default=0,
     )
 
-    leave_days = fields.Integer(
+    leave_days = fields.Float(
         string='Approved Leave Days',
         readonly=True,
-        default=0,
-        help='Approved paid leaves intersected with working days. Does not count as absent.',
+        default=0.0,
+        help='Approved paid leaves intersected with working days (fractional for half-days). Does not count as absent.',
     )
 
-    unpaid_leave_days = fields.Integer(
+    unpaid_leave_days = fields.Float(
         string='Unpaid Leave Days',
         readonly=True,
-        default=0,
-        help='Approved unpaid leaves — counted in salary deduction.',
+        default=0.0,
+        help='Approved unpaid leaves — counted in salary deduction (fractional for half-days).',
     )
 
-    absent_days = fields.Integer(
+    absent_days = fields.Float(
         string='Absent Days',
         readonly=True,
-        default=0,
-        help='working_days - present_days - leave_days',
+        default=0.0,
+        help='working_days - present_days - leave_days (fractional for half-day gaps).',
     )
 
-    unpaid_absent_days = fields.Integer(
+    unpaid_absent_days = fields.Float(
         string='Unpaid Absent Days',
         readonly=True,
-        default=0,
-        help='absent_days + unpaid_leave_days — used for payroll deduction.',
+        default=0.0,
+        help='absent_days + unpaid_leave_days — used for payroll deduction (fractional for half-days).',
     )
 
     permission_overflow_minutes = fields.Integer(
@@ -208,15 +208,22 @@ class AttendanceMonthlySummary(models.Model):
         )
 
         # --- 4. Leave days ---
-        leave_days_count, unpaid_leave_days_count, leave_date_set = \
+        leave_days_count, unpaid_leave_days_count, leave_date_fractions = \
             self._get_leave_data(employee, year, month, working_day_dates, tz)
 
-        # --- 5. Absent days ---
+        # --- 5. Absent days (fractional) ---
+        # present_date_set from hr.attendance is still whole-date granularity
+        # (Decision 8 simplification) — any check-in that date = 1.0 presence.
         effective_present = present_date_set & working_day_dates
-        effective_leave = leave_date_set & working_day_dates
-        covered_days = effective_present | effective_leave
-        absent_date_set = working_day_dates - covered_days
-        absent_days_count = len(absent_date_set)
+
+        absent_fraction_total = 0.0
+        for working_date in working_day_dates:
+            present_fraction = 1.0 if working_date in effective_present else 0.0
+            leave_fraction = leave_date_fractions.get(working_date, 0.0)
+            covered = min(1.0, present_fraction + leave_fraction)
+            absent_fraction_total += (1.0 - covered)
+
+        absent_days_count = absent_fraction_total
 
         # --- 6. Unpaid absent (for payroll deduction) ---
         unpaid_absent_days_count = absent_days_count + unpaid_leave_days_count
@@ -273,20 +280,21 @@ class AttendanceMonthlySummary(models.Model):
     def _get_leave_data(self, employee, year, month, working_day_dates, tz):
         """
         Returns:
-            leave_days_count     : approved paid leave days on working days
-            unpaid_leave_days    : approved unpaid leave days on working days
-            leave_date_set       : full set of dates covered by any approved leave
-                                   (used upstream to subtract from absent calculation)
+            leave_days_count     : approved paid leave — SUM of fractions (0.5/1.0 per date)
+            unpaid_leave_days    : approved unpaid leave — SUM of fractions
+            leave_date_fractions : dict[date, float] — fraction of that date covered by
+                                   approved leave (0.5 for a single half-day, 1.0 for a
+                                   full day, or 1.0 if both halves are separately covered
+                                   by two half-day leaves on the same date)
 
         Holiday-aware: days that fall on a company holiday or 2nd/4th Saturday
         are excluded from leave consumption — the employee should not lose a
-        leave day for a day that was already a holiday.
+        leave day (or half-day) for a day that was already a holiday.
         """
         num_days = calendar.monthrange(year, month)[1]
         first_day = date(year, month, 1)
         last_day = date(year, month, num_days)
 
-        # Fetch all holidays in the month once (declared + 2nd/4th Saturdays)
         holiday_dates = self.env['company.holiday'].get_holidays_in_range(
             first_day, last_day
         )
@@ -298,8 +306,9 @@ class AttendanceMonthlySummary(models.Model):
             ('date_to', '>=', datetime(year, month, 1, 0, 0, 0)),
         ])
 
-        leave_date_set = set()
-        unpaid_leave_date_set = set()
+        # date -> accumulated fraction (paid + unpaid combined, capped at 1.0)
+        leave_date_fractions = {}
+        unpaid_leave_date_fractions = {}
 
         for leave in hr_leaves:
             date_from_utc = leave.date_from
@@ -319,28 +328,49 @@ class AttendanceMonthlySummary(models.Model):
 
             is_unpaid = bool(leave.holiday_status_id.unpaid)
 
+            # Fraction this specific leave record contributes per date it touches.
+            # Half-day leaves are always single-date (date_from == date_to), so
+            # the fraction applies to that one date only. Multi-day leaves
+            # (full-day) contribute 1.0 to every date in their range.
+            record_fraction = 0.5 if leave.request_unit_half else 1.0
+
             current = date_from_local
             while current <= date_to_local:
                 # Skip Sundays
                 if current.weekday() == 6:
                     current = date.fromordinal(current.toordinal() + 1)
                     continue
-                # Skip holidays and 2nd/4th Saturdays —
-                # employee should not lose a leave day on an already-off day
+                # Skip holidays and 2nd/4th Saturdays
                 if current in holiday_dates:
                     current = date.fromordinal(current.toordinal() + 1)
                     continue
-                leave_date_set.add(current)
+
+                existing = leave_date_fractions.get(current, 0.0)
+                # Cap at 1.0 — two half-day leaves (AM + PM) on the same date
+                # should combine to a full day, never exceed it.
+                leave_date_fractions[current] = min(1.0, existing + record_fraction)
+
                 if is_unpaid:
-                    unpaid_leave_date_set.add(current)
+                    existing_unpaid = unpaid_leave_date_fractions.get(current, 0.0)
+                    unpaid_leave_date_fractions[current] = min(
+                        1.0, existing_unpaid + record_fraction
+                    )
+
                 current = date.fromordinal(current.toordinal() + 1)
 
-        # Intersect with working days only
-        leave_working = leave_date_set & working_day_dates
-        unpaid_leave_working = unpaid_leave_date_set & working_day_dates
-        paid_leave_working = leave_working - unpaid_leave_working
+        # Intersect with working days only, and split paid vs unpaid
+        leave_days_total = 0.0
+        unpaid_leave_days_total = 0.0
 
-        return len(paid_leave_working), len(unpaid_leave_working), leave_date_set
+        for d, fraction in leave_date_fractions.items():
+            if d not in working_day_dates:
+                continue
+            unpaid_fraction = unpaid_leave_date_fractions.get(d, 0.0)
+            paid_fraction = fraction - unpaid_fraction
+            leave_days_total += paid_fraction
+            unpaid_leave_days_total += unpaid_fraction
+
+        return leave_days_total, unpaid_leave_days_total, leave_date_fractions
 
     # ------------------------------------------------------------------
     # CRON
