@@ -1,38 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_hr_employee_defaults_button" model="ir.ui.view">
-        <field name="name">hr.employee.defaults.button</field>
-        <field name="model">hr.employee</field>
-        <field name="inherit_id" ref="hr.view_employee_form"/>
-        <field name="arch" type="xml">
+    <field name="name">hr.employee.defaults.button</field>
+    <field name="model">hr.employee</field>
+    <field name="inherit_id" ref="hr.view_employee_form"/>
+    <field name="arch" type="xml">
 
-            <!-- ── Setup Permissions button in form header (HR+ only) ── -->
-            <xpath expr="//header" position="inside">
-                <button
-                    name="action_setup_employee_permissions"
-                    string="Setup Permissions"
-                    type="object"
-                    class="btn-secondary"
-                    groups="hr.group_hr_user"
-                    help="Assign system permissions based on this employee's Role"/>
-            </xpath>
+        <xpath expr="//header" position="inside">
+            <button
+                name="action_setup_employee_permissions"
+                string="Setup Permissions"
+                type="object"
+                class="btn-secondary"
+                groups="hr.group_hr_user"
+                help="Assign system permissions based on this employee's Role"/>
+        </xpath>
 
-            <!-- ── System Role + separator, placed before user_id ─────
-                 The separator creates a visual "System Access" section
-                 inside the HR settings group where user_id lives.
-            ─────────────────────────────────────────────────────────── -->
-            <xpath expr="//field[@name='user_id']" position="before">
-                <separator string="System Access" groups="hr.group_hr_user"/>
-                <field
-                    name="employee_role"
-                    string="System Role"
-                    groups="hr.group_hr_user"
-                    help="Controls which permissions are assigned via the Setup Permissions button."/>
-            </xpath>
+        <!-- ── Widen native "Create User" button to HR + Manager ─────── -->
+        <xpath expr="//button[@name='action_create_user']" position="attributes">
+            <attribute name="groups">base.group_erp_manager,hr.group_hr_user</attribute>
+        </xpath>
 
-            <!-- ── Remove the empty properties field ─────────────────── -->
-            <xpath expr="//field[@name='employee_properties']" position="replace"/>
+        <xpath expr="//field[@name='user_id']" position="before">
+            <separator string="System Access" groups="hr.group_hr_user"/>
+            <field
+                name="employee_role"
+                string="System Role"
+                groups="hr.group_hr_user"
+                help="Controls which permissions are assigned via the Setup Permissions button."/>
+        </xpath>
 
-        </field>
-    </record>
+        <xpath expr="//field[@name='employee_properties']" position="replace"/>
+
+    </field>
+</record>
 </odoo>

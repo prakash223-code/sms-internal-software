@@ -18,3 +18,4 @@ access_hr_payslip_worked_days_manager,hr.payslip.worked_days manager full,bi_hr_
 access_hr_version_manager,hr.version manager full,hr.model_hr_version,hr.group_hr_manager,1,1,1,1
 access_hr_contract_type_manager,hr.contract.type manager full,hr.model_hr_contract_type,hr.group_hr_manager,1,1,1,1
 access_res_partner_bank_employee,res.partner.bank employee read,base.model_res_partner_bank,base.group_user,1,0,0,0
+access_res_users_hr_create,res.users hr create user,base.model_res_users,hr.group_hr_user,1,1,1,0
