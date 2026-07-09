@@ -255,7 +255,7 @@ class ProjectTask(models.Model):
 
             raise UserError(
                 _('You can only edit tasks you created. "%s" was created '
-                  'by someone else — contact your Team Lead, HR, or a '
+                  'by someone else — contact your HR, or a '
                   'Manager for changes to this task.') % task.name
             )
 
@@ -541,11 +541,28 @@ class ProjectTask(models.Model):
             notify_pairs.extend((task.id, emp_id) for emp_id in newly_added)
 
         if notify_pairs:
+            # Same fresh-cursor pattern as create()'s _send: postcommit
+            # callbacks run AFTER this transaction's cursor has already
+            # committed and closed, so reusing self.env here (as the
+            # previous version did) silently fails on every DB call —
+            # no exception surfaces to the user, the notification just
+            # never goes out. That's why assignment-at-creation worked
+            # (create()'s _send already opened a fresh cursor) while
+            # assignment via a later write() did not.
+            uid = self.env.uid
+            context = dict(self.env.context)
+            registry = self.env.registry
+
             def _send():
-                for task_id, emp_id in notify_pairs:
-                    t = self.env['project.task'].browse(task_id)
-                    emp = self.env['hr.employee'].browse(emp_id)
-                    t._notify_assigned_employee(emp)
+                try:
+                    with registry.cursor() as cr:
+                        env = api.Environment(cr, uid, context)
+                        for task_id, emp_id in notify_pairs:
+                            t = env['project.task'].browse(task_id)
+                            emp = env['hr.employee'].browse(emp_id)
+                            t._notify_assigned_employee(emp)
+                except Exception as e:
+                    _logger.warning("Task assignment notification failed: %s", e)
 
             self.env.cr.postcommit.add(_send)
 

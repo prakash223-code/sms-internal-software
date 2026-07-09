@@ -36,7 +36,7 @@
               parent="menu_team_management_tasks"
               sequence="20"
               action="action_all_tasks"
-              groups="custom_project.group_team_lead"/>
+              groups="custom_project.group_team_lead,hr.group_hr_user"/>
 
     <!-- Assignment Requests -->
     <menuitem id="menu_team_management_requests"

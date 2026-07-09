@@ -13,7 +13,7 @@
                     <i class="fa fa-lock" title="Read Only"/>
                     <div>
                         <strong>Read-only</strong>
-                        — you didn't create this task. Only the creator, your Team Lead, HR, or a Manager can edit its
+                        — you didn't create this task. Only the creator, HR, or a Manager can edit its
                         details. You can still update its state below if it's assigned to you.
                     </div>
                 </div>
