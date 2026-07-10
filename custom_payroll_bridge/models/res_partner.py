@@ -17,4 +17,11 @@ class ResPartner(models.Model):
     # Same fix pattern as hr_version.py: unlock read access with
     # groups=False rather than granting Accounting/Invoicing group
     # membership, which would pull in unrelated Accounting menus/rights.
-    credit_limit = fields.Monetary(groups=False)
+    credit_limit = fields.Float(
+        string='Credit Limit',
+        help='Credit limit specific to this partner.',
+        company_dependent=True,
+        copy=False,
+        readonly=False,
+        groups=False,
+    )
