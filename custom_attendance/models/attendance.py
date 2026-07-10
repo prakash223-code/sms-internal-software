@@ -48,7 +48,7 @@ class CustomAttendance(models.Model):
     @api.depends('check_in', 'employee_id')
     def _compute_is_late(self):
         LATE_HOUR = 9
-        LATE_MINUTE = 30  # After 09:30 AM = late (standard, and AM-revert case)
+        LATE_MINUTE = 30  # standard threshold
 
         Leave = self.env['hr.leave'].sudo()
 
@@ -71,10 +71,10 @@ class CustomAttendance(models.Model):
             check_in_local = check_in_utc.astimezone(tz)
             check_in_date = check_in_local.date()
 
-            # Check for a standing (non-reverted) approved AM-half leave on
-            # this date — if found, the employee was only expected to work
-            # the PM half, so the late threshold shifts to the PM start time
-            # instead of the standard 9:30 AM.
+            # Only an APPROVED AM half-day leave shifts the threshold.
+            # PM leave doesn't affect morning lateness at all — the employee
+            # is still expected in on time for the AM half regardless of
+            # whether they have PM off later that day.
             am_leave = Leave.search([
                 ('employee_id', '=', record.employee_id.id),
                 ('state', '=', 'validate'),
@@ -206,8 +206,7 @@ class CustomAttendance(models.Model):
             'employee_id': employee.id,
             'check_in': now,
         })
-        new_record._check_and_revert_conflicting_half_leave(employee, now)
-
+        new_record._apply_permission_deduction()
         return {
             'status': 'checked_in',
             'check_in': now,

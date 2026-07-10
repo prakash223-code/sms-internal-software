@@ -15,10 +15,14 @@ class HrAttendancePermissionDeduction(models.Model):
 
     def _apply_permission_deduction(self):
         self.ensure_one()
+
+        self._clear_stale_auto_permission_leave()
+
         if not self.is_late or self.late_minutes <= 0:
             return
 
         leave_type = self._get_permission_leave_type()
+        # ... rest unchanged from here
         if not leave_type:
             _logger.warning(
                 'Permission deduction: leave type not found — skipped for attendance %s',
@@ -127,15 +131,9 @@ class HrAttendancePermissionDeduction(models.Model):
         return max(0.0, allocation.virtual_remaining_leaves)
 
     def _create_auto_permission_leave(self, employee, leave_type, local_date, hours, start_offset_hours=0.0):
-        """
-        start_offset_hours shifts the block later than LATE_HOUR_THRESHOLD,
-        so it lands immediately after any manual Permission request already
-        covering the start of the late window — avoids the two overlapping
-        in wall-clock time (Odoo's native _check_date rejects same-employee
-        overlapping leave requests, confirmed via shell test).
-        """
         Leave = self.env['hr.leave'].sudo()
-        hour_from = LATE_HOUR_THRESHOLD + start_offset_hours
+        base_threshold = self._get_late_threshold_hour()
+        hour_from = base_threshold + start_offset_hours
         hour_to = hour_from + hours
 
         leave = Leave.create({
@@ -157,6 +155,59 @@ class HrAttendancePermissionDeduction(models.Model):
             leave.id, employee.name, hours, hour_from, hour_to, local_date
         )
         return leave
+
+    def _clear_stale_auto_permission_leave(self):
+        self.ensure_one()
+        leave_type = self._get_permission_leave_type()
+        if not leave_type:
+            return
+        local_date = self._get_local_check_in_date()
+        day_start = datetime.combine(local_date, time(0, 0, 0))
+        day_end = datetime.combine(local_date, time(23, 59, 59))
+        stale = self.env['hr.leave'].sudo().search([
+            ('employee_id', '=', self.employee_id.id),
+            ('holiday_status_id', '=', leave_type.id),
+            ('is_auto_permission', '=', True),
+            ('state', '=', 'validate'),
+            ('date_from', '<=', day_end),
+            ('date_to', '>=', day_start),
+        ])
+        if stale:
+            stale.action_refuse()
+
+    def _get_late_threshold_hour(self):
+        """
+        Returns the late-detection threshold as a float hour (e.g. 9.5 for
+        9:30 AM, 14.0 for 2:00 PM) — matching whatever threshold
+        _compute_is_late() actually used for this attendance record. This
+        must stay in sync with that method's logic: if an approved AM
+        half-day leave stands for this date, the threshold is PM-start;
+        otherwise it's the standard 9:30 AM.
+        """
+        self.ensure_one()
+        tz_name = self.employee_id.tz or 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_name)
+        except pytz.UnknownTimeZoneError:
+            tz = pytz.timezone('Asia/Kolkata')
+
+        local_date = self._get_local_check_in_date()
+
+        Leave = self.env['hr.leave'].sudo()
+        am_leave = Leave.search([
+            ('employee_id', '=', self.employee_id.id),
+            ('state', '=', 'validate'),
+            ('request_unit_half', '=', True),
+            ('request_date_from_period', '=', 'am'),
+            ('date_from', '>=', datetime.combine(local_date, time(0, 0, 0))),
+            ('date_from', '<=', datetime.combine(local_date, time(23, 59, 59))),
+        ], limit=1)
+
+        if am_leave:
+            pm_hour, pm_minute = self._get_pm_start_time(tz)
+            return pm_hour + (pm_minute / 60.0)
+
+        return LATE_HOUR_THRESHOLD
 
     def _notify_permission_low(self, employee, remaining_minutes):
         from markupsafe import Markup

@@ -2,6 +2,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from datetime import timedelta
+from datetime import datetime, time
 from markupsafe import Markup
 import pytz
 
@@ -119,20 +120,39 @@ class HrLeave(models.Model):
                 new_state = leave.state
                 if old_state == new_state:
                     continue
-                # Auto-generated Permission deductions (late-arrival buffer)
-                # are never employee-submitted requests, so the standard
-                # "Your time off request has been approved" notification is
-                # misleading here — skip it. A dedicated late-arrival
-                # notification is handled separately in permission_deduction.py
-                # (_notify_permission_low / _notify_permission_exhausted).
-                if leave.is_auto_permission:
-                    continue
                 if new_state == 'validate':
                     leave.sudo()._notify_leave_decision('approved')
+                    leave.flush_recordset(['state'])
+                    leave.sudo()._recompute_attendance_lateness_for_date()
                 elif new_state == 'refuse':
                     leave.sudo()._notify_leave_decision('refused')
+                    leave.flush_recordset(['state'])
+                    leave.sudo()._recompute_attendance_lateness_for_date()
 
         return res
+
+    def _recompute_attendance_lateness_for_date(self):
+        self.ensure_one()
+        if not self.request_unit_half or self.request_date_from_period != 'am':
+            return
+        if not self.date_from:
+            return
+
+        leave_date = self.date_from.date()
+
+        Attendance = self.env['hr.attendance'].sudo()
+        same_day_attendance = Attendance.search([
+            ('employee_id', '=', self.employee_id.id),
+            ('check_in', '>=', datetime.combine(leave_date, time(0, 0, 0))),
+            ('check_in', '<=', datetime.combine(leave_date, time(23, 59, 59))),
+        ])
+        if not same_day_attendance:
+            return
+
+        same_day_attendance._compute_is_late()
+
+        for attendance in same_day_attendance:
+            attendance._apply_permission_deduction()
 
     # ------------------------------------------------------------------
     # NOTIFICATION HELPERS
