@@ -388,6 +388,48 @@ class CustomAttendance(models.Model):
                     'check_out': auto_checkout_utc,
                     'auto_checkout': True,
                 })
+                attendance._notify_hr_missed_checkout(check_in_local.date())
+
+    def _notify_hr_missed_checkout(self, attendance_date):
+        """
+        Notifies HR + Managers whenever the auto-checkout cron has to
+        close a session at 19:00 because the employee forgot to check
+        out. Fired once per record, right after auto_checkout is set.
+        """
+        self.ensure_one()
+
+        hr_group = self.env.ref('hr.group_hr_user')
+        hr_users = self.env['res.users'].sudo().search([
+            ('group_ids', 'in', [hr_group.id]),
+        ])
+
+        manager_employees = self.env['hr.employee'].sudo().search([
+            ('employee_role', '=', 'manager'),
+            ('user_id', '!=', False),
+            ('active', '=', True),
+        ])
+        manager_users = manager_employees.mapped('user_id')
+
+        recipients = (hr_users | manager_users).mapped('partner_id')
+        if not recipients:
+            return
+
+        today_local = fields.Date.context_today(self)
+        date_label = 'today' if attendance_date == today_local else 'yesterday'
+        date_str = attendance_date.strftime('%d %b %Y')
+
+        body = Markup(
+            '<p><strong>%s</strong> did not check out on %s (%s).</p>'
+            '<p>The system automatically closed their attendance session '
+            'at 7:00 PM.</p>'
+        ) % (self.employee_id.name, date_label, date_str)
+
+        self.message_notify(
+            partner_ids=recipients.ids,
+            subject=_('Missed Checkout — %s') % self.employee_id.name,
+            body=body,
+            subtype_xmlid='mail.mt_comment',
+        )
 
     # ------------------------------------------------------------------
     # UTILITY: get present days / late days for monthly summary
