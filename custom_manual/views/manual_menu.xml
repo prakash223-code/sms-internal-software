@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Opens /manual in a new browser tab. The link itself is visible
+         to every logged-in user (base.group_user) — access to specific
+         SECTIONS inside the page is what's actually gated, server-side,
+         by ManualController.my_role(). -->
+    <record id="action_open_manual" model="ir.actions.act_url">
+        <field name="name">ERP Manual</field>
+        <field name="url">/manual</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+            id="menu_erp_manual_root"
+            name="User Manual"
+            action="action_open_manual"
+            parent="custom_welcome.menu_welcome_root"
+            sequence="95"
+            groups="base.group_user"/>
+
+</odoo>
