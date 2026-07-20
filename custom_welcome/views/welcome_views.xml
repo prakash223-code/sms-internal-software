@@ -128,7 +128,7 @@
                                         <span class="o_welcome_late_num">
                                             <field name="late_minutes" readonly="1" nolabel="1"/>
                                         </span>
-                                        minutes — threshold is 9:30 AM
+                                        minutes
                                     </span>
                                 </div>
 
