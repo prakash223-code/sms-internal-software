@@ -707,6 +707,9 @@
                 <div class="nav-item" data-target="projects" onclick="goTo('projects', this)"><span
                         class="idx">06B</span> Projects, Teams & Tasks
                 </div>
+                <div class="nav-item" data-target="manufacturing" onclick="goTo('manufacturing', this)"><span
+                        class="idx">06C</span> Manufacturing
+                </div>
             </div>
 
             <div class="nav-group" data-role="manager,hr">
@@ -1318,6 +1321,274 @@
                 </div>
             </section>
 
+            <!-- 06C MANUFACTURING -->
+            <section class="page" id="page-manufacturing" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">06C</span> Manufacturing</h1>
+                <p class="dek">Manufacturing Orders (MOs) run on standard Odoo Manufacturing, extended with
+                    Assembly/Production
+                    typing, component tracking, cost analysis, and serial number + warranty generation.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">Who sees this menu</span>
+                    The Manufacturing menu only appears for employees in a Manufacturing-named department, or anyone
+                    HR/Manager
+                    has explicitly given manufacturing access via Setup Permissions (see Section 14). If you don't see
+                    it and
+                    believe you should, ask HR.
+                </div>
+
+                <h2>Assembly vs Production — what the type means</h2>
+                <p>Every Bill of Materials (BOM) is tagged as <strong>Assembly</strong>, <strong>Production</strong>, or
+                    <strong>Assembly + Production</strong>. A Manufacturing Order (MO) automatically inherits this type
+                    from
+                    the BOM it's built on — you don't set it directly on the MO.</p>
+                <ul>
+                    <li><strong>Assembly</strong> orders show an "Assembly Details" tab (start/end dates, client
+                        requirements,
+                        step-by-step assembly instructions).
+                    </li>
+                    <li><strong>Production</strong> orders show a "Production Details" tab (start/end dates, process
+                        notes)
+                        instead.
+                    </li>
+                    <li><strong>Assembly + Production</strong> orders show both tabs.</li>
+                </ul>
+
+                <h2>Standard Odoo manufacturing flow</h2>
+                <p>The core MO lifecycle is unmodified Odoo Manufacturing:</p>
+                <div class="flow">
+                    <div class="step">Draft</div>
+                    <span class="arrow">→</span>
+                    <div class="step">Confirmed</div>
+                    <span class="arrow">→</span>
+                    <div class="step">In Progress</div>
+                    <span class="arrow">→</span>
+                    <div class="step">Done</div>
+                </div>
+                <ol>
+                    <li>Go to <strong>Manufacturing → Assembly Orders</strong> or <strong>Production Orders</strong>
+                        (these are
+                        the same underlying MO list, pre-filtered by manufacturing type) and click <strong>New</strong>.
+                    </li>
+                    <li>Select the <strong>Product</strong> — its BOM's manufacturing type and warranty period carry
+                        over
+                        automatically.
+                    </li>
+                    <li>Set the <strong>Client</strong> and, if useful, <strong>Client Requirements</strong>.</li>
+                    <li>Click <strong>Confirm</strong> to reserve components, then <strong>Mark as Done</strong> once
+                        production finishes — standard Odoo behavior throughout.
+                    </li>
+                </ol>
+
+                <h2>Bills of Materials — components and operations</h2>
+                <p>A BOM defines what it takes to build one unit of a product. Go to <strong>Manufacturing → Products →
+                    Bills of
+                    Materials</strong>, open or create one, and fill in two tabs:</p>
+                <ul>
+                    <li><strong>Components tab</strong> — click <strong>Add a line</strong> for each raw material,
+                        sub-assembly,
+                        bought-out part, or consumable and set its quantity. This module adds a <strong>Component
+                            Type</strong>
+                        field (Raw Material / Sub Assembly / Bought Out Part / Consumable), an
+                        <strong>is_critical</strong>
+                        checkbox, and a free-text notes column on top of the standard component line.
+                    </li>
+                    <li><strong>Operations tab</strong> — click <strong>Add a line</strong> to define each production
+                        step (e.g.
+                        "Cut", "Assemble", "Paint"). Each operation requires a <strong>Work Center</strong> and a
+                        <strong>Default
+                            Duration</strong> — this is what drives both scheduling and cost.
+                    </li>
+                </ul>
+
+                <h2>Work Centers — where operations actually happen</h2>
+                <p>A Work Center is a machine, workstation, or production line — e.g. "CNC Machine 01" or "Assembly Line
+                    A". Go to
+                    <strong>Manufacturing → Configuration → Work Centers</strong> to set one up:</p>
+                <ul>
+                    <li><strong>Capacity</strong> — how many units it can process in parallel.</li>
+                    <li><strong>Time Efficiency</strong> — a percentage used to adjust planned durations against
+                        real-world
+                        output (default 100%).
+                    </li>
+                    <li><strong>Working Hours</strong> — the resource calendar the work center follows, used for
+                        scheduling.
+                    </li>
+                    <li><strong>Equipment tab</strong> — optionally link specific machines/tools to the work center,
+                        each with a
+                        technician, MTBF (mean time between failures), and MTTR (mean time to recovery) for basic
+                        maintenance
+                        tracking.
+                    </li>
+                </ul>
+                <p>Work Orders must be enabled first: <strong>Manufacturing → Configuration → Settings → Work
+                    Orders</strong>.
+                    Once enabled, every operation on a BOM requires a work center, and every MO built from that BOM gets
+                    a
+                    <strong>Work Orders</strong> tab showing each step in sequence.</p>
+
+                <h2>Processing Work Orders on an MO</h2>
+                <p>Once an MO is confirmed, open its <strong>Work Orders</strong> tab to see each operation from the
+                    BOM, in
+                    order, with its assigned work center and planned duration. For each work order:</p>
+                <ol>
+                    <li>Click the work order line to open it.</li>
+                    <li>Click <strong>Start</strong> — this logs the actual start time and moves the work order to "In
+                        Progress".
+                    </li>
+                    <li>Once the step is physically done, click <strong>Mark as Done</strong>.</li>
+                    <li>Repeat for each subsequent operation. The MO as a whole is only ready to close once all its work
+                        orders
+                        are done.
+                    </li>
+                </ol>
+
+                <div class="stamp-note warn">
+                    <span class="tag">No Shop Floor tablet app on Community</span>
+                    Odoo Enterprise has a dedicated Shop Floor module — a full-screen tablet interface for operators to
+                    tap
+                    through work orders on the production floor. That module is <strong>not available on
+                    Community</strong>.
+                    On this installation, work orders are processed from the regular MO form's Work Orders tab as
+                    described
+                    above.
+                </div>
+
+                <h2>How operations feed into MO cost</h2>
+                <p>Beyond the component cost already covered under Cost Analysis, standard Odoo also factors in
+                    operation time
+                    and work center cost when a work center has an hourly cost configured — visible on the base Odoo
+                    cost
+                    breakdown, separate from this module's Labour Cost / Overhead Cost fields, which are for costs you
+                    want to
+                    enter manually per order.</p>
+
+                <h2>1-step vs 2-step vs 3-step manufacturing routes</h2>
+                <p>How components and finished goods physically move between stock, production, and back to stock is
+                    controlled
+                    per product/warehouse under <strong>Inventory → Configuration → Warehouses</strong>, or per-product
+                    route
+                    settings:</p>
+                <table class="ledger">
+                    <tr>
+                        <th>Route</th>
+                        <th>What happens</th>
+                    </tr>
+                    <tr>
+                        <td>1-step (Manufacture)</td>
+                        <td>Components are consumed straight from stock; the MO alone handles the movement.</td>
+                    </tr>
+                    <tr>
+                        <td>2-step (Pick + Manufacture)</td>
+                        <td>A separate picking operation stages components at a production location first, then the MO
+                            consumes from there.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3-step (Pick + Manufacture + Store)</td>
+                        <td>Adds a third step that puts the finished product away to its final storage location after
+                            production.
+                        </td>
+                    </tr>
+                </table>
+                <p>This is a warehouse-level configuration decision, not something you set per MO — ask HR/Manager if
+                    you're
+                    unsure which route your warehouse uses.</p>
+
+                <div class="stamp-note bad">
+                    <span class="tag">Community edition limits worth knowing</span>
+                    A few manufacturing-adjacent features you may see referenced in Odoo's official documentation or
+                    online
+                    guides are Enterprise-only and not present here: the <strong>Shop Floor</strong> tablet app, the
+                    <strong>Quality</strong> app (statistical process control, quality checkpoints),
+                    <strong>PLM</strong>
+                    (engineering change orders), advanced <strong>MRP-II</strong> scheduling, and IoT device
+                    integration. Serial
+                    number tracking, warranty, and job-card printing on this system are handled by this custom module
+                    instead.
+                </div>
+
+                <h2>Checking component availability</h2>
+                <p>The <strong>Components</strong> stat button on the MO form (top right) shows "available / total" at a
+                    glance. Click <strong>Check Components</strong> in the header for a full breakdown — each component
+                    is
+                    listed as either sufficient (✅) or short (❌) against what's required.</p>
+                <table class="ledger">
+                    <tr>
+                        <th>Component Status</th>
+                        <th>Meaning</th>
+                    </tr>
+                    <tr>
+                        <td>Components Pending</td>
+                        <td>None of the required components are fully available yet</td>
+                    </tr>
+                    <tr>
+                        <td>Partially Available</td>
+                        <td>Some, but not all, components are available</td>
+                    </tr>
+                    <tr>
+                        <td>All Components Ready</td>
+                        <td>Every component has enough quantity on hand</td>
+                    </tr>
+                </table>
+
+                <h2>Cost analysis</h2>
+                <p>Open the <strong>Cost Analysis</strong> tab on any MO to see:</p>
+                <ul>
+                    <li><strong>Component Cost</strong> — computed automatically from each component's standard cost ×
+                        quantity required.
+                    </li>
+                    <li><strong>Labour Cost</strong> and <strong>Overhead Cost</strong> — enter these manually.</li>
+                    <li><strong>Total Cost</strong>, <strong>Selling Price</strong>, <strong>Profit</strong>, and
+                        <strong>Profit %</strong> — calculated live as you fill in the fields above, with a Profit /
+                        Loss /
+                        Break Even badge.
+                    </li>
+                </ul>
+
+                <h2>Serial numbers &amp; warranties</h2>
+                <p>Once an order is producing real, trackable units, click <strong>Generate Serial Numbers</strong> (the
+                    Serials stat button, or from the header) to open the serial wizard:</p>
+                <ol>
+                    <li>Set the <strong>Quantity</strong> of serials to generate, and confirm the
+                        <strong>Client</strong>.
+                    </li>
+                    <li>Set <strong>Warranty Years</strong> (defaults from the product's BOM) and <strong>Warranty
+                        Start</strong> date.
+                    </li>
+                    <li>Click <strong>Generate Preview</strong> to see the serial numbers that will be created.</li>
+                    <li>Click <strong>Confirm &amp; Create</strong> — this creates one Serial Number record and one
+                        linked
+                        Warranty record per unit, all in one step.
+                    </li>
+                </ol>
+                <p>Warranties automatically show as <strong>Active</strong>, <strong>Expiring Soon</strong> (30 days or
+                    less
+                    remaining), or <strong>Expired</strong>, and can be browsed under <strong>Manufacturing →
+                        Warranties</strong>
+                    (All / Active / Expiring Soon). A daily background check logs any warranties entering the expiring
+                    or
+                    expired state.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">Printing a warranty certificate</span>
+                    Open any Warranty record and click <strong>Print Certificate</strong> to generate a client-ready PDF
+                    with
+                    product, serial number, client, and warranty period details.
+                </div>
+
+                <h2>Printing the Job Card</h2>
+                <p>Click <strong>Print Job Card</strong> in the MO header (available once the order is out of Draft) for
+                    a PDF
+                    summary of the order: components with required vs. available quantities and critical-part flags,
+                    assembly
+                    or production instructions, the full cost breakdown, and any serial numbers generated so far — handy
+                    as a
+                    shop-floor traveler document.</p>
+
+            </section>
+
             <!-- 07 MGR LEAVE -->
             <section class="page" id="page-mgr-leave" data-role="manager,hr">
                 <div class="crumb">Manual / Approvals</div>
@@ -1923,7 +2194,8 @@
                     to jump straight to the project that was created from it.</p>
 
                 <h2>Who can convert</h2>
-                <p>The Convert to Project button is only visible to HR officers and Managers — regular salespeople and employees
+                <p>The Convert to Project button is only visible to HR officers and Managers — regular salespeople and
+                    employees
                     don't see it, even on their own Won opportunities.</p>
 
                 <div class="stamp-note info">
