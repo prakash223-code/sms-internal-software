@@ -1,281 +1,642 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMS Enterprises — ERP Field Manual</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#1B2A4A;
-    --ink-soft:#3C4E72;
-    --paper:#F7F5EF;
-    --paper-deep:#EFEBDF;
-    --rule:#D8D2C4;
-    --brass:#B8862E;
-    --brass-soft:#E4C489;
-    --green:#2F6F4E;
-    --green-soft:#E1EEE6;
-    --red:#A63D40;
-    --red-soft:#F3E1E1;
-    --shadow: 0 1px 0 rgba(27,42,74,0.06);
-    --serif: 'Zilla Slab', Georgia, serif;
-    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
-    --mono: 'IBM Plex Mono', 'Courier New', monospace;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Enterprises — ERP Field Manual</title>
+    <link rel="icon" type="image/png" href="/custom_manual/static/img/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1B2A4A;
+            --ink-soft: #3C4E72;
+            --paper: #F7F5EF;
+            --paper-deep: #EFEBDF;
+            --rule: #D8D2C4;
+            --brass: #B8862E;
+            --brass-soft: #E4C489;
+            --green: #2F6F4E;
+            --green-soft: #E1EEE6;
+            --red: #A63D40;
+            --red-soft: #F3E1E1;
+            --shadow: 0 1px 0 rgba(27, 42, 74, 0.06);
+            --serif: 'Zilla Slab', Georgia, serif;
+            --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+            --mono: 'IBM Plex Mono', 'Courier New', monospace;
+        }
 
-  *{ margin:0; padding:0; box-sizing:border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  body{
-    font-family: var(--sans);
-    color: var(--ink);
-    background:
-      repeating-linear-gradient(
-        transparent, transparent 27px, rgba(27,42,74,0.035) 28px
-      ),
-      var(--paper);
-    min-height: 100vh;
-  }
+        body {
+            font-family: var(--sans);
+            color: var(--ink);
+            background: repeating-linear-gradient(
+                    transparent, transparent 27px, rgba(27, 42, 74, 0.035) 28px
+            ),
+            var(--paper);
+            min-height: 100vh;
+        }
 
-  ::selection{ background: var(--brass-soft); }
+        ::selection {
+            background: var(--brass-soft);
+        }
 
-  a:focus-visible, button:focus-visible, input:focus-visible{
-    outline: 2px solid var(--brass);
-    outline-offset: 2px;
-  }
+        a:focus-visible, button:focus-visible, input:focus-visible {
+            outline: 2px solid var(--brass);
+            outline-offset: 2px;
+        }
 
-  /* ============ VERIFYING SCREEN ============ */
-  #gate{
-    min-height: 100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding: 40px 20px;
-    text-align:center;
-  }
+        /* ============ VERIFYING SCREEN ============ */
+        #gate {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
 
-  .gate-eyebrow{
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 14px;
-  }
+        .gate-eyebrow {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 14px;
+        }
 
-  .gate-title{
-    font-family: var(--serif);
-    font-weight: 700;
-    font-size: clamp(28px, 5vw, 44px);
-    line-height: 1.1;
-    color: var(--ink);
-    margin-bottom: 14px;
-  }
+        .gate-title {
+            font-family: var(--serif);
+            font-weight: 700;
+            font-size: clamp(28px, 5vw, 44px);
+            line-height: 1.1;
+            color: var(--ink);
+            margin-bottom: 14px;
+        }
 
-  .gate-sub{
-    font-size: 14px;
-    color: var(--ink-soft);
-    max-width: 420px;
-    line-height: 1.6;
-  }
+        .gate-sub {
+            font-size: 14px;
+            color: var(--ink-soft);
+            max-width: 420px;
+            line-height: 1.6;
+        }
 
-  .punch-clock{
-    width: 46px;
-    height: 46px;
-    border: 3px solid var(--ink);
-    border-radius: 50%;
-    position: relative;
-    margin-bottom: 24px;
-  }
-  .punch-clock::before{
-    content:'';
-    position:absolute;
-    left:50%; top:50%;
-    width: 2px; height: 14px;
-    background: var(--ink);
-    transform-origin: bottom center;
-    transform: translate(-50%, -100%) rotate(0deg);
-    animation: tick 1.1s linear infinite;
-  }
-  @keyframes tick{
-    to{ transform: translate(-50%, -100%) rotate(360deg); }
-  }
+        .punch-clock {
+            width: 46px;
+            height: 46px;
+            border: 3px solid var(--ink);
+            border-radius: 50%;
+            position: relative;
+            margin-bottom: 24px;
+        }
 
-  .gate-error{
-    margin-top: 22px;
-    font-family: var(--mono);
-    font-size: 12.5px;
-    color: var(--red);
-    max-width: 420px;
-    display:none;
-  }
-  .gate-error a{ color: var(--red); }
+        .punch-clock::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 2px;
+            height: 14px;
+            background: var(--ink);
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%) rotate(0deg);
+            animation: tick 1.1s linear infinite;
+        }
 
-  .stamp-mark{
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
-    z-index: 999;
-    opacity:0;
-  }
-  .stamp-mark span{
-    font-family: var(--serif);
-    font-weight:700;
-    font-size: clamp(28px, 6vw, 56px);
-    color: var(--red);
-    border: 6px solid var(--red);
-    border-radius: 10px;
-    padding: 14px 34px;
-    transform: rotate(-8deg) scale(1.5);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    opacity:0;
-  }
-  .stamp-mark.fire{ animation: stampFade .6s ease forwards; }
-  .stamp-mark.fire span{ animation: stampHit .6s cubic-bezier(.2,1.4,.4,1) forwards; }
-  @keyframes stampHit{
-    0%{ opacity:0; transform: rotate(-8deg) scale(2.4); }
-    55%{ opacity:1; transform: rotate(-8deg) scale(0.94); }
-    75%{ transform: rotate(-8deg) scale(1.04); }
-    100%{ opacity:1; transform: rotate(-8deg) scale(1); }
-  }
-  @keyframes stampFade{
-    0%{ opacity:0; } 15%{ opacity:1; } 75%{ opacity:1; } 100%{ opacity:0; }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .stamp-mark, .stamp-mark span, .punch-clock::before{ animation:none !important; }
-  }
+        @keyframes tick {
+            to {
+                transform: translate(-50%, -100%) rotate(360deg);
+            }
+        }
 
-  /* ============ PORTAL SHELL ============ */
-  #portal{ display:none; }
-  #portal.active{ display:block; }
+        .gate-error {
+            margin-top: 22px;
+            font-family: var(--mono);
+            font-size: 12.5px;
+            color: var(--red);
+            max-width: 420px;
+            display: none;
+        }
 
-  header.bar{
-    background: var(--ink);
-    color: var(--paper);
-    padding: 16px 28px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    position: sticky;
-    top:0;
-    z-index: 50;
-  }
+        .gate-error a {
+            color: var(--red);
+        }
 
-  .bar-title{ font-family: var(--serif); font-size: 20px; font-weight: 700; letter-spacing: .3px; }
-  .bar-title small{ display:block; font-family: var(--mono); font-weight:400; font-size: 10.5px; letter-spacing: 2px; color: #A9B6D6; margin-top: 2px; }
+        .stamp-mark {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+        }
 
-  .bar-role{ display:flex; align-items:center; gap: 12px; font-family: var(--mono); font-size: 12px; }
+        .stamp-mark span {
+            font-family: var(--serif);
+            font-weight: 700;
+            font-size: clamp(28px, 6vw, 56px);
+            color: var(--red);
+            border: 6px solid var(--red);
+            border-radius: 10px;
+            padding: 14px 34px;
+            transform: rotate(-8deg) scale(1.5);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0;
+        }
 
-  .role-pill{ background: var(--brass); color: var(--ink); font-weight: 600; padding: 5px 12px; border-radius: 20px; letter-spacing: .5px; }
-  .role-name{ color: #C6CFE6; }
+        .stamp-mark.fire {
+            animation: stampFade .6s ease forwards;
+        }
 
-  .change-role{
-    background: transparent; border: 1px solid #4A5C86; color: #C6CFE6;
-    font-family: var(--sans); font-size: 12px; padding: 6px 12px; border-radius: 3px;
-    cursor: pointer; transition: border-color .15s, color .15s;
-  }
-  .change-role:hover{ border-color: var(--brass); color: var(--paper); }
+        .stamp-mark.fire span {
+            animation: stampHit .6s cubic-bezier(.2, 1.4, .4, 1) forwards;
+        }
 
-  .layout{ display:grid; grid-template-columns: 270px 1fr; max-width: 1320px; margin: 0 auto; }
+        @keyframes stampHit {
+            0% {
+                opacity: 0;
+                transform: rotate(-8deg) scale(2.4);
+            }
+            55% {
+                opacity: 1;
+                transform: rotate(-8deg) scale(0.94);
+            }
+            75% {
+                transform: rotate(-8deg) scale(1.04);
+            }
+            100% {
+                opacity: 1;
+                transform: rotate(-8deg) scale(1);
+            }
+        }
 
-  aside.nav{
-    border-right: 1px solid var(--rule); padding: 22px 16px 40px;
-    position: sticky; top: 65px; align-self: start;
-    max-height: calc(100vh - 65px); overflow-y: auto;
-  }
+        @keyframes stampFade {
+            0% {
+                opacity: 0;
+            }
+            15% {
+                opacity: 1;
+            }
+            75% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
 
-  .search-wrap{ margin-bottom: 20px; }
-  .search-wrap input{
-    width:100%; border: 1px solid var(--rule); background: #fffdf8; padding: 9px 12px;
-    font-family: var(--sans); font-size: 13px; border-radius: 3px; color: var(--ink);
-  }
-  .search-wrap input::placeholder{ color: #9AA3B8; }
+        @media (prefers-reduced-motion: reduce) {
+            .stamp-mark, .stamp-mark span, .punch-clock::before {
+                animation: none !important;
+            }
+        }
 
-  .nav-group{ margin-bottom: 22px; }
-  .nav-group-label{
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--brass); margin-bottom: 8px; padding-left: 4px;
-  }
-  .nav-item{
-    display:flex; align-items:center; gap: 8px; padding: 8px 10px; font-size: 13.5px;
-    color: var(--ink-soft); text-decoration:none; border-radius: 3px; cursor:pointer;
-    border-left: 3px solid transparent; transition: background .12s, color .12s, border-color .12s;
-  }
-  .nav-item .idx{ font-family: var(--mono); font-size: 11px; color: #B3AF9E; width: 20px; }
-  .nav-item:hover{ background: var(--paper-deep); color: var(--ink); }
-  .nav-item.active{
-    background: #fffdf8; color: var(--ink); border-left-color: var(--brass);
-    font-weight: 600; box-shadow: var(--shadow);
-  }
+        /* ============ PORTAL SHELL ============ */
+        #portal {
+            display: none;
+        }
 
-  main{ padding: 36px 44px 100px; max-width: 900px; }
+        #portal.active {
+            display: block;
+        }
 
-  .crumb{ font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--ink-soft); text-transform: uppercase; margin-bottom: 14px; }
+        header.bar {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
 
-  .page{ display:none; }
-  .page.active{ display:block; animation: fadeIn .25s ease; }
-  @keyframes fadeIn{ from{opacity:0; transform: translateY(4px);} to{opacity:1; transform:none;} }
+        .bar-title {
+            font-family: var(--serif);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: .3px;
+        }
 
-  .page h1{ font-family: var(--serif); font-size: 32px; font-weight: 700; margin-bottom: 6px; display:flex; align-items:baseline; gap: 12px; }
-  .page h1 .num{ font-family: var(--mono); font-size: 15px; color: var(--brass); font-weight:500; }
+        .bar-title small {
+            display: block;
+            font-family: var(--mono);
+            font-weight: 400;
+            font-size: 10.5px;
+            letter-spacing: 2px;
+            color: #A9B6D6;
+            margin-top: 2px;
+        }
 
-  .page .dek{ color: var(--ink-soft); font-size: 15px; margin-bottom: 30px; max-width: 640px; line-height: 1.6; }
+        .bar-role {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--mono);
+            font-size: 12px;
+        }
 
-  .page h2{ font-family: var(--serif); font-size: 20px; font-weight: 600; margin: 34px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
-  .page h3{ font-family: var(--sans); font-size: 14.5px; font-weight: 600; margin: 22px 0 8px; color: var(--ink); }
-  .page p{ font-size: 14.5px; line-height: 1.75; margin-bottom: 12px; color: #2A3654; }
-  .page ul, .page ol{ margin: 10px 0 16px 22px; }
-  .page li{ font-size: 14.5px; line-height: 1.75; margin-bottom: 6px; color: #2A3654; }
-  .page strong{ color: var(--ink); }
-  code{ font-family: var(--mono); background: var(--paper-deep); padding: 1px 6px; border-radius: 3px; font-size: 13px; }
+        .role-pill {
+            background: var(--brass);
+            color: var(--ink);
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            letter-spacing: .5px;
+        }
 
-  .stamp-note{
-    border: 1.5px solid var(--ink); border-radius: 4px; padding: 14px 16px; margin: 18px 0;
-    font-size: 13.5px; line-height: 1.65; position:relative; background: #fffdf8;
-  }
-  .stamp-note .tag{ font-family: var(--mono); font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; display:block; margin-bottom: 6px; }
-  .stamp-note.info{ border-color: var(--ink-soft); }
-  .stamp-note.info .tag{ color: var(--ink-soft); }
-  .stamp-note.warn{ border-color: var(--brass); background: #FFF8EC; }
-  .stamp-note.warn .tag{ color: var(--brass); }
-  .stamp-note.good{ border-color: var(--green); background: var(--green-soft); }
-  .stamp-note.good .tag{ color: var(--green); }
-  .stamp-note.bad{ border-color: var(--red); background: var(--red-soft); }
-  .stamp-note.bad .tag{ color: var(--red); }
+        .role-name {
+            color: #C6CFE6;
+        }
 
-  table.ledger{ width:100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 13.5px; }
-  table.ledger th{ background: var(--ink); color: var(--paper); text-align:left; padding: 10px 14px; font-weight: 600; font-size: 12px; letter-spacing: .3px; }
-  table.ledger td{ padding: 10px 14px; border-bottom: 1px solid var(--rule); color: #2A3654; }
-  table.ledger tr:nth-child(even) td{ background: #FBFAF5; }
+        .change-role {
+            background: transparent;
+            border: 1px solid #4A5C86;
+            color: #C6CFE6;
+            font-family: var(--sans);
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: border-color .15s, color .15s;
+        }
 
-  .flow{ display:flex; flex-wrap:wrap; gap: 6px; align-items:center; margin: 16px 0 22px; font-family: var(--mono); font-size: 12px; }
-  .flow .step{ background: var(--paper-deep); border: 1px solid var(--rule); padding: 8px 12px; border-radius: 3px; color: var(--ink); }
-  .flow .arrow{ color: var(--brass); font-weight:700; }
+        .change-role:hover {
+            border-color: var(--brass);
+            color: var(--paper);
+        }
 
-  .qa{ margin-bottom: 20px; }
-  .qa .q{ font-weight:600; font-size: 14.5px; margin-bottom: 4px; color: var(--ink); }
-  .qa .q::before{ content: 'Q. '; color: var(--brass); font-family: var(--mono); }
-  .qa .a{ font-size: 14px; color: #2A3654; line-height:1.7; }
-  .qa .a::before{ content: 'A. '; color: var(--ink-soft); font-family: var(--mono); }
+        .layout {
+            display: grid;
+            grid-template-columns: 270px 1fr;
+            max-width: 1320px;
+            margin: 0 auto;
+        }
 
-  .empty-search{ padding: 60px 10px; text-align:center; color: var(--ink-soft); font-size: 14px; }
+        aside.nav {
+            border-right: 1px solid var(--rule);
+            padding: 22px 16px 40px;
+            position: sticky;
+            top: 65px;
+            align-self: start;
+            max-height: calc(100vh - 65px);
+            overflow-y: auto;
+        }
 
-  footer.foot{ border-top: 1px solid var(--rule); padding: 22px 44px; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); text-align:center; }
+        .search-wrap {
+            margin-bottom: 20px;
+        }
 
-  @media (max-width: 860px){
-    .layout{ grid-template-columns: 1fr; }
-    aside.nav{ position: static; max-height: none; border-right:none; border-bottom: 1px solid var(--rule); }
-    main{ padding: 26px 20px 80px; }
-  }
-</style>
+        .search-wrap input {
+            width: 100%;
+            border: 1px solid var(--rule);
+            background: #fffdf8;
+            padding: 9px 12px;
+            font-family: var(--sans);
+            font-size: 13px;
+            border-radius: 3px;
+            color: var(--ink);
+        }
+
+        .search-wrap input::placeholder {
+            color: #9AA3B8;
+        }
+
+        .nav-group {
+            margin-bottom: 22px;
+        }
+
+        .nav-group-label {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--brass);
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            font-size: 13.5px;
+            color: var(--ink-soft);
+            text-decoration: none;
+            border-radius: 3px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: background .12s, color .12s, border-color .12s;
+        }
+
+        .nav-item .idx {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: #B3AF9E;
+            width: 20px;
+        }
+
+        .nav-item:hover {
+            background: var(--paper-deep);
+            color: var(--ink);
+        }
+
+        .nav-item.active {
+            background: #fffdf8;
+            color: var(--ink);
+            border-left-color: var(--brass);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        main {
+            padding: 36px 44px 100px;
+            max-width: 900px;
+        }
+
+        .crumb {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn .25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .page h1 {
+            font-family: var(--serif);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .page h1 .num {
+            font-family: var(--mono);
+            font-size: 15px;
+            color: var(--brass);
+            font-weight: 500;
+        }
+
+        .page .dek {
+            color: var(--ink-soft);
+            font-size: 15px;
+            margin-bottom: 30px;
+            max-width: 640px;
+            line-height: 1.6;
+        }
+
+        .page h2 {
+            font-family: var(--serif);
+            font-size: 20px;
+            font-weight: 600;
+            margin: 34px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .page h3 {
+            font-family: var(--sans);
+            font-size: 14.5px;
+            font-weight: 600;
+            margin: 22px 0 8px;
+            color: var(--ink);
+        }
+
+        .page p {
+            font-size: 14.5px;
+            line-height: 1.75;
+            margin-bottom: 12px;
+            color: #2A3654;
+        }
+
+        .page ul, .page ol {
+            margin: 10px 0 16px 22px;
+        }
+
+        .page li {
+            font-size: 14.5px;
+            line-height: 1.75;
+            margin-bottom: 6px;
+            color: #2A3654;
+        }
+
+        .page strong {
+            color: var(--ink);
+        }
+
+        code {
+            font-family: var(--mono);
+            background: var(--paper-deep);
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .stamp-note {
+            border: 1.5px solid var(--ink);
+            border-radius: 4px;
+            padding: 14px 16px;
+            margin: 18px 0;
+            font-size: 13.5px;
+            line-height: 1.65;
+            position: relative;
+            background: #fffdf8;
+        }
+
+        .stamp-note .tag {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .stamp-note.info {
+            border-color: var(--ink-soft);
+        }
+
+        .stamp-note.info .tag {
+            color: var(--ink-soft);
+        }
+
+        .stamp-note.warn {
+            border-color: var(--brass);
+            background: #FFF8EC;
+        }
+
+        .stamp-note.warn .tag {
+            color: var(--brass);
+        }
+
+        .stamp-note.good {
+            border-color: var(--green);
+            background: var(--green-soft);
+        }
+
+        .stamp-note.good .tag {
+            color: var(--green);
+        }
+
+        .stamp-note.bad {
+            border-color: var(--red);
+            background: var(--red-soft);
+        }
+
+        .stamp-note.bad .tag {
+            color: var(--red);
+        }
+
+        table.ledger {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 24px;
+            font-size: 13.5px;
+        }
+
+        table.ledger th {
+            background: var(--ink);
+            color: var(--paper);
+            text-align: left;
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: .3px;
+        }
+
+        table.ledger td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--rule);
+            color: #2A3654;
+        }
+
+        table.ledger tr:nth-child(even) td {
+            background: #FBFAF5;
+        }
+
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            margin: 16px 0 22px;
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        .flow .step {
+            background: var(--paper-deep);
+            border: 1px solid var(--rule);
+            padding: 8px 12px;
+            border-radius: 3px;
+            color: var(--ink);
+        }
+
+        .flow .arrow {
+            color: var(--brass);
+            font-weight: 700;
+        }
+
+        .qa {
+            margin-bottom: 20px;
+        }
+
+        .qa .q {
+            font-weight: 600;
+            font-size: 14.5px;
+            margin-bottom: 4px;
+            color: var(--ink);
+        }
+
+        .qa .q::before {
+            content: 'Q. ';
+            color: var(--brass);
+            font-family: var(--mono);
+        }
+
+        .qa .a {
+            font-size: 14px;
+            color: #2A3654;
+            line-height: 1.7;
+        }
+
+        .qa .a::before {
+            content: 'A. ';
+            color: var(--ink-soft);
+            font-family: var(--mono);
+        }
+
+        .empty-search {
+            padding: 60px 10px;
+            text-align: center;
+            color: var(--ink-soft);
+            font-size: 14px;
+        }
+
+        footer.foot {
+            border-top: 1px solid var(--rule);
+            padding: 22px 44px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--ink-soft);
+            text-align: center;
+        }
+
+        @media (max-width: 860px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            aside.nav {
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--rule);
+            }
+
+            main {
+                padding: 26px 20px 80px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -286,552 +647,1477 @@
      asks the server "who am I really?" via /manual/my_role, which reads
      employee_role off the logged-in user's hr.employee record. -->
 <div id="gate">
-  <div class="punch-clock" aria-hidden="true"></div>
-  <div class="gate-eyebrow">SMS Enterprises · Internal Field Manual</div>
-  <h1 class="gate-title">Checking your register…</h1>
-  <p class="gate-sub" id="gateSub">Reading your role from your ERP account. This determines which sections of the manual you'll see — nothing to select here.</p>
-  <div class="gate-error" id="gateError">
-    Couldn't verify your access. Make sure you're logged into the ERP, then
-    <a href="/manual" onclick="event.preventDefault(); location.reload();">try again</a>.
-  </div>
+    <div class="punch-clock" aria-hidden="true"></div>
+    <div class="gate-eyebrow">SMS Enterprises · Internal Field Manual</div>
+    <h1 class="gate-title">Checking your register…</h1>
+    <p class="gate-sub" id="gateSub">Reading your role from your ERP account. This determines which sections of the
+        manual you'll see — nothing to select here.</p>
+    <div class="gate-error" id="gateError">
+        Couldn't verify your access. Make sure you're logged into the ERP, then
+        <a href="/manual" onclick="event.preventDefault(); location.reload();">try again</a>.
+    </div>
 </div>
 
 <!-- ============ PORTAL ============ -->
 <div id="portal">
-  <header class="bar">
-    <div class="bar-title">SMS Enterprises ERP Manual
-      <small>ODOO 19 · CUSTOM ADDON SUITE</small>
+    <header class="bar">
+        <div class="bar-title">SMS Enterprises ERP Manual
+            <small>ODOO 19 · CUSTOM ADDON SUITE</small>
+        </div>
+        <div class="bar-role">
+            <span class="role-name" id="userName"></span>
+            <span class="role-pill" id="rolePill">EMPLOYEE</span>
+            <button class="change-role" onclick="refreshAccess()">⟲ Refresh My Access</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="nav">
+            <div class="search-wrap">
+                <input type="text" id="searchBox" placeholder="Search this manual…" oninput="doSearch()">
+            </div>
+
+            <div class="nav-group" data-role="employee,manager,hr">
+                <div class="nav-group-label">Everyone</div>
+                <div class="nav-item" data-target="overview" onclick="goTo('overview', this)"><span
+                        class="idx">00</span> Overview
+                </div>
+            </div>
+
+            <div class="nav-group" data-role="employee,manager,hr">
+                <div class="nav-group-label">Your Desk</div>
+                <div class="nav-item" data-target="attendance" onclick="goTo('attendance', this)"><span
+                        class="idx">01</span> Attendance & Check-In
+                </div>
+                <div class="nav-item" data-target="leave" onclick="goTo('leave', this)"><span class="idx">02</span>
+                    Leave & Half-Days
+                </div>
+                <div class="nav-item" data-target="permission" onclick="goTo('permission', this)"><span
+                        class="idx">03</span> Permission Buffer
+                </div>
+                <div class="nav-item" data-target="expenses" onclick="goTo('expenses', this)"><span
+                        class="idx">04</span> Expenses
+                </div>
+                <div class="nav-item" data-target="workreports" onclick="goTo('workreports', this)"><span
+                        class="idx">05</span> Work Reports
+                </div>
+                <div class="nav-item" data-target="documents" onclick="goTo('documents', this)"><span
+                        class="idx">06</span> Documents & Payslip
+                </div>
+                <div class="nav-item" data-target="projects" onclick="goTo('projects', this)"><span
+                        class="idx">06B</span> Projects, Teams & Tasks
+                </div>
+            </div>
+
+            <div class="nav-group" data-role="manager,hr">
+                <div class="nav-group-label">Approvals</div>
+                <div class="nav-item" data-target="mgr-leave" onclick="goTo('mgr-leave', this)"><span
+                        class="idx">07</span> Approving Leave
+                </div>
+                <div class="nav-item" data-target="mgr-expense" onclick="goTo('mgr-expense', this)"><span
+                        class="idx">08</span> Approving Expenses
+                </div>
+                <div class="nav-item" data-target="mgr-project" onclick="goTo('mgr-project', this)"><span
+                        class="idx">09</span> Projects & Task Assignment
+                </div>
+            </div>
+
+            <div class="nav-group" data-role="manager,hr">
+                <div class="nav-group-label">HR & Policy</div>
+                <div class="nav-item" data-target="hr-leavepolicy" onclick="goTo('hr-leavepolicy', this)"><span
+                        class="idx">10</span> Leave Policy & Allocations
+                </div>
+                <div class="nav-item" data-target="hr-payroll" onclick="goTo('hr-payroll', this)"><span
+                        class="idx">11</span> Payroll Processing
+                </div>
+                <div class="nav-item" data-target="hr-attendance" onclick="goTo('hr-attendance', this)"><span
+                        class="idx">12</span> Attendance Monitoring
+                </div>
+                <div class="nav-item" data-target="hr-holidays" onclick="goTo('hr-holidays', this)"><span
+                        class="idx">13</span> Company Holidays
+                </div>
+                <div class="nav-item" data-target="hr-documents" onclick="goTo('hr-documents', this)"><span class="idx">14</span>
+                    Employee Records
+                </div>
+                <div class="nav-item" data-target="hr-crm" onclick="goTo('hr-crm', this)"><span class="idx">14</span>
+                    CRM
+                </div>
+            </div>
+
+            <div class="nav-group" data-role="employee,manager,hr">
+                <div class="nav-group-label">Reference</div>
+                <div class="nav-item" data-target="faq" onclick="goTo('faq', this)"><span class="idx">15</span> FAQ
+                </div>
+            </div>
+        </aside>
+
+        <main id="mainContent">
+
+            <!-- 00 OVERVIEW -->
+            <section class="page" id="page-overview" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Overview</div>
+                <h1><span class="num">00</span> Overview</h1>
+                <p class="dek">The SMS Enterprises ERP runs on ODOO 19, extended with a custom addon suite covering
+                    attendance, leave, payroll, projects, expenses, and documents.</p>
+
+                <h2>What the system covers</h2>
+                <ul>
+                    <li><strong>Attendance</strong> — check-in/check-out, late detection, half-day leave logic, company
+                        holidays.
+                    </li>
+                    <li><strong>Leave</strong> — Casual, Earned, Medical, and Permission leave, with anniversary-based
+                        allocation and carry-forward.
+                    </li>
+                    <li><strong>Payroll</strong> — monthly salary computation, driven by your attendance and leave
+                        register.
+                    </li>
+                    <li><strong>Projects</strong> — team-based tasks, kanban boards, cross-team assignment approval.
+                    </li>
+                    <li><strong>Expenses</strong> — submission, approval, and Excel export for records.</li>
+                    <li><strong>Documents</strong> — employee document upload with inline preview.</li>
+                </ul>
+
+                <div class="stamp-note info">
+                    <span class="tag">How access works here</span>
+                    The sections you see are read directly from your employee role in the ERP — the same role that
+                    already controls your permissions elsewhere in the system. There's nothing to select; it's not
+                    something this page can get wrong or something you can override from the browser.
+                </div>
+            </section>
+
+            <!-- 01 ATTENDANCE -->
+            <section class="page" id="page-attendance" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">01</span> Attendance & Check-In</h1>
+                <p class="dek">One check-in, one check-out, once a day. The system tracks lateness automatically and
+                    talks to your leave balance behind the scenes.</p>
+
+                <h2>How to check in or out</h2>
+                <ol>
+                    <li>Go to <strong>Attendances → Check In / Check Out</strong> (or use the button on your Home
+                        dashboard).
+                    </li>
+                    <li>A popup shows your current status. If you're not checked in, click <strong>Check In</strong>.
+                    </li>
+                    <li>To check out later, open the same menu again — the button now says <strong>Check Out</strong>.
+                        Click it.
+                    </li>
+                </ol>
+                <p>You can only complete <strong>one full check-in/check-out cycle per day</strong>. Once you've checked
+                    out, the button won't let you check in again until the next day.</p>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Late threshold — 9:30 AM</span>
+                    Checking in after 9:30 AM marks the day as <strong>Late</strong> and starts drawing from your
+                    monthly Permission buffer (see Section 03).
+                    On a day you have an <strong>approved AM half-day leave</strong>, the threshold shifts to the
+                    company's afternoon session start time instead (currently 2:00 PM) — you're not "late" until after
+                    that.
+                </div>
+
+                <h3>What happens if you check in during your own AM leave</h3>
+                <p>If you have an approved AM half-day leave for today and you still check in during the morning, the
+                    system doesn't do anything automatically — your leave stays approved, and no late minutes are
+                    calculated for that check-in, since the late threshold is still shifted to the afternoon start
+                    time.</p>
+                <p>If this needs correcting (for example, you actually worked the full day and shouldn't have taken the
+                    AM leave), <strong>HR must manually refuse the AM leave record</strong> from the Time Off screen.
+                    Once HR refuses it, the system recalculates your lateness against the normal 9:30 AM threshold for
+                    that day.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">Employees</span>
+                    If your plans changed and you ended up working the morning after all, let HR know so they can refuse
+                    the leave on your behalf — it won't happen by itself.
+                </div>
+
+                <h3>If you forget to check out</h3>
+                <p>The system auto-closes any open session at <strong>7:00 PM</strong> your local time. This shows on
+                    your record as <strong>Auto Checkout</strong>. HR and Managers get notified automatically whenever
+                    this happens to you.</p>
+
+                <h3>Holidays and Saturdays</h3>
+                <ul>
+                    <li>On a declared company holiday, check-in is blocked with a message telling you why.</li>
+                    <li>The <strong>2nd and 4th Saturday</strong> of every month are automatically treated as days off —
+                        no check-in needed, nothing to configure.
+                    </li>
+                    <li>If HR has marked a specific Saturday as a <strong>Compensatory Working Day</strong> (see Section
+                        13), check-in works normally that day even though it's a Saturday.
+                    </li>
+                </ul>
+
+                <h2>Viewing your own records</h2>
+                <p>Go to <strong>Attendances → My Attendance → My Records</strong> to see your check-in/check-out
+                    history, hours worked, and which days were flagged late or auto-closed.</p>
+            </section>
+
+            <!-- 02 LEAVE -->
+            <section class="page" id="page-leave" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">02</span> Leave & Half-Days</h1>
+                <p class="dek">Three leave types, an anniversary-based year, and half-days split cleanly into AM and
+                    PM.</p>
+
+                <h2>Leave types & entitlement</h2>
+                <table class="ledger">
+                    <tr>
+                        <th>Type</th>
+                        <th>Annual Quota</th>
+                        <th>Carry-Forward</th>
+                    </tr>
+                    <tr>
+                        <td>Casual Leave (CL)</td>
+                        <td>12 days</td>
+                        <td>Up to 50% (max 6 days)</td>
+                    </tr>
+                    <tr>
+                        <td>Earned Leave (EL)</td>
+                        <td>3 days</td>
+                        <td>Full carry-forward</td>
+                    </tr>
+                    <tr>
+                        <td>Medical Leave (ML)</td>
+                        <td>3 days</td>
+                        <td>Full carry-forward</td>
+                    </tr>
+                </table>
+
+                <p>Your leave year runs from your <strong>joining anniversary</strong>, not the calendar year. Each year
+                    on that date, the system automatically closes your previous cycle and opens a new one — unused leave
+                    carries forward per the table above, and your fresh quota is added on top.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">Days only — no hourly requests</span>
+                    Casual, Earned, and Medical Leave are all requested in full or half days. If you need to request
+                    time off in hours instead, that's a different leave type — see Section 03, Permission Buffer.
+                </div>
+
+                <h2>How to request leave</h2>
+                <ol>
+                    <li>Go to <strong>Time Off → New</strong>.</li>
+                    <li>Choose the <strong>Time Off Type</strong> — Casual Leave, Earned Leave, or Medical Leave. The
+                        dropdown shows your remaining balance for each (e.g. "Earned Leave (3 remaining out of 3
+                        days)").
+                    </li>
+                    <li>Set the <strong>Date</strong> range. For a single day, set the start and end date to the same
+                        day.
+                    </li>
+                    <li>Under <strong>Day Period</strong>, you'll see two fields: <strong>Morning</strong> and <strong>Afternoon</strong>.
+                        <ul>
+                            <li>To take the <strong>full day</strong> off, leave both as they are (the system defaults
+                                to covering the whole day).
+                            </li>
+                            <li>To take a <strong>half day</strong>, select only <strong>Morning</strong> or only
+                                <strong>Afternoon</strong> — picking just one half is what makes it a half-day request
+                                instead of a full day.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Optionally attach a file (e.g. a medical certificate) using <strong>Attach File</strong>.</li>
+                    <li>Click <strong>Submit Request</strong>. It goes to HR for approval — you'll get a notification
+                        once it's approved or refused.
+                    </li>
+                </ol>
+
+                <div class="stamp-note warn">
+                    <span class="tag">No backdating</span>
+                    You can't submit a leave request for a date that has already passed. If you need a past date
+                    recorded (e.g. you were out sick and didn't file it in time), ask HR to enter it on your behalf —
+                    only HR can backdate a leave request.
+                </div>
+
+                <div class="stamp-note bad">
+                    <span class="tag">All-holiday requests are blocked</span>
+                    If every single day in your requested range is already a company holiday, the system won't let you
+                    submit the request at all — there's nothing to take leave from. Pick working days only.
+                </div>
+
+                <h2>Half-day mechanics</h2>
+                <p>A half-day leave (Morning only, or Afternoon only) is recorded as its own separate entry — it is not
+                    a fraction of a full-day record. This means:</p>
+                <ul>
+                    <li>You can mix leave types on the same day — for example, submit Casual Leave for the Morning and
+                        Earned Leave for the Afternoon as two separate requests.
+                    </li>
+                    <li>Each half can be approved or refused independently by HR — approving your Morning half doesn't
+                        automatically approve the Afternoon half, and vice versa.
+                    </li>
+                </ul>
+
+                <div class="stamp-note info">
+                    <span class="tag">Checking in during an approved Morning leave</span>
+                    If you have an approved Morning half-day leave but check in that morning anyway, nothing happens
+                    automatically — your leave stays approved and you won't be marked late (see Section 01). If your
+                    leave should be corrected, ask HR to manually refuse it.
+                </div>
+
+                <h2>Checking your balance</h2>
+                <p>Go to <strong>Time Off → My Time Off</strong> to see your current balance for each leave type, and
+                    your request history.</p>
+
+                <h2>Allocation requests (asking for more than your quota)</h2>
+                <p>If you need more days than your current allocation allows, you can submit an allocation request from
+                    <strong>Time Off → My Allocations → New</strong>. This does <strong>not</strong> get approved
+                    automatically — every allocation request, for every leave type, requires HR sign-off before the
+                    extra days are added to your balance.</p>
+            </section>
+
+            <!-- 03 PERMISSION -->
+            <section class="page" id="page-permission" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">03</span> Permission Buffer</h1>
+                <p class="dek">A monthly 4-hour cushion for late arrivals — used automatically, or claimed proactively.
+                    Unlike Casual/Earned/Medical Leave, Permission is requested in <strong>hours</strong>, not days.</p>
+
+                <h2>How it works</h2>
+                <p>Every employee gets a flat <strong>4 hours (240 minutes)</strong> of Permission leave on the 1st of
+                    every month. It does not carry forward, and there's no proration — everyone gets the full 240
+                    minutes regardless of when in the month they joined or how much they used last month.</p>
+
+                <div class="flow">
+                    <div class="step">Check in after 9:30 AM</div>
+                    <span class="arrow">→</span>
+                    <div class="step">Late minutes calculated</div>
+                    <span class="arrow">→</span>
+                    <div class="step">Minutes drawn from Permission pool</div>
+                    <span class="arrow">→</span>
+                    <div class="step">You're notified</div>
+                </div>
+
+                <h2>Requesting Permission time proactively</h2>
+                <p>You can draw on the same pool ahead of time — for a dentist appointment, say — instead of waiting for
+                    a late check-in to use it up.</p>
+                <ol>
+                    <li>Go to <strong>Time Off → New</strong>.</li>
+                    <li>Set <strong>Time Off Type</strong> to <strong>Permission</strong>.</li>
+                    <li>Enter the date and the number of hours you need.</li>
+                    <li>Submit — like other leave types, this goes to HR for approval.</li>
+                </ol>
+
+                <div class="stamp-note info">
+                    <span class="tag">Manual requests are used first</span>
+                    If you've already submitted and been approved for Permission hours on a given day, those hours are
+                    subtracted from your late-arrival minutes <strong>before</strong> the automatic deduction kicks in.
+                    In other words, a manual request that morning reduces (or fully covers) any lateness deduction for
+                    that same day, instead of stacking on top of it.
+                </div>
+
+                <h2>What happens when you're late</h2>
+                <p>If you check in after 9:30 AM (or after the shifted threshold on a half-day-leave day — see Section
+                    01), the system automatically:</p>
+                <ol>
+                    <li>Calculates your late minutes.</li>
+                    <li>Subtracts any manual Permission hours you already have approved for that day.</li>
+                    <li>Deducts the remaining late minutes from your monthly Permission balance.</li>
+                    <li>Sends you a notification confirming how many minutes were deducted and what your remaining
+                        balance is.
+                    </li>
+                </ol>
+                <p>You'll get a notification <strong>every time</strong> a late-arrival deduction happens — not just
+                    when your balance runs low.</p>
+
+                <div class="stamp-note good">
+                    <span class="tag">This doesn't double-count</span>
+                    If your manual Permission request already covers your actual arrival time, no additional minutes are
+                    deducted — the system subtracts your approved manual hours from your late minutes first, and only
+                    deducts anything extra if you arrive later than what you'd requested.
+                </div>
+
+                <div class="stamp-note bad">
+                    <span class="tag">If the pool runs out</span>
+                    Once your 4-hour buffer is exhausted for the month, further late minutes are <strong>not</strong>
+                    deducted from Permission — instead, they're recorded as overflow and deducted directly from your
+                    salary in that month's payroll (see Section 11).
+                </div>
+
+                <p>On top of the per-deduction notification, you'll get an extra warning when your remaining balance
+                    drops to <strong>30 minutes or below</strong>, and again when it hits <strong>zero</strong>.</p>
+
+                <h2>Checking your balance</h2>
+                <p>Go to <strong>Time Off → My Time Off</strong> and look for Permission in your list of leave types to
+                    see your remaining minutes for the current month.</p>
+            </section>
+
+            <!-- 04 EXPENSES -->
+            <section class="page" id="page-expenses" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">04</span> Expenses</h1>
+                <p class="dek">Submit, attach a receipt, and track approval status.</p>
+
+                <h2>How to submit an expense</h2>
+                <ol>
+                    <li>Go to <strong>Expenses → My Expenses</strong> and click <strong>New</strong>.</li>
+                    <li>Fill in:
+                        <ul>
+                            <li><strong>Category</strong> — e.g. Travel, Stationery, Office Snacks, Utilities,
+                                Software/Subscriptions, or Miscellaneous.
+                            </li>
+                            <li><strong>Amount</strong>.</li>
+                            <li><strong>Related Project</strong> — optional, only if the expense should be tied to a
+                                specific project.
+                            </li>
+                            <li><strong>Expense Date</strong>.</li>
+                            <li><strong>Description</strong> — required, explain what the expense was for.</li>
+                        </ul>
+                    </li>
+                    <li>Under <strong>Attachments</strong>, attach your bill or invoice proof.</li>
+                    <li>Click <strong>Submit for Approval</strong>.</li>
+                </ol>
+
+                <div class="stamp-note info">
+                    <span class="tag">Draft vs Submitted</span>
+                    While your expense is in <strong>Draft</strong>, you can still edit every field. Once you click
+                    Submit for Approval, it moves to <strong>Submitted</strong> and becomes read-only until a decision
+                    is made.
+                </div>
+
+                <h2>What happens after you submit</h2>
+                <p>Your submission notifies HR and Managers. One of them will either:</p>
+                <ul>
+                    <li><strong>Approve it</strong> — you get notified that it's approved. Reimbursement is handled
+                        separately by HR outside the system.
+                    </li>
+                    <li><strong>Reject it</strong> — you get notified with a written reason. The expense moves to
+                        <strong>Rejected</strong> status, showing that reason on the form.
+                    </li>
+                </ul>
+
+                <h3>If your expense is rejected</h3>
+                <ol>
+                    <li>Open the rejected expense from <strong>Expenses → My Expenses</strong>.</li>
+                    <li>Read the rejection reason shown on the form.</li>
+                    <li>Click <strong>Reset to Draft</strong> — this is available only on rejected expenses.</li>
+                    <li>Make your corrections and submit again.</li>
+                </ol>
+
+                <h2>Tracking your expenses</h2>
+                <p>The <strong>My Expenses</strong> list shows all your submissions grouped by status (Draft, Submitted,
+                    Approved, Rejected), with the amount, category, and attachment count visible at a glance.</p>
+
+                <h3>Excel export</h3>
+                <p>From the Expenses list view, use the export option to download a summary of your own expense history
+                    as an Excel file for your own records.</p>
+            </section>
+
+            <!-- 05 WORK REPORTS -->
+            <section class="page" id="page-workreports" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">05</span> Work Reports</h1>
+                <p class="dek">A short daily record of what you worked on — submitted to your Manager, no approval step,
+                    just a submit/reset workflow.</p>
+
+                <h2>How to file a report</h2>
+                <ol>
+                    <li>Go to <strong>Work Reports → My Reports</strong> and click <strong>New</strong>.</li>
+                    <li>Fill in:
+                        <ul>
+                            <li><strong>Date</strong> — defaults to today.</li>
+                            <li><strong>Project</strong> — optional, link it if the work relates to a specific project.
+                            </li>
+                            <li><strong>Hours Spent</strong>.</li>
+                            <li><strong>Work Done</strong> — a description of what you accomplished.</li>
+                        </ul>
+                    </li>
+                    <li>Under <strong>Attachments</strong>, attach any relevant files — they open with a
+                        <strong>Preview</strong> button that shows the file in a new tab, so there's no need to download
+                        to view them.
+                    </li>
+                    <li>Click <strong>Submit</strong>.</li>
+                </ol>
+
+                <div class="stamp-note info">
+                    <span class="tag">There's no approval step</span>
+                    Unlike Leave or Expenses, a Work Report doesn't require anyone to approve or reject it. Submitting
+                    simply notifies everyone in the Work Report Manager group that your report is in — it's a record for
+                    visibility, not a request awaiting a decision.
+                </div>
+
+                <h2>Draft vs Submitted</h2>
+                <p>While a report is in <strong>Draft</strong>, you can freely edit it. Once you click
+                    <strong>Submit</strong>, it moves to <strong>Submitted</strong> and becomes read-only for you.</p>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Only a Manager can reset a submitted report to Draft</span>
+                    If you need to correct a report after submitting it, you can't do this yourself — ask your Manager
+                    to click <strong>Reset to Draft</strong> on the record. Once it's back in Draft, you can edit and
+                    resubmit it.
+                </div>
+
+                <h2>Viewing your reports</h2>
+                <p>Go to <strong>Work Reports → My Reports</strong> to see your full history, grouped by status, with
+                    the date, project, hours, and state visible in the list.</p>
+
+                <div data-role="manager,hr">
+                    <h2>For Managers &amp; HR — reviewing team reports</h2>
+                    <p>Go to <strong>Work Reports → All Reports</strong> to see every submitted report across the team.
+                        You'll also get an inbox notification each time an employee submits one. If an employee needs to
+                        correct a submitted report, open it and click <strong>Reset to Draft</strong> — this unlocks it
+                        for
+                        them to edit and resubmit.</p>
+                </div>
+            </section>
+
+            <!-- 06 DOCUMENTS -->
+            <section class="page" id="page-documents" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">06</span> Documents & Payslip</h1>
+                <p class="dek">Your payslip and how HR keeps your personal documents on file.</p>
+
+                <h2>Your documents</h2>
+                <div class="stamp-note info">
+                    <span class="tag">Employee document uploads are handled by HR</span>
+                    You don't upload or manage your own ID proofs, certificates, or contracts directly. If you need to
+                    submit a document (ID proof, certificate, offer letter, etc.), hand it to HR — they'll upload it to
+                    your employee record. You won't see a Documents menu of your own for this.
+                </div>
+
+                <h2>Viewing your payslip</h2>
+                <ol>
+                    <li>Go to <strong>Employees → My Payslips</strong>.</li>
+                    <li>You'll see a list of your payslips grouped by status.</li>
+                    <li>Open any payslip to see the breakdown: earnings, deductions (including any Permission Overflow
+                        or Absent Day deductions), and net pay.
+                    </li>
+                    <li>Use the <strong>Print Payslip</strong> button on the payslip form to generate a PDF copy.</li>
+                </ol>
+                <p>Your payslip reflects your attendance, leave, and any Permission overflow deductions for that month
+                    once HR has run and confirmed the monthly payroll (see Section 11).</p>
+            </section>
+
+            <!-- 06B PROJECTS (EMPLOYEE) -->
+            <section class="page" id="page-projects" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Your Desk</div>
+                <h1><span class="num">06B</span> Projects, Teams & Tasks</h1>
+                <p class="dek">How teams work, how to create and progress a task, and how timesheets and cross-team
+                    assignment actually behave.</p>
+
+                <h2>What a "Team" is</h2>
+                <p>A <strong>Team</strong> groups employees together under a <strong>Team Lead</strong>. Every project
+                    is tied to a team, and most task visibility is scoped by team membership.</p>
+                <ul>
+                    <li>You can see a project or task if: it belongs to your team, it has no team assigned at all, you
+                        created it, you're assigned to it, or you assigned it to someone else.
+                    </li>
+                    <li>You <strong>cannot</strong> see tasks or projects belonging to other teams, unless you're a Team
+                        Lead, Manager, or HR.
+                    </li>
+                </ul>
+                <p>To see which team(s) you belong to, open your own profile — HR/Manager profiles show a
+                    <strong>Teams</strong> smart button; you can also ask HR if you're unsure.</p>
+
+                <h2>How to create a task</h2>
+                <ol>
+                    <li>Go to <strong>Tasks → My Tasks</strong> (or open a project and add a task from its kanban
+                        board).
+                    </li>
+                    <li>Click <strong>New</strong> — this always opens the full task form, not a quick-create card.</li>
+                    <li>Fill in the task name, select the <strong>Project</strong> (this auto-fills the Team if the
+                        project has one), and set <strong>Assigned To</strong>.
+                    </li>
+                    <li>Save.</li>
+                </ol>
+
+                <div class="stamp-note info">
+                    <span class="tag">Only the creator can fully edit a task</span>
+                    If you didn't create a task, you can't edit most of its fields — even if it's assigned to you.
+                    You'll see a read-only banner at the top of the form. What you <strong>can</strong> still do on a
+                    task assigned to you: change its <strong>state</strong> (see below) and log
+                    <strong>timesheet</strong> entries. Managers and HR can edit any task regardless of who
+                    created it.
+                </div>
+
+                <h2>Task states — how to progress a task</h2>
+                <p>Every task moves through a fixed sequence: <strong>Draft → Assigned → In Progress → Completed →
+                    Verified → Closed</strong>. Only the employee(s) a task is assigned to can move it forward
+                    (Managers, Team Leads, and HR can do this for any task):</p>
+                <ul>
+                    <li><strong>Start</strong> — moves Assigned → In Progress.</li>
+                    <li><strong>Mark Complete</strong> — moves In Progress → Completed.</li>
+                    <li><strong>Verify</strong> — moves Completed → Verified.</li>
+                    <li><strong>Close</strong> — moves Verified → Closed (this is the final state).</li>
+                </ul>
+                <p>These buttons appear on the task form's header, and only the button relevant to the task's current
+                    state is shown.</p>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Only a Manager can reset a task to Draft</span>
+                    If a closed or in-progress task needs to be reopened from scratch, that's a Manager-only action —
+                    ask your Manager.
+                </div>
+
+                <h2>Assigning a task to someone — and what happens across teams</h2>
+                <p>When you add someone to a task's <strong>Assigned To</strong> field:</p>
+                <ul>
+                    <li>If that person is on the <strong>same team</strong> as the task, they're assigned immediately —
+                        no approval needed.
+                    </li>
+                    <li>If that person is on a <strong>different team</strong>, the system doesn't assign them right
+                        away. Instead, it creates a <strong>cross-team assignment request</strong> and sends it to
+                        Managers and HR for approval. The task stays visible to that person as "pending" until the
+                        request is decided.
+                    </li>
+                    <li>Managers can assign across teams freely — the approval step doesn't apply to them.</li>
+                </ul>
+
+                <h3>Tracking your assignment requests</h3>
+                <p>Go to <strong>Assignment Requests → My Requests</strong> to see anything you've requested and its
+                    status (Pending, Approved, Rejected). You'll be notified either way once a Manager or HR makes a
+                    decision.</p>
+
+                <h2>Logging timesheets</h2>
+                <ol>
+                    <li>Open the task you worked on.</li>
+                    <li>Go to the <strong>Timesheets</strong> tab and add a line: date, hours, a short description, and
+                        — if relevant — the <strong>Software Used</strong> field, a free-text note on what
+                        tool/application you used.
+                    </li>
+                    <li>Save.</li>
+                </ol>
+
+                <div class="stamp-note info">
+                    <span class="tag">You can see everyone's timesheet entries, but only edit your own</span>
+                    Every employee can view all timesheet entries across the whole company (useful for coordinating on
+                    shared tasks), but you can only create, edit, or delete <strong>your own</strong> entries. Rows
+                    belonging to someone else appear read-only. HR and Managers can edit anyone's entries.
+                </div>
+
+                <h2>Task stages (kanban columns)</h2>
+                <p>Task stages (e.g. Requirement, Development, Testing, Done) are a shared library managed by
+                    HR/Managers — you can't create a brand-new stage on the fly from a project's kanban board. If you
+                    type a stage name that already exists in the library while adding a column, it links that existing
+                    stage to your project. If it doesn't exist yet, ask a Manager or HR to add it under <strong>Configuration
+                        → Task Stages</strong>.</p>
+
+                <h2>Team Lead — what's different</h2>
+                <p>If you're set as the <strong>Team Lead</strong> of a team, you get some extra visibility and rights
+                    your teammates don't have:</p>
+                <ul>
+                    <li>You can submit a <strong>Project Completion Request</strong> for your team's project (see below)
+                        — regular team members cannot.
+                    </li>
+                    <li>You still cannot approve cross-team assignment requests — that stays Manager/HR only.</li>
+                </ul>
+
+                <h2>Requesting project completion</h2>
+                <p>When a project is fully done, it needs to be formally marked complete and locked. This can only be
+                    requested by the project's <strong>Team Lead</strong>, an <strong>HR officer</strong>, or a <strong>Manager</strong>
+                    — not by regular team members.</p>
+                <ol>
+                    <li>Open the project and click <strong>Request Completion</strong>.</li>
+                    <li>Confirm the prompt. This creates a completion request and notifies Managers.</li>
+                    <li>Track it under <strong>Completion Requests → My Completion Requests</strong>.</li>
+                </ol>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Only a Manager approves — not HR</span>
+                    Unlike most approvals in this system, project completion is decided by <strong>Managers
+                    only</strong>. Once approved, the project moves to its Done stage and is <strong>locked</strong> —
+                    after that, only a Manager can edit the project or its tasks, until a Manager clicks
+                    <strong>Reopen</strong>.
+                </div>
+            </section>
+
+            <!-- 07 MGR LEAVE -->
+            <section class="page" id="page-mgr-leave" data-role="manager,hr">
+                <div class="crumb">Manual / Approvals</div>
+                <h1><span class="num">07</span> Approving Leave</h1>
+                <p class="dek">Every leave and allocation request — Casual, Earned, Medical, and Permission — routes to
+                    HR for a decision.</p>
+
+                <h2>How to approve or refuse a leave request</h2>
+                <ol>
+                    <li>Go to <strong>Time Off → Management → Time Off</strong>.</li>
+                    <li>Open the request you want to review.</li>
+                    <li>Check the dates, leave type, and any attached document (e.g. a medical certificate).</li>
+                    <li>Click <strong>Approve</strong> or <strong>Refuse</strong>.</li>
+                </ol>
+                <p>The employee is notified automatically either way — you don't need to message them separately.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">Half-days approve independently</span>
+                    A Morning half-day and an Afternoon half-day on the same date are two separate records. Approving
+                    one does not approve the other — check and decide each one on its own.
+                </div>
+
+                <h2>What to check before approving</h2>
+                <ul>
+                    <li>Whether the request overlaps a company holiday — the system already blocks requests where
+                        <strong>every</strong> requested day is a holiday, but partial overlaps still go through, so
+                        check the actual working days involved.
+                    </li>
+                    <li>Whether a half-day request makes sense against that day's workload.</li>
+                    <li>Medical Leave requests should ideally have a certificate attached for anything beyond a single
+                        day.
+                    </li>
+                </ul>
+
+                <h2>Approving allocation requests</h2>
+                <p>If an employee requests more days than their current balance allows (via <strong>Time Off → My
+                    Allocations</strong> on their end), it shows up for you the same way:</p>
+                <ol>
+                    <li>Go to <strong>Time Off → Management → Allocations</strong>.</li>
+                    <li>Open the pending allocation request.</li>
+                    <li>Click <strong>Approve</strong> or <strong>Refuse</strong>.</li>
+                </ol>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Every allocation needs HR approval — including your own</span>
+                    All three leave types (Casual, Earned, Medical) are configured so that no allocation is added
+                    automatically, even for the employee who requested it. Every single allocation request must be
+                    explicitly approved by HR before those days count toward the employee's balance.
+                </div>
+
+                <h2>Correcting a leave after the fact</h2>
+                <p>If an employee has an approved Morning half-day leave but checked in that day anyway, the system
+                    doesn't auto-correct anything (see Section 01). You need to manually refuse the leave from <strong>Time
+                        Off → Approvals</strong> — this automatically triggers a lateness recalculation for that day.
+                    See Section 12 for the full walkthrough.</p>
+            </section>
+
+            <!-- 08 MGR EXPENSE -->
+            <section class="page" id="page-mgr-expense" data-role="manager,hr">
+                <div class="crumb">Manual / Approvals</div>
+                <h1><span class="num">08</span> Approving Expenses</h1>
+                <p class="dek">Review team expense claims before they're settled outside the system.</p>
+
+                <h2>How to approve an expense</h2>
+                <ol>
+                    <li>Go to <strong>Expenses → All Expenses</strong>.</li>
+                    <li>Open a submitted expense.</li>
+                    <li>Check the amount, category, description, and attached receipt/invoice.</li>
+                    <li>Click <strong>Approve</strong>.</li>
+                </ol>
+                <p>The employee is notified automatically that their expense was approved.</p>
+
+                <h2>How to reject an expense</h2>
+                <ol>
+                    <li>Open the submitted expense.</li>
+                    <li>Click <strong>Reject</strong> — this opens a small wizard.</li>
+                    <li>Enter a <strong>Rejection Reason</strong>. This field is mandatory; you can't reject without
+                        one.
+                    </li>
+                    <li>Click <strong>Confirm Rejection</strong>.</li>
+                </ol>
+                <p>The employee is notified with your reason, and the expense moves to Rejected status. They can then
+                    use <strong>Reset to Draft</strong> on their end to correct and resubmit it — you don't need to do
+                    anything further at that point.</p>
+
+                <h2>Filtering the queue</h2>
+                <p><strong>Expenses → All Expenses</strong> defaults to showing Submitted (pending) expenses first, so
+                    you can work through the approval queue without extra filtering. Use the search filters (Draft /
+                    Submitted / Approved / Rejected) to look at other states.</p>
+
+                <h2>Managing expense categories</h2>
+                <p>Go to <strong>Expenses → Configuration → Expense Categories</strong> to add, rename, or archive
+                    categories (Travel, Stationery, Office Snacks, Utilities, Software/Subscriptions, Miscellaneous,
+                    etc.). This is HR Manager only.</p>
+            </section>
+
+            <!-- 09 MGR PROJECT -->
+            <section class="page" id="page-mgr-project" data-role="manager,hr">
+                <div class="crumb">Manual / Approvals</div>
+                <h1><span class="num">09</span> Projects & Task Assignment</h1>
+                <p class="dek">Cross-team assignment decisions, task stage configuration, and locking a project as
+                    complete. For how employees create tasks, log timesheets, and progress task states, see Section
+                    06B.</p>
+
+                <h2>Approving cross-team assignment requests</h2>
+                <p>When someone assigns a task to an employee on a different team, the system holds it as a pending
+                    request instead of assigning immediately (unless the person assigning is a Manager or HR, who can
+                    assign
+                    across teams freely).</p>
+                <ol>
+                    <li>Go to <strong>Assignment Requests → All Requests</strong>.</li>
+                    <li>Open a pending request — it shows the task, who requested it, the requesting team, and the
+                        target employee/team.
+                    </li>
+                    <li>Click <strong>Approve</strong> or <strong>Reject</strong>.</li>
+                </ol>
+                <p>Approving assigns the employee to the task immediately and notifies them. Rejecting leaves the task
+                    unassigned and notifies the requester with any comment you leave.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">Both HR and Managers can decide these</span>
+                    Unlike project completion (below), cross-team assignment requests can be approved or rejected by
+                    either an HR officer or a Manager — there's no restriction here.
+                </div>
+
+                <h2>Approving project completion requests</h2>
+                <p>A completion request can only be <strong>submitted</strong> by the project's Team Lead, an HR
+                    officer, or a Manager — but it can only be <strong>approved</strong> by a Manager.</p>
+                <ol>
+                    <li>Go to <strong>Completion Requests → All Completion Requests</strong>.</li>
+                    <li>Open a pending request.</li>
+                    <li>Click <strong>Approve</strong> or <strong>Reject</strong>.</li>
+                </ol>
+
+                <div class="stamp-note warn">
+                    <span class="tag">HR cannot approve project completion — Managers only</span>
+                    This is one of the few approvals in the system where HR is deliberately excluded. If you're an HR
+                    officer, you can submit a completion request on behalf of a team, but a Manager has to make the
+                    final call.
+                </div>
+
+                <p>Approving a request moves the project to its <strong>Done</strong> stage and <strong>locks</strong>
+                    it — from that point on, only a Manager can edit the project or its tasks. To unlock it later, open
+                    the project and click <strong>Reopen Project</strong> (Manager only) — this restores it to whatever
+                    stage it was on before the lock.</p>
+
+                <h2>Managing task stages</h2>
+                <p>Task stages are a shared library, not per-project — the same set of stages (e.g. Requirement,
+                    Analysis & Planning, Development, Internal Testing, Client Review, Implementation,
+                    Maintenance/Support, Done) is available across every project.</p>
+                <ol>
+                    <li>Go to <strong>Configuration → Task Stages</strong>.</li>
+                    <li>Click <strong>New</strong> to add a stage, or edit an existing one inline.</li>
+                    <li>Toggle <strong>Auto-add to New Projects</strong> if the stage should automatically appear on
+                        every new project's kanban board.
+                    </li>
+                    <li>Toggle <strong>Folded by Default</strong> if the stage's column should start collapsed in kanban
+                        view (typically used for "Done").
+                    </li>
+                </ol>
+
+                <div class="stamp-note info">
+                    <span class="tag">Employees can't create new stages on the fly</span>
+                    If an employee tries to add a new kanban column with a name that doesn't already exist in the stage
+                    library, the system blocks it. They can only pick from stages you've already created here.
+                </div>
+
+                <h2>Full project and task visibility</h2>
+                <p>As HR or Manager, you see every project and task regardless of team — the team-based visibility
+                    restriction that applies to regular employees doesn't apply to you.</p>
+            </section>
+
+            <!-- 10 HR LEAVE POLICY -->
+            <section class="page" id="page-hr-leavepolicy" data-role="manager,hr">
+                <div class="crumb">Manual / HR & Policy</div>
+                <h1><span class="num">10</span> Leave Policy & Allocations</h1>
+                <p class="dek">How the anniversary-based leave year, quotas, and carry-forward are administered — and
+                    where the automation ends and manual work begins.</p>
+
+                <h2>Policy at a glance</h2>
+                <table class="ledger">
+                    <tr>
+                        <th>Type</th>
+                        <th>Quota</th>
+                        <th>Carry-Forward Cap</th>
+                    </tr>
+                    <tr>
+                        <td>Casual Leave</td>
+                        <td>12 days / year</td>
+                        <td>6 days (50%)</td>
+                    </tr>
+                    <tr>
+                        <td>Earned Leave</td>
+                        <td>3 days / year</td>
+                        <td>3 days (full)</td>
+                    </tr>
+                    <tr>
+                        <td>Medical Leave</td>
+                        <td>3 days / year</td>
+                        <td>3 days (full)</td>
+                    </tr>
+                </table>
+
+                <div class="stamp-note info">
+                    <span class="tag">All three types require HR approval to allocate</span>
+                    Casual, Earned, and Medical Leave are all configured with allocation approval required — no employee
+                    (or HR user, for that matter) can self-approve an allocation. Every allocation, whether generated
+                    automatically or requested manually, must go through an HR approval step before it counts toward the
+                    employee's balance.
+                </div>
+
+                <h2>Initial allocation — new employees</h2>
+                <p>When a new employee record is created, the system automatically generates their first cycle's
+                    allocation for all three leave types, based on their joining date (read from their contract start
+                    date, or their record creation date as a fallback). This happens without any manual action — you
+                    don't need to create these allocations yourself.</p>
+
+                <h2>Anniversary carry-forward</h2>
+                <p>A scheduled job runs <strong>daily</strong> and checks every active employee. If today matches an
+                    employee's joining-date anniversary (month and day), the system:</p>
+                <ol>
+                    <li>Closes their previous leave-year allocation.</li>
+                    <li>Calculates unused days from the closing cycle, capped at each type's carry-forward limit (6 for
+                        Casual, full 3 for Earned/Medical).
+                    </li>
+                    <li>Opens a new allocation for the new cycle: fresh quota + carried-forward days.</li>
+                </ol>
+                <p>This is fully automatic — you don't need to trigger it manually, and it's safe even if it somehow ran
+                    twice for the same employee on the same day (it checks for an existing allocation for that start
+                    date first).</p>
+
+                <h2>Manual allocation edits</h2>
+                <p>If you need to adjust an employee's allocation directly (a correction, a special grant, etc.):</p>
+                <ol>
+                    <li>Go to <strong>Time Off → Allocations</strong>.</li>
+                    <li>Open or create the allocation record for the employee and leave type.</li>
+                    <li>Edit the <strong>Number of Days</strong>.</li>
+                    <li>Approve the record — it won't count toward their balance until it's in the Approved state.</li>
+                </ol>
+
+                <div class="stamp-note warn">
+                    <span class="tag">After changing an employee's System Role</span>
+                    Changing an employee's <strong>System Role</strong> (Employee / HR / Manager) on their profile does
+                    not automatically update their system permissions. You must open their profile and click <strong>Setup
+                    Permissions</strong> for the new role's access to actually take effect.
+                </div>
+
+                <h2>Permission leave allocation</h2>
+                <p>A separate monthly job runs on the <strong>1st of every month</strong> and grants every active
+                    employee a flat <strong>4-hour (240-minute)</strong> Permission allocation for that month. There's
+                    no carry-forward and no proration — this runs automatically and needs no manual step from HR, unless
+                    an employee's Permission allocation is somehow missing (in which case, create it manually the same
+                    way as above, using the Permission leave type).</p>
+            </section>
+
+            <!-- <!-- 11 HR PAYROLL -->
+            <section class="page" id="page-hr-payroll" data-role="manager,hr">
+                <div class="crumb">Manual / HR & Policy</div>
+                <h1><span class="num">11</span> Payroll Processing</h1>
+                <p class="dek">Monthly payroll draws directly from the attendance and leave register — the order you run
+                    things in matters.</p>
+
+                <div class="flow">
+                    <div class="step">Finalize leave records</div>
+                    <span class="arrow">→</span>
+                    <div class="step">Generate & Confirm Monthly Summary</div>
+                    <span class="arrow">→</span>
+                    <div class="step">Create payslip</div>
+                    <span class="arrow">→</span>
+                    <div class="step">Compute & validate</div>
+                </div>
+
+                <div class="stamp-note bad">
+                    <span class="tag">Order matters — the summary must be Confirmed, not just generated</span>
+                    A payslip only picks up attendance/leave data from a Monthly Summary that is in the <strong>Confirmed</strong>
+                    state. If the summary for that employee and month is still in Draft, or doesn't exist yet, the
+                    payslip falls back to a default 30-day denominator and zero absent/overflow deduction — it will not
+                    wait for you to confirm it later; you'd need to recompute the payslip after confirming the summary.
+                </div>
+
+                <h2>Step 1 — Generate the Monthly Summary</h2>
+                <ol>
+                    <li>Go to <strong>Attendance → Generate Summaries (Batch)</strong>.</li>
+                    <li>Select the <strong>Month</strong> and <strong>Year</strong> (defaults to last month).</li>
+                    <li>Optionally pick specific employees — leave blank to generate for everyone active.</li>
+                    <li>Click <strong>Generate Summaries</strong>.</li>
+                </ol>
+                <p>This creates or recomputes each employee's working days, present days, late days, leave days, and
+                    absent days for that month.</p>
+
+                <h2>Step 2 — Confirm the summary</h2>
+                <ol>
+                    <li>Go to <strong>Attendance → Monthly Summaries</strong>.</li>
+                    <li>Open each employee's summary, review the numbers.</li>
+                    <li>Click <strong>Confirm and Lock</strong>.</li>
+                </ol>
+                <p>Once confirmed, a summary can't be edited unless you explicitly reset it to Draft first — this is
+                    what protects it from being accidentally recalculated after payroll has already used it.</p>
+
+                <h2>Step 3 — Create and compute the payslip</h2>
+                <ol>
+                    <li>Go to <strong>Payroll → Employee Payslips</strong>, and create a new payslip (or
+                        use Payslip Batches ).
+                    </li>
+                    <li>Set the <strong>Month</strong> and <strong>Year</strong> directly on the payslip — this
+                        automatically sets the underlying pay period dates.
+                    </li>
+                    <li>Click <strong>Compute Sheet</strong>. This is the point where the system pulls in that
+                        employee's confirmed Monthly Summary and injects the absent-day and overflow figures as payslip
+                        inputs.
+                    </li>
+                    <li>Review the computed lines, then confirm/validate the payslip as your payroll process requires.
+                    </li>
+                </ol>
+
+                <h2>What feeds the payslip, and the exact math</h2>
+                <ul>
+                    <li><strong>Unpaid Absent Days</strong> — pulled from the confirmed Monthly Summary (absences +
+                        unpaid leave combined).
+                    </li>
+                    <li><strong>Working Days</strong> — also from the confirmed summary; falls back to 30 if no
+                        confirmed summary exists for that period.
+                    </li>
+                    <li><strong>Absent Deduction</strong> — calculated as <code>(wage ÷ working_days) ×
+                        absent_days</code>.
+                    </li>
+                    <li><strong>Permission Overflow Deduction</strong> — late minutes beyond the monthly 4-hour
+                        Permission buffer, calculated as <code>((wage ÷ working_days) ÷ 540) × overflow_minutes</code>
+                        (540 minutes = a 9-hour working day).
+                    </li>
+                </ul>
+
+                <h2>Common issues</h2>
+                <table class="ledger">
+                    <tr>
+                        <th>Symptom</th>
+                        <th>Likely cause</th>
+                        <th>Fix</th>
+                    </tr>
+                    <tr>
+                        <td>Payslip shows unexpectedly low or zero deductions</td>
+                        <td>Monthly Summary for that period isn't Confirmed yet</td>
+                        <td>Confirm the summary, then recompute the payslip</td>
+                    </tr>
+                    <tr>
+                        <td>Working days shows as 30 for everyone</td>
+                        <td>No confirmed summary exists for the payslip's period</td>
+                        <td>Generate and confirm the summary first, then recompute</td>
+                    </tr>
+                    <tr>
+                        <td>No Permission Overflow line on the payslip</td>
+                        <td>Employee had no overflow minutes that month, or the summary wasn't confirmed</td>
+                        <td>Check the summary's Permission Overflow Minutes field</td>
+                    </tr>
+                </table>
+
+                <h2>Printing a payslip</h2>
+                <p>Open the payslip and click <strong>Print Payslip</strong> in the header — this generates the official
+                    SMS Enterprises-branded PDF layout.</p>
+            </section>
+
+            <!-- 12 HR ATTENDANCE -->
+            <section class="page" id="page-hr-attendance" data-role="manager,hr">
+                <div class="crumb">Manual / HR & Policy</div>
+                <h1><span class="num">12</span> Attendance Monitoring</h1>
+                <p class="dek">Corrections, oversight, and what auto-adjusts versus what needs a manual hand.</p>
+
+                <h2>Viewing records</h2>
+                <p>Go to <strong>Attendance → All Attendance</strong>, filter by employee, status, or date range. Late
+                    entries and auto-checkouts are visually flagged.</p>
+
+                <h2>Manual corrections</h2>
+                <p>Editing a check-in or check-out time directly on a record is sometimes necessary — device downtime, a
+                    missed checkin, and so on.</p>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Corrections don't cascade automatically</span>
+                    If you manually change a check-in time in a way that would have avoided a late-arrival Permission
+                    deduction, that deduction is <strong>not</strong> automatically reversed. You'll need to refuse the
+                    associated auto-generated Permission leave record yourself if it's no longer warranted.
+                </div>
+
+                <h2>Refusing an AM half-day leave after a same-day check-in</h2>
+                <p>If an employee has an approved AM half-day leave but ends up checking in that morning anyway (plans
+                    changed, emergency resolved, etc.), the system does <strong>not</strong> auto-correct anything —
+                    their leave stays approved and no late minutes are calculated, since the late threshold is still
+                    shifted to the afternoon start time for that day. Fixing this is a manual HR step:</p>
+                <ol>
+                    <li>Go to <strong>Time Off → Management → Time Off</strong> and
+                        find the employee's AM leave record for that date.
+                    </li>
+                    <li>Open the record and click <strong>Refuse</strong>.</li>
+                    <li>Once refused, the system automatically recalculates that day's attendance against the normal
+                        9:30 AM threshold — if the employee checked in late relative to 9:30 AM, it will now show as
+                        Late and draw from their Permission balance as usual.
+                    </li>
+                </ol>
+                <p>No further action is needed after refusing — the recalculation happens immediately, you don't need to
+                    manually edit the attendance record itself.</p>
+
+                <h2>Batch summary generation</h2>
+                <p>Use <strong>Generate Summaries (Batch)</strong> to compute or recompute Monthly Summary records for
+                    all employees at once — useful at month-end before payroll, or after a bulk correction.</p>
+            </section>
+
+            <!-- 13 HR HOLIDAYS -->
+            <section class="page" id="page-hr-holidays" data-role="manager,hr">
+                <div class="crumb">Manual / HR & Policy</div>
+                <h1><span class="num">13</span> Company Holidays</h1>
+                <p class="dek">Declared holidays, the automatic 2nd/4th Saturday rule, and how to turn a specific
+                    Saturday into a working day.</p>
+
+                <h2>How to declare a holiday</h2>
+                <ol>
+                    <li>Go to <strong>Attendance → Company Holidays</strong> and click <strong>New</strong>.</li>
+                    <li>Enter the <strong>Holiday Name</strong> and <strong>Date</strong>.</li>
+                    <li>Select the <strong>Type</strong>: Public Holiday, Company Event, Emergency Closure, or Other.
+                    </li>
+                    <li>Leave <strong>Compensatory Working Day</strong> unchecked (this is only for turning a Saturday
+                        into a working day — see below).
+                    </li>
+                    <li>Save.</li>
+                </ol>
+                <p>This immediately blocks check-in for that date, company-wide — employees attempting to check in will
+                    see a message explaining why.</p>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Only one record per date</span>
+                    You can't create two holiday records for the same date — the system blocks duplicates and tells you
+                    which existing record already covers that day.
+                </div>
+
+                <h2>2nd & 4th Saturday — fully automatic</h2>
+                <p>These are treated as company-wide days off without you needing to declare anything. A background job
+                    keeps the Time Off calendar showing them as greyed-out/non-working for the current year and next
+                    year automatically.</p>
+
+                <h2>Turning a specific Saturday into a working day</h2>
+                <p>To make up for a mid-week closure (or any other reason), you can designate a specific Saturday as a
+                    working day instead:</p>
+                <ol>
+                    <li>Go to <strong>Attendance → Company Holidays</strong> and click <strong>New</strong>.</li>
+                    <li>Set the <strong>Date</strong> to the Saturday you want to convert.</li>
+                    <li>Enable <strong>Compensatory Working Day</strong>.</li>
+                    <li>Save.</li>
+                </ol>
+
+                <div class="stamp-note bad">
+                    <span class="tag">Only works on Saturdays</span>
+                    If you try to enable Compensatory Working Day on any date that isn't a Saturday, the system blocks
+                    it with a validation error naming the actual day of the week.
+                </div>
+
+                <p>Once saved, check-in works normally for employees on that date — even though it's a 2nd or 4th
+                    Saturday that would otherwise be a day off.</p>
+
+                <h2>Editing or removing a holiday</h2>
+                <p>Open the record from the <strong>Company Holidays</strong> list and edit or archive it as needed.
+                    Archiving (unchecking <strong>Active</strong>) removes it from the Time Off calendar and un-blocks
+                    check-in for that date, same as deleting would — but keeps the record for reference.</p>
+            </section>
+
+            <!-- 14 HR DOCUMENTS -->
+            <section class="page" id="page-hr-documents" data-role="manager,hr">
+                <div class="crumb">Manual / HR & Policy</div>
+                <h1><span class="num">14</span> Employee Records</h1>
+                <p class="dek">Uploading documents, confirming a new employee's ID, and assigning system
+                    permissions.</p>
+
+                <h2>How to upload a document for an employee</h2>
+                <ol>
+                    <li>Open the employee's profile (<strong>Employees → [select employee]</strong>).</li>
+                    <li>Go to the <strong>Documents</strong> tab.</li>
+                    <li>Click <strong>New</strong> on the documents list.</li>
+                    <li>Enter a <strong>Document Name</strong> and select a <strong>Category</strong>: ID Proof,
+                        Educational Certificate, Contract/Agreement, Experience Letter, Medical Certificate, or Other.
+                    </li>
+                    <li>Attach the file and save.</li>
+                </ol>
+                <p>Documents preview inline in the browser via the Preview link — no download required.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">Access levels differ</span>
+                    HR officers have full access (upload, edit, delete). HR Managers can view documents but cannot edit
+                    or delete them from here. Employees do not have access to this tab at all — if an employee needs to
+                    submit a document, they hand it to HR to upload.
+                </div>
+
+                <h2>Confirming a new employee (Employee ID)</h2>
+                <p>New employee records start in <strong>Draft</strong> — no Employee ID is assigned yet, and the record
+                    can be freely deleted if it was created by mistake.</p>
+                <ol>
+                    <li>Open the new employee's profile.</li>
+                    <li>Verify all details are correct — <strong>especially the Department</strong>, since the Employee
+                        ID is generated from the department code and can't be changed after confirmation.
+                    </li>
+                    <li>Click <strong>Confirm Employee</strong>.</li>
+                </ol>
+                <p>This generates a permanent Employee ID (format: year + department code + sequence number, e.g. <code>25CFD003</code>)
+                    and locks the record — the Employee ID field becomes read-only, and the Department can no longer be
+                    changed on this record.</p>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Confirmed employees can't be deleted</span>
+                    Once confirmed, an employee record can only be archived, not deleted — this protects data integrity.
+                    If you need a genuine department transfer, archive the old record and create a new one rather than
+                    trying to edit the department.
+                </div>
+
+                <h3>Resetting an employee to Draft</h3>
+                <p>Only a <strong>Manager</strong> (HR Manager group) can do this, and only if the employee has no
+                    payslips, attendance records, or leave allocations yet — the system blocks the reset otherwise and
+                    tells you which type of record is blocking it. If you reset and later re-confirm the same employee
+                    <strong>without changing their department</strong>, the same Employee ID is restored rather than
+                    consuming a new sequence number.</p>
+
+                <h2>Assigning System Role & permissions</h2>
+                <p>Every employee has a <strong>System Role</strong> field (Employee / HR / Manager) that determines
+                    what they can access in the system — separate from their job title.</p>
+                <ol>
+                    <li>Open the employee's profile.</li>
+                    <li>Under <strong>Settings → System Access</strong>, set the <strong>System Role</strong>.</li>
+                    <li>Click <strong>Setup Permissions</strong> in the header.</li>
+                </ol>
+
+                <div class="stamp-note bad">
+                    <span class="tag">Changing the role field alone does nothing</span>
+                    Setting a new System Role does not, by itself, change what the employee can access. You must click
+                    Setup Permissions afterward for the change to actually apply — this is a deliberate manual step, not
+                    an oversight.
+                </div>
+
+                <p>Employees in a department whose name contains "Manufacturing" automatically also receive
+                    manufacturing module access, regardless of their System Role — this is applied at the same time you
+                    click Setup Permissions.</p>
+
+            </section>
+
+            <!-- 14B CRM -->
+            <section class="page" id="page-hr-crm" data-role="manager,hr">
+                <div class="crumb">Manual / HR & Policy</div>
+                <h1><span class="num">14B</span> CRM: Leads, Opportunities & Converting to a Project</h1>
+                <p class="dek">Standard CRM usage for tracking client queries, plus the custom Convert to Project step
+                    once a deal is won.</p>
+
+                <h2>Creating a lead or opportunity</h2>
+                <ol>
+                    <li>Go to <strong>CRM → My Pipeline</strong> (or <strong>CRM → Leads</strong> if lead scoring is
+                        enabled for your setup).
+                    </li>
+                    <li>Click <strong>New</strong>.</li>
+                    <li>Fill in the client/contact details, an <strong>Opportunity</strong> title, expected revenue, and
+                        assign a <strong>Salesperson</strong> and <strong>Sales Team</strong> if relevant.
+                    </li>
+                    <li>Save.</li>
+                </ol>
+
+                <h2>Moving a deal through the pipeline</h2>
+                <p>CRM opportunities move through pipeline stages (e.g. New, Qualified, Proposal, Won) shown as kanban
+                    columns under <strong>CRM → My Pipeline</strong>. Drag a card to a new column to change its stage,
+                    or open the opportunity and use the stage bar at the top of the form.</p>
+                <ul>
+                    <li>Use the <strong>Log a Note</strong> / <strong>Activities</strong> tools on the opportunity to
+                        track calls, meetings, and follow-ups as you work the deal.
+                    </li>
+                    <li>Update <strong>Expected Revenue</strong> and <strong>Probability</strong> as the deal firms up —
+                        this feeds the pipeline forecast views under <strong>CRM → Reporting</strong>.
+                    </li>
+                </ul>
+
+                <div class="stamp-note info">
+                    <span class="tag">This part is standard Odoo CRM</span>
+                    Lead capture, pipeline stages, activities, and reporting all work the way standard Odoo CRM normally
+                    does — nothing here has been customized. The one addition specific to this system is the Convert to
+                    Project step below, which only applies once a deal reaches <strong>Won</strong>.
+                </div>
+
+                <h2>Converting a Won opportunity into a project</h2>
+                <p>Once an opportunity is genuinely closed and won, and the work is ready to be tracked as a project, HR
+                    converts it directly from the CRM record — there's no need to manually recreate the project and
+                    re-enter the client details.</p>
+                <ol>
+                    <li>Open the opportunity (<strong>CRM → [select the opportunity]</strong>).</li>
+                    <li>Make sure its stage is set to <strong>Won</strong> — the Convert to Project button won't work
+                        otherwise.
+                    </li>
+                    <li>Click <strong>Convert to Project</strong> in the header.</li>
+                    <li>Confirm the prompt.</li>
+                </ol>
+                <p>This creates a new project (auto-numbered), copies over the client and description, links the project
+                    back to this opportunity, and marks the opportunity as converted.</p>
+
+                <div class="stamp-note bad">
+                    <span class="tag">This cannot be undone or repeated</span>
+                    Once converted, the opportunity becomes read-only for its core fields (name, partner, stage,
+                    salesperson, team, revenue, probability) and cannot be converted again. It also can't be deleted or
+                    archived afterward — this is intentional, to preserve traceability between the original query and
+                    the resulting project.
+                </div>
+
+                <h2>Finding the linked project</h2>
+                <p>On a converted opportunity, a <strong>Project</strong> smart button appears in the header — click it
+                    to jump straight to the project that was created from it.</p>
+
+                <h2>Who can convert</h2>
+                <p>The Convert to Project button is only visible to HR officers and Managers — regular salespeople and employees
+                    don't see it, even on their own Won opportunities.</p>
+
+                <div class="stamp-note info">
+                    <span class="tag">The new project starts unassigned to a team</span>
+                    Converting doesn't automatically assign the new project to a Team — you (or a Manager) need to open
+                    the project afterward and set its Team, the same way you would for any manually created project,
+                    before it shows up properly in employees' team-scoped project views (see Section 06B).
+                </div>
+            </section>
+
+            <!-- 15 FAQ -->
+            <section class="page" id="page-faq" data-role="employee,manager,hr">
+                <div class="crumb">Manual / Reference</div>
+                <h1><span class="num">15</span> FAQ</h1>
+                <p class="dek">Quick answers, filtered to your register.</p>
+
+                <div data-role="employee,manager,hr">
+                    <div class="qa">
+                        <div class="q">What happens if I forget to check out?</div>
+                        <div class="a">The system auto-closes your session at 7:00 PM and flags it as an Auto Checkout
+                            on your record.
+                        </div>
+                    </div>
+                    <div class="qa">
+                        <div class="q">Can I request leave for a past date?</div>
+                        <div class="a">Not directly — only HR can backdate a leave request on your behalf.</div>
+                    </div>
+                    <div class="qa">
+                        <div class="q">What's the difference between Permission leave and regular leave?</div>
+                        <div class="a">Permission is a monthly 4-hour buffer specifically for late arrivals or short
+                            personal errands, billed in hours. Regular leave (CL/EL/ML) is billed in full or half days.
+                        </div>
+                    </div>
+                </div>
+
+                <div data-role="manager,hr">
+                    <div class="qa">
+                        <div class="q">Can I approve one half of a half-day leave and reject the other?</div>
+                        <div class="a">Yes — AM and PM halves are separate records, so they can be approved or refused
+                            independently.
+                        </div>
+                    </div>
+                    <div class="qa">
+                        <div class="q">An employee had an approved AM leave but checked in anyway — why doesn't the
+                            system fix this automatically?
+                        </div>
+                        <div class="a">By design, it doesn't. The leave stays approved and no late minutes are
+                            calculated until you manually refuse the AM leave record from Time Off → Approvals. Once
+                            refused, lateness recalculates automatically against the normal 9:30 AM threshold.
+                        </div>
+                    </div>
+                </div>
+
+                <div data-role="manager,hr">
+                    <div class="qa">
+                        <div class="q">How do I tell an auto-deducted Permission leave from a manually requested one?
+                        </div>
+                        <div class="a">Auto-generated records from late-arrival deductions are flagged internally and
+                            don't trigger the standard "your leave was approved" notification, to avoid confusing the
+                            employee.
+                        </div>
+                    </div>
+                    <div class="qa">
+                        <div class="q">What if Permission overflow doesn't show up on a payslip?</div>
+                        <div class="a">Run the Monthly Summary for that employee and month before recomputing payroll —
+                            overflow minutes flow through the summary, not directly from attendance.
+                        </div>
+                    </div>
+                </div>
+
+                <div data-role="employee,manager,hr">
+                    <div class="qa">
+                        <div class="q">My role looks wrong / I can't see a section I should have access to.</div>
+                        <div class="a">Click "Refresh My Access" in the header — it re-checks your role from the ERP. If
+                            it's still wrong, your employee_role field in HR needs updating; contact HR.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="empty-search" id="emptyState" style="display:none;">No matching sections. Try a different
+                term.
+            </div>
+
+        </main>
     </div>
-    <div class="bar-role">
-      <span class="role-name" id="userName"></span>
-      <span class="role-pill" id="rolePill">EMPLOYEE</span>
-      <button class="change-role" onclick="refreshAccess()">⟲ Refresh My Access</button>
-    </div>
-  </header>
 
-  <div class="layout">
-    <aside class="nav">
-      <div class="search-wrap">
-        <input type="text" id="searchBox" placeholder="Search this manual…" oninput="doSearch()">
-      </div>
-
-      <div class="nav-group" data-role="employee,manager,hr">
-        <div class="nav-group-label">Everyone</div>
-        <div class="nav-item" data-target="overview" onclick="goTo('overview', this)"><span class="idx">00</span> Overview</div>
-      </div>
-
-      <div class="nav-group" data-role="employee,manager,hr">
-        <div class="nav-group-label">Your Desk</div>
-        <div class="nav-item" data-target="attendance" onclick="goTo('attendance', this)"><span class="idx">01</span> Attendance & Check-In</div>
-        <div class="nav-item" data-target="leave" onclick="goTo('leave', this)"><span class="idx">02</span> Leave & Half-Days</div>
-        <div class="nav-item" data-target="permission" onclick="goTo('permission', this)"><span class="idx">03</span> Permission Buffer</div>
-        <div class="nav-item" data-target="expenses" onclick="goTo('expenses', this)"><span class="idx">04</span> Expenses</div>
-        <div class="nav-item" data-target="workreports" onclick="goTo('workreports', this)"><span class="idx">05</span> Work Reports</div>
-        <div class="nav-item" data-target="documents" onclick="goTo('documents', this)"><span class="idx">06</span> Documents & Payslip</div>
-      </div>
-
-      <div class="nav-group" data-role="manager,hr">
-        <div class="nav-group-label">Approvals</div>
-        <div class="nav-item" data-target="mgr-leave" onclick="goTo('mgr-leave', this)"><span class="idx">07</span> Approving Leave</div>
-        <div class="nav-item" data-target="mgr-expense" onclick="goTo('mgr-expense', this)"><span class="idx">08</span> Approving Expenses</div>
-        <div class="nav-item" data-target="mgr-project" onclick="goTo('mgr-project', this)"><span class="idx">09</span> Projects & Task Assignment</div>
-      </div>
-
-      <div class="nav-group" data-role="manager,hr">
-        <div class="nav-group-label">HR & Policy</div>
-        <div class="nav-item" data-target="hr-leavepolicy" onclick="goTo('hr-leavepolicy', this)"><span class="idx">10</span> Leave Policy & Allocations</div>
-        <div class="nav-item" data-target="hr-payroll" onclick="goTo('hr-payroll', this)"><span class="idx">11</span> Payroll Processing</div>
-        <div class="nav-item" data-target="hr-attendance" onclick="goTo('hr-attendance', this)"><span class="idx">12</span> Attendance Monitoring</div>
-        <div class="nav-item" data-target="hr-holidays" onclick="goTo('hr-holidays', this)"><span class="idx">13</span> Company Holidays</div>
-        <div class="nav-item" data-target="hr-documents" onclick="goTo('hr-documents', this)"><span class="idx">14</span> Employee Records</div>
-      </div>
-
-      <div class="nav-group" data-role="employee,manager,hr">
-        <div class="nav-group-label">Reference</div>
-        <div class="nav-item" data-target="faq" onclick="goTo('faq', this)"><span class="idx">15</span> FAQ</div>
-      </div>
-    </aside>
-
-    <main id="mainContent">
-
-      <!-- 00 OVERVIEW -->
-      <section class="page" id="page-overview" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Overview</div>
-        <h1><span class="num">00</span> Overview</h1>
-        <p class="dek">The SMS Enterprises ERP runs on ODOO 19, extended with a custom addon suite covering attendance, leave, payroll, projects, expenses, and documents.</p>
-
-        <h2>What the system covers</h2>
-        <ul>
-          <li><strong>Attendance</strong> — check-in/check-out, late detection, half-day leave logic, company holidays.</li>
-          <li><strong>Leave</strong> — Casual, Earned, Medical, and Permission leave, with anniversary-based allocation and carry-forward.</li>
-          <li><strong>Payroll</strong> — monthly salary computation, driven by your attendance and leave register.</li>
-          <li><strong>Projects</strong> — team-based tasks, kanban boards, cross-team assignment approval.</li>
-          <li><strong>Expenses</strong> — submission, approval, and Excel export for records.</li>
-          <li><strong>Documents</strong> — employee document upload with inline preview.</li>
-        </ul>
-
-        <div class="stamp-note info">
-          <span class="tag">How access works here</span>
-          The sections you see are read directly from your employee role in the ERP — the same role that already controls your permissions elsewhere in the system. There's nothing to select; it's not something this page can get wrong or something you can override from the browser.
-        </div>
-      </section>
-
-      <!-- 01 ATTENDANCE -->
-      <section class="page" id="page-attendance" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Your Desk</div>
-        <h1><span class="num">01</span> Attendance & Check-In</h1>
-        <p class="dek">One check-in, one check-out, once a day. The system tracks lateness automatically.</p>
-
-        <h2>Checking in and out</h2>
-        <p>Open <strong>Check In / Check Out</strong> from the Attendances menu. The same button toggles — if you're already checked in, it checks you out. You can only complete one full cycle per day.</p>
-
-        <div class="stamp-note warn">
-          <span class="tag">Late threshold — 9:30 AM</span>
-          Checking in after 9:30 AM marks the day as <strong>Late</strong> and starts eating into your monthly Permission buffer (see Section 03). The threshold shifts to the afternoon start time on days you have an approved AM half-day leave.
-        </div>
-
-        <h3>If you don't check out</h3>
-        <p>The system auto-closes any open session at <strong>7:00 PM</strong> your local time. This is flagged as an <strong>Auto Checkout</strong> on your record — worth a habit check if it happens often.</p>
-
-        <h3>Holidays block check-in</h3>
-        <p>On declared company holidays and the 2nd/4th Saturday of the month, check-in is disabled with a message explaining why. Check-out still works if you were already checked in (e.g. a compensatory working day changes this — see Section 13).</p>
-      </section>
-
-      <!-- 02 LEAVE -->
-      <section class="page" id="page-leave" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Your Desk</div>
-        <h1><span class="num">02</span> Leave & Half-Days</h1>
-        <p class="dek">Three leave types, an anniversary-based year, and half-days split cleanly into AM and PM.</p>
-
-        <h2>Leave types & entitlement</h2>
-        <table class="ledger">
-          <tr><th>Type</th><th>Annual Quota</th><th>Carry-Forward</th></tr>
-          <tr><td>Casual Leave (CL)</td><td>12 days</td><td>Up to 50% (max 6 days)</td></tr>
-          <tr><td>Earned Leave (EL)</td><td>3 days</td><td>Full carry-forward</td></tr>
-          <tr><td>Medical Leave (ML)</td><td>3 days</td><td>Full carry-forward</td></tr>
-        </table>
-
-        <p>Your leave year runs from your <strong>joining anniversary</strong>, not the calendar year. On your anniversary, unused leave carries forward automatically per the table above, and a fresh quota opens.</p>
-
-        <h2>Requesting leave</h2>
-        <ol>
-          <li>Go to <strong>Time Off → New</strong></li>
-          <li>Choose the leave type and dates</li>
-          <li>For a single day, choose Full Day or Half Day (AM/PM)</li>
-          <li>Submit — it routes to HR for approval</li>
-        </ol>
-
-        <h2>Half-day mechanics</h2>
-        <p>A half-day leave is recorded as its own leave entry for that morning or afternoon. You can mix types on the same day — for example, Casual Leave in the morning and Earned Leave in the afternoon.</p>
-
-        <div class="stamp-note info">
-          <span class="tag">If you check in during your AM leave</span>
-          Checking in before the afternoon session start (typically 2:00 PM) on a day you have an approved AM half-day leave is treated as a change of plan — HR is notified and the leave is reviewed. Checking in at or after the afternoon start is treated as you legitimately working your PM half; the AM leave stands.
-        </div>
-
-        <div class="stamp-note warn">
-          <span class="tag">No backdating</span>
-          Leave can't be requested for past dates unless HR enters it on your behalf. Plan ahead where you can.
-        </div>
-      </section>
-
-      <!-- 03 PERMISSION -->
-      <section class="page" id="page-permission" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Your Desk</div>
-        <h1><span class="num">03</span> Permission Buffer</h1>
-        <p class="dek">A monthly 4-hour cushion for late arrivals — used automatically, or claimed proactively.</p>
-
-        <h2>How it works</h2>
-        <p>Every employee gets a flat <strong>4 hours (240 minutes)</strong> of Permission leave each month. It doesn't carry forward, and there's no proration for mid-month joiners — everyone starts the month fresh.</p>
-
-        <div class="flow">
-          <div class="step">Check in after 9:30 AM</div>
-          <span class="arrow">→</span>
-          <div class="step">Late minutes calculated</div>
-          <span class="arrow">→</span>
-          <div class="step">Minutes drawn from Permission pool</div>
-          <span class="arrow">→</span>
-          <div class="step">You're notified</div>
-        </div>
-
-        <h3>Manual requests</h3>
-        <p>You can also draw on the same pool proactively — for a dentist appointment, say — by submitting a Permission leave request in hours, same as any other leave type.</p>
-
-        <div class="stamp-note bad">
-          <span class="tag">If the pool runs out</span>
-          Once your 4-hour buffer is exhausted for the month, further late minutes are deducted directly from salary in that month's payroll, under the overflow deduction rule.
-        </div>
-
-        <p>You'll get a notification when your balance drops to 30 minutes or below, and again if it hits zero.</p>
-      </section>
-
-      <!-- 04 EXPENSES -->
-      <section class="page" id="page-expenses" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Your Desk</div>
-        <h1><span class="num">04</span> Expenses</h1>
-        <p class="dek">Submit, attach a receipt, and track approval status.</p>
-
-        <h2>Submitting an expense</h2>
-        <ol>
-          <li>Go to <strong>Expenses → Submit Expense</strong></li>
-          <li>Select category, amount, and date</li>
-          <li>Attach a receipt or supporting document</li>
-          <li>Submit for approval</li>
-        </ol>
-        <p>Your Manager reviews it first; approved expenses are reimbursed through your next payslip.</p>
-
-        <h3>Excel export</h3>
-        <p>You can download a summary of your own expense history as an Excel file for your own records, from the Expenses list view.</p>
-      </section>
-
-      <!-- 05 WORK REPORTS -->
-      <section class="page" id="page-workreports" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Your Desk</div>
-        <h1><span class="num">05</span> Work Reports</h1>
-        <p class="dek">A short daily record of what you worked on — visible to your Manager.</p>
-        <h2>Filing a report</h2>
-        <ul>
-          <li>Go to <strong>Work Reports → New</strong></li>
-          <li>Enter the date and a summary of tasks completed</li>
-          <li>Attach any relevant files — they preview inline, no download needed</li>
-        </ul>
-      </section>
-
-      <!-- 06 DOCUMENTS -->
-      <section class="page" id="page-documents" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Your Desk</div>
-        <h1><span class="num">06</span> Documents & Payslip</h1>
-        <p class="dek">Your personal file cabinet, and where your payslip lands once HR processes it.</p>
-
-        <h2>Uploading documents</h2>
-        <p>Under <strong>My Profile → Documents</strong>, upload ID proofs, certificates, or any HR-requested paperwork. Files preview inline in the browser rather than forcing a download.</p>
-
-        <h2>Payslips</h2>
-        <p>Once HR runs and validates the monthly payroll, your payslip appears under <strong>Payroll → My Payslips</strong>. It reflects your attendance, leave, and any Permission overflow deductions for that month.</p>
-      </section>
-
-      <!-- 07 MGR LEAVE -->
-      <section class="page" id="page-mgr-leave" data-role="manager,hr">
-        <div class="crumb">Manual / Approvals</div>
-        <h1><span class="num">07</span> Approving Leave</h1>
-        <p class="dek">Team leave requests land in your queue before HR gives final sign-off.</p>
-
-        <div class="flow">
-          <div class="step">Employee submits</div>
-          <span class="arrow">→</span>
-          <div class="step">Manager reviews</div>
-          <span class="arrow">→</span>
-          <div class="step">HR validates</div>
-          <span class="arrow">→</span>
-          <div class="step">Employee notified</div>
-        </div>
-
-        <h2>What to check</h2>
-        <ul>
-          <li>Whether the request overlaps a company holiday (the system already blocks all-holiday requests)</li>
-          <li>Whether a half-day request makes sense against that day's workload</li>
-          <li>Medical Leave requests should have a certificate attached for anything beyond a day</li>
-        </ul>
-
-        <p>Go to <strong>Time Off → Approvals</strong> and filter by your team. Approve or refuse with a note — the employee is notified either way.</p>
-      </section>
-
-      <!-- 08 MGR EXPENSE -->
-      <section class="page" id="page-mgr-expense" data-role="manager,hr">
-        <div class="crumb">Manual / Approvals</div>
-        <h1><span class="num">08</span> Approving Expenses</h1>
-        <p class="dek">Review team expense claims before they reach HR for reimbursement.</p>
-        <ul>
-          <li>Go to <strong>Expenses → Team Expenses</strong></li>
-          <li>Check the receipt matches the claimed amount and category</li>
-          <li>Approve or reject with a note</li>
-        </ul>
-        <p>Approved expenses move to HR for final processing and appear in the employee's next payslip.</p>
-      </section>
-
-      <!-- 09 MGR PROJECT -->
-      <section class="page" id="page-mgr-project" data-role="manager,hr">
-        <div class="crumb">Manual / Approvals</div>
-        <h1><span class="num">09</span> Projects & Task Assignment</h1>
-        <p class="dek">Team-based project tracking with a kanban board and a cross-team approval gate.</p>
-
-        <h2>Cross-team assignment</h2>
-        <p>Tasks can be reassigned across teams, but that reassignment routes through an approval step first — this keeps team leads aware of who's picking up work outside their own group.</p>
-
-        <h3>Kanban board</h3>
-        <p>Each project's board reflects task stage. Drag a card to move a task forward; the underlying record updates immediately.</p>
-      </section>
-
-      <!-- 10 HR LEAVE POLICY -->
-      <section class="page" id="page-hr-leavepolicy" data-role="manager,hr">
-        <div class="crumb">Manual / HR & Policy</div>
-        <h1><span class="num">10</span> Leave Policy & Allocations</h1>
-        <p class="dek">How the anniversary-based leave year, quotas, and carry-forward are administered.</p>
-
-        <h2>Policy at a glance</h2>
-        <table class="ledger">
-          <tr><th>Type</th><th>Quota</th><th>Carry-Forward Cap</th></tr>
-          <tr><td>Casual Leave</td><td>12 days / year</td><td>6 days (50%)</td></tr>
-          <tr><td>Earned Leave</td><td>3 days / year</td><td>3 days (full)</td></tr>
-          <tr><td>Medical Leave</td><td>3 days / year</td><td>3 days (full)</td></tr>
-        </table>
-
-        <h2>Initial allocation</h2>
-        <p>New employees receive their first cycle's allocation automatically on record creation, based on their joining date. No manual action needed unless the automated run is interrupted.</p>
-
-        <h2>Anniversary carry-forward</h2>
-        <p>A scheduled job runs daily and processes any employee whose joining-date anniversary falls that day — closing the previous leave year and opening a new one with carry-forward applied per the caps above.</p>
-
-        <div class="stamp-note warn">
-          <span class="tag">Manual allocation edits</span>
-          If you need to adjust an employee's allocation directly, go to <strong>Time Off → Allocations</strong>, edit the amount, and approve the record for it to take effect.
-        </div>
-
-        <h2>Permission leave allocation</h2>
-        <p>A separate monthly job grants every active employee a flat 4-hour Permission allocation on the 1st of each month — no carry-forward, no proration.</p>
-      </section>
-
-      <!-- 11 HR PAYROLL -->
-      <section class="page" id="page-hr-payroll" data-role="manager,hr">
-        <div class="crumb">Manual / HR & Policy</div>
-        <h1><span class="num">11</span> Payroll Processing</h1>
-        <p class="dek">Monthly payroll draws directly from the attendance and leave register — run summaries before payslips.</p>
-
-        <div class="flow">
-          <div class="step">Finalize leave records</div>
-          <span class="arrow">→</span>
-          <div class="step">Run Monthly Summary</div>
-          <span class="arrow">→</span>
-          <div class="step">Create payroll batch</div>
-          <span class="arrow">→</span>
-          <div class="step">Compute & validate payslips</div>
-        </div>
-
-        <div class="stamp-note bad">
-          <span class="tag">Order matters</span>
-          Always run <strong>Attendance → Monthly Summary</strong> before generating payroll for the month. This is what feeds Permission overflow minutes into the salary deduction rule — skip it and the deduction won't appear on the payslip.
-        </div>
-
-        <h2>What feeds the payslip</h2>
-        <ul>
-          <li><strong>Unpaid absent days</strong> — absences plus unpaid leave, from the monthly summary</li>
-          <li><strong>Permission overflow</strong> — late minutes beyond the 4-hour monthly buffer, deducted at the per-minute rate</li>
-          <li><strong>Base salary & allowances</strong> — from the employee's contract</li>
-        </ul>
-
-        <h2>Common issues</h2>
-        <table class="ledger">
-          <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
-          <tr><td>Payslip shows ₹0</td><td>Missing or expired contract</td><td>Verify contract dates cover the payroll month</td></tr>
-          <tr><td>No Permission deduction on payslip</td><td>Monthly Summary wasn't run first</td><td>Run the summary, then recompute payroll</td></tr>
-        </table>
-      </section>
-
-      <!-- 12 HR ATTENDANCE -->
-      <section class="page" id="page-hr-attendance" data-role="manager,hr">
-        <div class="crumb">Manual / HR & Policy</div>
-        <h1><span class="num">12</span> Attendance Monitoring</h1>
-        <p class="dek">Corrections, oversight, and what auto-adjusts versus what needs a manual hand.</p>
-
-        <h2>Viewing records</h2>
-        <p>Go to <strong>Attendance → All Attendance</strong>, filter by employee, status, or date range. Late entries and auto-checkouts are visually flagged.</p>
-
-        <h2>Manual corrections</h2>
-        <p>Editing a check-in or check-out time directly on a record is sometimes necessary — device downtime, a missed punch, and so on.</p>
-
-        <div class="stamp-note warn">
-          <span class="tag">Corrections don't cascade automatically</span>
-          If you manually change a check-in time in a way that would have avoided a late-arrival Permission deduction, that deduction is <strong>not</strong> automatically reversed. You'll need to refuse the associated auto-generated Permission leave record yourself if it's no longer warranted.
-        </div>
-
-        <h2>Batch summary generation</h2>
-        <p>Use <strong>Generate Summaries (Batch)</strong> to compute or recompute Monthly Summary records for all employees at once — useful at month-end before payroll, or after a bulk correction.</p>
-      </section>
-
-      <!-- 13 HR HOLIDAYS -->
-      <section class="page" id="page-hr-holidays" data-role="manager,hr">
-        <div class="crumb">Manual / HR & Policy</div>
-        <h1><span class="num">13</span> Company Holidays</h1>
-        <p class="dek">Declared holidays, the 2nd/4th Saturday rule, and compensatory working days.</p>
-
-        <h2>Declaring a holiday</h2>
-        <p>Go to <strong>Attendance → Company Holidays → New</strong>. Set the date and type (Public Holiday, Company Event, Emergency Closure). This immediately blocks check-in for that date.</p>
-
-        <h2>2nd & 4th Saturday</h2>
-        <p>These are treated as company-wide days off automatically — no need to declare them individually.</p>
-
-        <h2>Compensatory working Saturdays</h2>
-        <p>To turn a specific Saturday into a working day (to make up for a mid-week closure, for example), create a holiday record for that Saturday and enable <strong>Compensatory Working Day</strong>. This overrides the default off-day rule for that date only, and only works on Saturdays.</p>
-      </section>
-
-      <!-- 14 HR DOCUMENTS -->
-      <section class="page" id="page-hr-documents" data-role="manager,hr">
-        <div class="crumb">Manual / HR & Policy</div>
-        <h1><span class="num">14</span> Employee Records</h1>
-        <p class="dek">Managing uploaded documents across the organization.</p>
-        <p>Open an employee's profile and go to the <strong>Documents</strong> tab to view, download, or archive anything they've uploaded — ID proofs, certificates, contracts, appointment letters.</p>
-        <p>Documents preview inline in the browser. Archiving a document doesn't delete it permanently — it removes it from the employee-facing view while keeping it available to HR.</p>
-      </section>
-
-      <!-- 15 FAQ -->
-      <section class="page" id="page-faq" data-role="employee,manager,hr">
-        <div class="crumb">Manual / Reference</div>
-        <h1><span class="num">15</span> FAQ</h1>
-        <p class="dek">Quick answers, filtered to your register.</p>
-
-        <div data-role="employee,manager,hr">
-          <div class="qa">
-            <div class="q">What happens if I forget to check out?</div>
-            <div class="a">The system auto-closes your session at 7:00 PM and flags it as an Auto Checkout on your record.</div>
-          </div>
-          <div class="qa">
-            <div class="q">Can I request leave for a past date?</div>
-            <div class="a">Not directly — only HR can backdate a leave request on your behalf.</div>
-          </div>
-          <div class="qa">
-            <div class="q">What's the difference between Permission leave and regular leave?</div>
-            <div class="a">Permission is a monthly 4-hour buffer specifically for late arrivals or short personal errands, billed in hours. Regular leave (CL/EL/ML) is billed in full or half days.</div>
-          </div>
-        </div>
-
-        <div data-role="manager,hr">
-          <div class="qa">
-            <div class="q">Can I approve one half of a half-day leave and reject the other?</div>
-            <div class="a">Yes — AM and PM halves are separate records, so they can be approved or refused independently.</div>
-          </div>
-        </div>
-
-        <div data-role="manager,hr">
-          <div class="qa">
-            <div class="q">How do I tell an auto-deducted Permission leave from a manually requested one?</div>
-            <div class="a">Auto-generated records from late-arrival deductions are flagged internally and don't trigger the standard "your leave was approved" notification, to avoid confusing the employee.</div>
-          </div>
-          <div class="qa">
-            <div class="q">What if Permission overflow doesn't show up on a payslip?</div>
-            <div class="a">Run the Monthly Summary for that employee and month before recomputing payroll — overflow minutes flow through the summary, not directly from attendance.</div>
-          </div>
-        </div>
-
-        <div data-role="employee,manager,hr">
-          <div class="qa">
-            <div class="q">My role looks wrong / I can't see a section I should have access to.</div>
-            <div class="a">Click "Refresh My Access" in the header — it re-checks your role from the ERP. If it's still wrong, your employee_role field in HR needs updating; contact HR.</div>
-          </div>
-        </div>
-      </section>
-
-      <div class="empty-search" id="emptyState" style="display:none;">No matching sections. Try a different term.</div>
-
-    </main>
-  </div>
-
-  <footer class="foot">SMS ENTERPRISES · TIRUCHIRAPPALLI, TAMIL NADU · INTERNAL USE ONLY</footer>
+    <footer class="foot">SMS ENTERPRISES · TIRUCHIRAPPALLI, TAMIL NADU · INTERNAL USE ONLY</footer>
 </div>
 
 <script>
-  const ROLE_LABELS = { employee: 'EMPLOYEE', manager: 'MANAGER', hr: 'HR OFFICER' };
+    const ROLE_LABELS = {employee: 'EMPLOYEE', manager: 'MANAGER', hr: 'HR OFFICER'};
 
-  // --------------------------------------------------------------
-  // The ONLY source of truth for role is this fetch call, which the
-  // server answers by reading hr.employee.employee_role for whoever
-  // is actually logged in (see ManualController.my_role). There is
-  // no client-side selector, no localStorage override, nothing the
-  // browser can lie about.
-  // --------------------------------------------------------------
-  async function verifyAndEnter(){
-    try{
-      const res = await fetch('/manual/my_role', { credentials: 'same-origin' });
-      if(!res.ok) throw new Error('bad status ' + res.status);
-      const data = await res.json();
-      const role = ROLE_LABELS[data.role] ? data.role : 'employee';
+    // --------------------------------------------------------------
+    // The ONLY source of truth for role is this fetch call, which the
+    // server answers by reading hr.employee.employee_role for whoever
+    // is actually logged in (see ManualController.my_role). There is
+    // no client-side selector, no localStorage override, nothing the
+    // browser can lie about.
+    // --------------------------------------------------------------
+    async function verifyAndEnter() {
+        try {
+            const res = await fetch('/manual/my_role', {credentials: 'same-origin'});
+            if (!res.ok) throw new Error('bad status ' + res.status);
+            const data = await res.json();
+            const role = ROLE_LABELS[data.role] ? data.role : 'employee';
 
-      document.getElementById('userName').textContent = data.name || '';
+            document.getElementById('userName').textContent = data.name || '';
 
-      const overlay = document.getElementById('stampOverlay');
-      const text = document.getElementById('stampText');
-      text.textContent = ROLE_LABELS[role] + ' ACCESS';
-      overlay.classList.add('fire');
+            const overlay = document.getElementById('stampOverlay');
+            const text = document.getElementById('stampText');
+            text.textContent = ROLE_LABELS[role] + ' ACCESS';
+            overlay.classList.add('fire');
 
-      setTimeout(() => {
-        enterPortal(role);
-        overlay.classList.remove('fire');
-      }, 480);
+            setTimeout(() => {
+                enterPortal(role);
+                overlay.classList.remove('fire');
+            }, 480);
 
-    }catch(err){
-      document.getElementById('gateSub').style.display = 'none';
-      document.getElementById('gateError').style.display = 'block';
-    }
-  }
-
-  function enterPortal(role){
-    document.getElementById('gate').style.display = 'none';
-    document.getElementById('portal').classList.add('active');
-    document.getElementById('rolePill').textContent = ROLE_LABELS[role];
-    applyRoleVisibility(role);
-    goTo('overview', document.querySelector('.nav-item[data-target="overview"]'));
-  }
-
-  function applyRoleVisibility(role){
-    document.querySelectorAll('[data-role]').forEach(el => {
-      const allowed = el.dataset.role.split(',');
-      el.style.display = allowed.includes(role) ? '' : 'none';
-    });
-  }
-
-  // Re-checks role from the server. Useful if HR just changed someone's
-  // employee_role while they had this tab open.
-  function refreshAccess(){
-    document.getElementById('portal').classList.remove('active');
-    document.getElementById('gate').style.display = 'flex';
-    document.getElementById('gateSub').style.display = 'block';
-    document.getElementById('gateError').style.display = 'none';
-    verifyAndEnter();
-  }
-
-  function goTo(targetId, el){
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById('page-' + targetId);
-    if(target) target.classList.add('active');
-
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    if(el) el.classList.add('active');
-
-    document.getElementById('mainContent').scrollTop = 0;
-    window.scrollTo(0,0);
-
-    document.getElementById('searchBox').value = '';
-    document.getElementById('emptyState').style.display = 'none';
-  }
-
-  function doSearch(){
-    const term = document.getElementById('searchBox').value.trim().toLowerCase();
-    const role = document.getElementById('rolePill').textContent === 'HR OFFICER' ? 'hr'
-               : document.getElementById('rolePill').textContent === 'MANAGER' ? 'manager'
-               : 'employee';
-
-    if(term === ''){
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      const activeNav = document.querySelector('.nav-item.active') || document.querySelector('.nav-item[data-target="overview"]');
-      const target = document.getElementById('page-' + activeNav.dataset.target);
-      if(target) target.classList.add('active');
-      document.getElementById('emptyState').style.display = 'none';
-      return;
+        } catch (err) {
+            document.getElementById('gateSub').style.display = 'none';
+            document.getElementById('gateError').style.display = 'block';
+        }
     }
 
-    let anyMatch = false;
-    document.querySelectorAll('.page').forEach(page => {
-      const allowedRoles = (page.dataset.role || '').split(',');
-      const visibleToRole = allowedRoles.includes(role);
-      const text = page.textContent.toLowerCase();
-      const matches = visibleToRole && text.includes(term);
-      page.classList.toggle('active', matches);
-      if(matches) anyMatch = true;
-    });
+    function enterPortal(role) {
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('portal').classList.add('active');
+        document.getElementById('rolePill').textContent = ROLE_LABELS[role];
+        applyRoleVisibility(role);
+        goTo('overview', document.querySelector('.nav-item[data-target="overview"]'));
+    }
 
-    document.getElementById('emptyState').style.display = anyMatch ? 'none' : 'block';
-  }
+    function applyRoleVisibility(role) {
+        document.querySelectorAll('[data-role]').forEach(el => {
+            const allowed = el.dataset.role.split(',');
+            el.style.display = allowed.includes(role) ? '' : 'none';
+        });
+    }
 
-  window.addEventListener('DOMContentLoaded', verifyAndEnter);
+    // Re-checks role from the server. Useful if HR just changed someone's
+    // employee_role while they had this tab open.
+    function refreshAccess() {
+        document.getElementById('portal').classList.remove('active');
+        document.getElementById('gate').style.display = 'flex';
+        document.getElementById('gateSub').style.display = 'block';
+        document.getElementById('gateError').style.display = 'none';
+        verifyAndEnter();
+    }
+
+    function goTo(targetId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const target = document.getElementById('page-' + targetId);
+        if (target) target.classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if (el) el.classList.add('active');
+
+        document.getElementById('mainContent').scrollTop = 0;
+        window.scrollTo(0, 0);
+
+        document.getElementById('searchBox').value = '';
+        document.getElementById('emptyState').style.display = 'none';
+    }
+
+    function doSearch() {
+        const term = document.getElementById('searchBox').value.trim().toLowerCase();
+        const role = document.getElementById('rolePill').textContent === 'HR OFFICER' ? 'hr'
+            : document.getElementById('rolePill').textContent === 'MANAGER' ? 'manager'
+                : 'employee';
+
+        if (term === '') {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const activeNav = document.querySelector('.nav-item.active') || document.querySelector('.nav-item[data-target="overview"]');
+            const target = document.getElementById('page-' + activeNav.dataset.target);
+            if (target) target.classList.add('active');
+            document.getElementById('emptyState').style.display = 'none';
+            return;
+        }
+
+        let anyMatch = false;
+        document.querySelectorAll('.page').forEach(page => {
+            const allowedRoles = (page.dataset.role || '').split(',');
+            const visibleToRole = allowedRoles.includes(role);
+            const text = page.textContent.toLowerCase();
+            const matches = visibleToRole && text.includes(term);
+            page.classList.toggle('active', matches);
+            if (matches) anyMatch = true;
+        });
+
+        document.getElementById('emptyState').style.display = anyMatch ? 'none' : 'block';
+    }
+
+    window.addEventListener('DOMContentLoaded', verifyAndEnter);
 </script>
 
 </body>
