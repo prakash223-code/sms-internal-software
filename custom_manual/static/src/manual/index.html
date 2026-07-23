@@ -855,11 +855,12 @@
 
             <div class="nav-group" data-role="employee,manager,hr">
                 <div class="nav-group-label">Reference</div>
-                <div class="nav-item" data-target="casestudy" onclick="goTo('casestudy', this)"><span
-                        class="idx">19</span> Case Studies
+                <div class="nav-item" data-target="contacts" data-role="manager,hr"
+                     onclick="goTo('contacts', this)"><span
+                        class="idx">19</span> Contacts
                 </div>
-                <div class="nav-item" data-target="contacts" onclick="goTo('contacts', this)"><span
-                        class="idx">20</span> Contacts
+                <div class="nav-item" data-target="casestudy" onclick="goTo('casestudy', this)"><span
+                        class="idx">20</span> Case Studies
                 </div>
                 <div class="nav-item" data-target="discuss" onclick="goTo('discuss', this)"><span class="idx">21</span>
                     Discuss
@@ -2437,10 +2438,56 @@
                 </div>
             </section>
 
-            <!-- 19 CASE STUDY -->
+            <!-- 19 CONTACTS -->
+            <section class="page" id="page-contacts" data-role="manager,hr">
+                <div class="crumb">Manual / HR & Policy</div>
+                <h1><span class="num">19</span> Contacts — Auto Company ID</h1>
+                <p class="dek">One custom addition to standard Contacts: every company contact gets a unique,
+                    auto-generated ID.</p>
+
+                <h2>How it works</h2>
+                <p>When you save a new contact marked as a <strong>Company</strong> (not an individual), the system
+                    automatically generates a unique <strong>Company ID</strong> the first time you click Save — visible
+                    as a read-only badge next to the contact's name.</p>
+                <ul>
+                    <li>Indian companies (Country = India) get an ID prefixed with <strong>N</strong> (e.g. <code>N001SMSTECHGARMENTS</code>).
+                    </li>
+                    <li>Companies from any other country get an ID prefixed with <strong>IN</strong> (e.g. <code>IN001ACMECORP</code>).
+                    </li>
+                </ul>
+                <p>The ID is built from a running sequence number plus the company name with spaces and special
+                    characters stripped out.</p>
+
+                <div class="stamp-note warn">
+                    <span class="tag">Country is mandatory for companies</span>
+                    You can't save a contact marked as a Company without selecting a Country — the system blocks the
+                    save until it's set, since the Company ID's prefix depends on it.
+                </div>
+
+                <h2>If a contact is missing its Company ID</h2>
+                <p>This can happen for contacts converted from an individual to a company, or ones created before this
+                    feature existed.</p>
+                <ol>
+                    <li>Open the contact.</li>
+                    <li>Click <strong>Generate Company ID</strong> next to the name field — this button only appears if
+                        the contact is a Company and doesn't already have an ID.
+                    </li>
+                </ol>
+
+                <h2>Individual contacts under a company</h2>
+                <p>A person linked to a company (via the <strong>Related Company</strong> field) shows that company's ID
+                    on their own contact form too, for quick reference — this is read-only and just mirrors the parent
+                    company's ID.</p>
+
+                <h2>Where else this shows up</h2>
+                <p>On a CRM lead or opportunity, the linked contact's Company ID appears as a badge next to the customer
+                    field, so you can identify the account at a glance while working the deal.</p>
+            </section>
+
+            <!-- 20 CASE STUDY -->
             <section class="page" id="page-casestudy" data-role="employee,manager,hr">
                 <div class="crumb">Manual / Reference</div>
-                <h1><span class="num">19</span> Case Studies</h1>
+                <h1><span class="num">20</span> Case Studies</h1>
                 <p class="dek">A shared record of completed work — organized by department, with timesheets and
                     documents attached. Everyone can browse; only assigned employees and HR can edit.</p>
 
@@ -2510,52 +2557,6 @@
                     Only HR can add or remove people from the Assigned Employees list, even before the case study is
                     confirmed. If you're assigned and need someone else added to the team, ask HR to update it.
                 </div>
-            </section>
-
-            <!-- 20 CONTACTS -->
-            <section class="page" id="page-contacts" data-role="manager,hr">
-                <div class="crumb">Manual / HR & Policy</div>
-                <h1><span class="num">20</span> Contacts — Auto Company ID</h1>
-                <p class="dek">One custom addition to standard Contacts: every company contact gets a unique,
-                    auto-generated ID.</p>
-
-                <h2>How it works</h2>
-                <p>When you save a new contact marked as a <strong>Company</strong> (not an individual), the system
-                    automatically generates a unique <strong>Company ID</strong> the first time you click Save — visible
-                    as a read-only badge next to the contact's name.</p>
-                <ul>
-                    <li>Indian companies (Country = India) get an ID prefixed with <strong>N</strong> (e.g. <code>N001SMSTECHGARMENTS</code>).
-                    </li>
-                    <li>Companies from any other country get an ID prefixed with <strong>IN</strong> (e.g. <code>IN001ACMECORP</code>).
-                    </li>
-                </ul>
-                <p>The ID is built from a running sequence number plus the company name with spaces and special
-                    characters stripped out.</p>
-
-                <div class="stamp-note warn">
-                    <span class="tag">Country is mandatory for companies</span>
-                    You can't save a contact marked as a Company without selecting a Country — the system blocks the
-                    save until it's set, since the Company ID's prefix depends on it.
-                </div>
-
-                <h2>If a contact is missing its Company ID</h2>
-                <p>This can happen for contacts converted from an individual to a company, or ones created before this
-                    feature existed.</p>
-                <ol>
-                    <li>Open the contact.</li>
-                    <li>Click <strong>Generate Company ID</strong> next to the name field — this button only appears if
-                        the contact is a Company and doesn't already have an ID.
-                    </li>
-                </ol>
-
-                <h2>Individual contacts under a company</h2>
-                <p>A person linked to a company (via the <strong>Related Company</strong> field) shows that company's ID
-                    on their own contact form too, for quick reference — this is read-only and just mirrors the parent
-                    company's ID.</p>
-
-                <h2>Where else this shows up</h2>
-                <p>On a CRM lead or opportunity, the linked contact's Company ID appears as a badge next to the customer
-                    field, so you can identify the account at a glance while working the deal.</p>
             </section>
 
             <!-- 21 DISCUSS -->
