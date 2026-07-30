@@ -28,3 +28,12 @@ def post_init_hook(env):
     ])
     if apps_menus:
         apps_menus.write({'group_ids': restrict})
+
+    # --- Saturday working hours setup ---
+    # Adds Saturday (dayofweek=5) as a working day to the company's resource
+    # calendar so 1st/3rd/5th Saturdays render as normal working days in the
+    # Time Off calendar. Without this, ALL Saturdays show grey (like Sunday)
+    # regardless of the 2nd/4th [SAT-OFF] holiday logic, since the calendar
+    # has no working hours defined for Saturday at all by default.
+    # Idempotent — setup_saturday_in_calendar() only adds if not already present.
+    env['company.holiday'].setup_saturday_in_calendar()

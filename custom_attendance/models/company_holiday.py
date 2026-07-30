@@ -6,18 +6,18 @@ import pytz
 
 
 class CompanyHoliday(models.Model):
-    _name        = 'company.holiday'
+    _name = 'company.holiday'
     _description = 'Company Holiday'
-    _order       = 'date asc'
-    _rec_name    = 'name'
+    _order = 'date asc'
+    _rec_name = 'name'
 
-    name             = fields.Char(string='Holiday Name', required=True)
-    date             = fields.Date(string='Date', required=True)
-    holiday_type     = fields.Selection([
-        ('public',    'Public Holiday'),
-        ('event',     'Company Event'),
+    name = fields.Char(string='Holiday Name', required=True)
+    date = fields.Date(string='Date', required=True)
+    holiday_type = fields.Selection([
+        ('public', 'Public Holiday'),
+        ('event', 'Company Event'),
         ('emergency', 'Emergency Closure'),
-        ('other',     'Other'),
+        ('other', 'Other'),
     ], string='Type', default='public')
     is_working_override = fields.Boolean(
         string='Mark as Compensatory Working Day',
@@ -27,7 +27,7 @@ class CompanyHoliday(models.Model):
              'next week, or even next month.',
     )
     description = fields.Text(string='Notes')
-    active      = fields.Boolean(default=True)
+    active = fields.Boolean(default=True)
 
     day_label = fields.Char(
         string='Day',
@@ -64,8 +64,8 @@ class CompanyHoliday(models.Model):
     def _check_duplicate(self):
         for rec in self:
             duplicate = self.search([
-                ('date',   '=', rec.date),
-                ('id',     '!=', rec.id),
+                ('date', '=', rec.date),
+                ('id', '!=', rec.id),
                 ('active', '=', True),
             ], limit=1)
             if duplicate:
@@ -104,34 +104,29 @@ class CompanyHoliday(models.Model):
         return self.sudo().env.company.resource_calendar_id
 
     def _date_to_utc_range(self, d):
-        tz = pytz.timezone('Asia/Kolkata')
-        dt_from = tz.localize(datetime.combine(d, time(0, 0, 0)))
-        dt_to   = tz.localize(datetime.combine(d, time(23, 59, 59)))
-        return (
-            dt_from.astimezone(pytz.utc).replace(tzinfo=None),
-            dt_to.astimezone(pytz.utc).replace(tzinfo=None),
-        )
+        """
+        Pass naive local (calendar-timezone) wall-clock boundaries directly.
+        hr_holidays' _prepare_public_holidays_values() on resource.calendar.leaves
+        automatically converts these from env.user.tz to the calendar's tz and
+        stores the UTC equivalent — this is standard Odoo behavior for whole-day
+        public-holiday-style records. Do NOT pre-convert here; that causes a
+        double-shift.
+        """
+        dt_from = datetime.combine(d, time(0, 0, 0))
+        dt_to = datetime.combine(d, time(23, 59, 59))
+        return (dt_from, dt_to)
 
     def _get_resource_leave_name(self):
         return f'[CH-{self.id}] {self.name}'
 
     def _sync_resource_leave(self):
-        """
-        For declared holidays → create resource.calendar.leaves so the
-        day appears greyed out in Time Off calendar.
-
-        For working overrides → remove any existing SAT-OFF leave for
-        that date so the compensatory Saturday appears as a working day.
-        """
         self.ensure_one()
         if not self.active:
             return
-
         calendar = self._get_company_calendar()
         if not calendar:
             return
-
-        ResLeave = self.env['resource.calendar.leaves'].sudo()
+        ResLeave = self.env['resource.calendar.leaves'].sudo().with_context(tz=calendar.tz)
 
         if self.is_working_override:
             # Remove the SAT-OFF cron-generated leave for this date
@@ -141,10 +136,10 @@ class CompanyHoliday(models.Model):
             # Declared holiday → add to resource leaves
             date_from_utc, date_to_utc = self._date_to_utc_range(self.date)
             ResLeave.create({
-                'name':        self._get_resource_leave_name(),
+                'name': self._get_resource_leave_name(),
                 'calendar_id': calendar.id,
-                'date_from':   date_from_utc,
-                'date_to':     date_to_utc,
+                'date_from': date_from_utc,
+                'date_to': date_to_utc,
                 'resource_id': False,
             })
 
@@ -156,23 +151,17 @@ class CompanyHoliday(models.Model):
         ]).unlink()
 
     def _remove_saturday_off_leave_for_date(self, target_date):
-        """
-        Remove the [SAT-OFF] resource.calendar.leaves entry for a specific
-        date so a compensatory Saturday appears as a working day in the
-        Time Off calendar.
-        """
         calendar = self._get_company_calendar()
         if not calendar:
             return
 
-        tz = pytz.timezone('Asia/Kolkata')
         date_from_utc, date_to_utc = self._date_to_utc_range(target_date)
 
         self.env['resource.calendar.leaves'].sudo().search([
             ('calendar_id', '=', calendar.id),
             ('name',        'like', '[SAT-OFF]'),
-            ('date_from',   '>=', date_from_utc),
             ('date_from',   '<=', date_to_utc),
+            ('date_to',     '>=', date_from_utc),
         ]).unlink()
 
     # ------------------------------------------------------------------
@@ -199,7 +188,7 @@ class CompanyHoliday(models.Model):
         # Check if Saturday already exists in attendance lines
         existing_saturday = self.env['resource.calendar.attendance'].search([
             ('calendar_id', '=', calendar.id),
-            ('dayofweek',   '=', '5'),
+            ('dayofweek', '=', '5'),
         ])
         if existing_saturday:
             return  # already set up
@@ -207,20 +196,20 @@ class CompanyHoliday(models.Model):
         # Add Saturday morning and afternoon lines (same as other days)
         self.env['resource.calendar.attendance'].create([
             {
-                'name':        'Saturday Morning',
+                'name': 'Saturday Morning',
                 'calendar_id': calendar.id,
-                'dayofweek':   '5',
-                'hour_from':   9.25,   # 9:15 AM
-                'hour_to':     13.0,
-                'day_period':  'morning',
+                'dayofweek': '5',
+                'hour_from': 9.25,  # 9:15 AM
+                'hour_to': 13.0,
+                'day_period': 'morning',
             },
             {
-                'name':        'Saturday Afternoon',
+                'name': 'Saturday Afternoon',
                 'calendar_id': calendar.id,
-                'dayofweek':   '5',
-                'hour_from':   14.0,
-                'hour_to':     18.25,  # 6:15 PM
-                'day_period':  'afternoon',
+                'dayofweek': '5',
+                'hour_from': 14.0,
+                'hour_to': 18.25,  # 6:15 PM
+                'day_period': 'afternoon',
             },
         ])
 
@@ -237,8 +226,8 @@ class CompanyHoliday(models.Model):
         """
         import calendar as cal_module
 
-        today    = date.today()
-        years    = [today.year, today.year + 1]
+        today = date.today()
+        years = [today.year, today.year + 1]
         calendar = self.env.company.resource_calendar_id
         ResLeave = self.env['resource.calendar.leaves'].sudo()
 
@@ -246,21 +235,21 @@ class CompanyHoliday(models.Model):
             return
 
         existing = ResLeave.search([
-            ('name',        'like', '[SAT-OFF]'),
-            ('calendar_id', '=',    calendar.id),
+            ('name', 'like', '[SAT-OFF]'),
+            ('calendar_id', '=', calendar.id),
         ])
         existing_names = {r.name for r in existing}
 
         override_dates = {
             rec.date for rec in self.search([
                 ('is_working_override', '=', True),
-                ('active',              '=', True),
+                ('active', '=', True),
             ])
         }
 
         for year in years:
             for month in range(1, 13):
-                num_days  = cal_module.monthrange(year, month)[1]
+                num_days = cal_module.monthrange(year, month)[1]
                 saturdays = [
                     date(year, month, d)
                     for d in range(1, num_days + 1)
@@ -273,17 +262,17 @@ class CompanyHoliday(models.Model):
                         continue
 
                     ordinal = '2nd' if idx == 2 else '4th'
-                    name    = f'[SAT-OFF] {sat.strftime("%Y-%m")} {ordinal} Saturday'
+                    name = f'[SAT-OFF] {sat.strftime("%Y-%m")} {ordinal} Saturday'
 
                     if name in existing_names:
                         continue
 
                     date_from_utc, date_to_utc = self._date_to_utc_range(sat)
                     ResLeave.create({
-                        'name':        name,
+                        'name': name,
                         'calendar_id': calendar.id,
-                        'date_from':   date_from_utc,
-                        'date_to':     date_to_utc,
+                        'date_from': date_from_utc,
+                        'date_to': date_to_utc,
                         'resource_id': False,
                     })
                     existing_names.add(name)
@@ -298,9 +287,9 @@ class CompanyHoliday(models.Model):
             check_date = check_date.date()
 
         override = self.search([
-            ('date',               '=', check_date),
-            ('is_working_override','=', True),
-            ('active',             '=', True),
+            ('date', '=', check_date),
+            ('is_working_override', '=', True),
+            ('active', '=', True),
         ], limit=1)
         if override:
             return False
@@ -311,9 +300,9 @@ class CompanyHoliday(models.Model):
                 return True
 
         return bool(self.search([
-            ('date',               '=', check_date),
-            ('is_working_override','=', False),
-            ('active',             '=', True),
+            ('date', '=', check_date),
+            ('is_working_override', '=', False),
+            ('active', '=', True),
         ], limit=1))
 
     @api.model
@@ -321,18 +310,18 @@ class CompanyHoliday(models.Model):
         holidays = set()
 
         overrides = self.search([
-            ('date',               '>=', date_from),
-            ('date',               '<=', date_to),
-            ('is_working_override','=',  True),
-            ('active',             '=',  True),
+            ('date', '>=', date_from),
+            ('date', '<=', date_to),
+            ('is_working_override', '=', True),
+            ('active', '=', True),
         ])
         override_dates = {rec.date for rec in overrides}
 
         records = self.search([
-            ('date',               '>=', date_from),
-            ('date',               '<=', date_to),
-            ('is_working_override','=',  False),
-            ('active',             '=',  True),
+            ('date', '>=', date_from),
+            ('date', '<=', date_to),
+            ('is_working_override', '=', False),
+            ('active', '=', True),
         ])
         for rec in records:
             holidays.add(rec.date)
