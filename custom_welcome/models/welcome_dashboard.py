@@ -18,10 +18,10 @@ class WelcomeDashboard(models.TransientModel):
 
     # Greeting
     greeting_full = fields.Char(readonly=True)
-    today_label   = fields.Char(readonly=True)
+    today_label = fields.Char(readonly=True)
 
     # Quote
-    quote_text   = fields.Text(readonly=True)
+    quote_text = fields.Text(readonly=True)
     quote_author = fields.Char(readonly=True)
 
     # Employee
@@ -29,18 +29,18 @@ class WelcomeDashboard(models.TransientModel):
 
     # Attendance state
     status = fields.Selection([
-        ('out',         'Not Checked In'),
-        ('in',          'Checked In'),
-        ('done',        'All Done Today'),
-        ('holiday',     'Holiday Today'),
+        ('out', 'Not Checked In'),
+        ('in', 'Checked In'),
+        ('done', 'All Done Today'),
+        ('holiday', 'Holiday Today'),
         ('no_employee', 'No Employee Linked'),
     ], readonly=True)
 
-    last_check_in  = fields.Datetime(readonly=True)
+    last_check_in = fields.Datetime(readonly=True)
     last_check_out = fields.Datetime(readonly=True)
-    is_late        = fields.Boolean(readonly=True)
-    late_minutes   = fields.Integer(readonly=True)
-    holiday_name   = fields.Char(readonly=True)
+    is_late = fields.Boolean(readonly=True)
+    late_minutes = fields.Integer(readonly=True)
+    holiday_name = fields.Char(readonly=True)
 
     # ------------------------------------------------------------------
     # WEEKLY SUMMARY FIELDS
@@ -97,9 +97,9 @@ class WelcomeDashboard(models.TransientModel):
             res['quote_author'] = f'"குறள் #{q.kural_number}'
 
         # ── 2. Greeting ────────────────────────────────────────────────
-        ist      = pytz.timezone('Asia/Kolkata')
-        now_ist  = datetime.now(ist)
-        hour     = now_ist.hour
+        ist = pytz.timezone('Asia/Kolkata')
+        now_ist = datetime.now(ist)
+        hour = now_ist.hour
 
         if 5 <= hour < 12:
             salutation = 'Good Morning'
@@ -116,13 +116,26 @@ class WelcomeDashboard(models.TransientModel):
         )
         if not employee:
             res['greeting_full'] = f'{salutation}!'
-            res['status']        = 'no_employee'
+            res['status'] = 'no_employee'
             self._load_announcements(res)
             return res
 
-        first_name = employee.name.split()[0] if employee.name else employee.name
+        if employee.name:
+            words = employee.name.split()
+            titles = {'dr', 'mr', 'mrs', 'ms', 'prof', 'er', 'shri', 'smt'}
+            first_name = employee.name  # fallback
+            for word in words:
+                clean = word.rstrip('.').lower()
+                # Skip known titles AND single-letter initials (e.g. "R", "K")
+                if clean in titles or len(clean) == 1:
+                    continue
+                first_name = word
+                break
+        else:
+            first_name = employee.name
+
         res['greeting_full'] = f'{salutation}, {first_name}!'
-        res['employee_id']   = employee.id
+        res['employee_id'] = employee.id
 
         # ── 4. Timezone helpers ────────────────────────────────────────
         tz_name = employee.tz or 'Asia/Kolkata'
@@ -131,31 +144,31 @@ class WelcomeDashboard(models.TransientModel):
         except pytz.UnknownTimeZoneError:
             tz = pytz.timezone('Asia/Kolkata')
 
-        now_utc     = pytz.utc.localize(fields.Datetime.now())
+        now_utc = pytz.utc.localize(fields.Datetime.now())
         today_local = now_utc.astimezone(tz).date()
 
         # ── 5. Weekly summary ──────────────────────────────────────────
         self._compute_weekly_stats(res, employee, today_local, tz)
 
         # ── 6. Open attendance session? ────────────────────────────────
-        Attendance   = self.env['hr.attendance'].sudo()
+        Attendance = self.env['hr.attendance'].sudo()
         open_session = Attendance.search([
             ('employee_id', '=', employee.id),
-            ('check_out',   '=', False),
+            ('check_out', '=', False),
         ], limit=1)
 
         if open_session:
-            res['status']        = 'in'
+            res['status'] = 'in'
             res['last_check_in'] = open_session.check_in
-            res['is_late']       = open_session.is_late
-            res['late_minutes']  = open_session.late_minutes
+            res['is_late'] = open_session.is_late
+            res['late_minutes'] = open_session.late_minutes
             self._load_announcements(res)
             return res
 
         # ── 7. Holiday check ───────────────────────────────────────────
         Holiday = self.env['company.holiday'].sudo()
         if Holiday.is_holiday(today_local):
-            res['status']       = 'holiday'
+            res['status'] = 'holiday'
             res['holiday_name'] = (
                 self.env['hr.attendance'].sudo()._get_holiday_name(today_local)
             )
@@ -166,23 +179,23 @@ class WelcomeDashboard(models.TransientModel):
         today_start_utc = tz.localize(
             datetime.combine(today_local, time(0, 0, 0))
         ).astimezone(pytz.utc).replace(tzinfo=None)
-        today_end_utc   = tz.localize(
+        today_end_utc = tz.localize(
             datetime.combine(today_local, time(23, 59, 59))
         ).astimezone(pytz.utc).replace(tzinfo=None)
 
         completed = Attendance.search([
             ('employee_id', '=', employee.id),
-            ('check_in',    '>=', today_start_utc),
-            ('check_in',    '<=', today_end_utc),
-            ('check_out',   '!=', False),
+            ('check_in', '>=', today_start_utc),
+            ('check_in', '<=', today_end_utc),
+            ('check_out', '!=', False),
         ], limit=1, order='check_in desc')
 
         if completed:
-            res['status']        = 'done'
-            res['last_check_in']  = completed.check_in
+            res['status'] = 'done'
+            res['last_check_in'] = completed.check_in
             res['last_check_out'] = completed.check_out
-            res['is_late']        = completed.is_late
-            res['late_minutes']   = completed.late_minutes
+            res['is_late'] = completed.is_late
+            res['late_minutes'] = completed.late_minutes
             self._load_announcements(res)
             return res
 
@@ -207,8 +220,8 @@ class WelcomeDashboard(models.TransientModel):
                            which day of the week it currently is.
         """
         # Monday of the current week
-        days_since_monday = today_local.weekday()   # 0 = Monday
-        week_start_local  = today_local - timedelta(days=days_since_monday)
+        days_since_monday = today_local.weekday()  # 0 = Monday
+        week_start_local = today_local - timedelta(days=days_since_monday)
 
         # End of the working week = Saturday (weekday 5)
         week_end_local = week_start_local + timedelta(days=5)
@@ -223,15 +236,15 @@ class WelcomeDashboard(models.TransientModel):
         ).astimezone(pytz.utc).replace(tzinfo=None)
 
         Attendance = self.env['hr.attendance'].sudo()
-        week_atts  = Attendance.search([
+        week_atts = Attendance.search([
             ('employee_id', '=', employee.id),
-            ('check_in',    '>=', week_start_utc),
-            ('check_in',    '<=', today_end_utc),
+            ('check_in', '>=', week_start_utc),
+            ('check_in', '<=', today_end_utc),
         ])
 
-        present_dates  = set()
-        total_hours    = 0.0
-        late_count     = 0
+        present_dates = set()
+        total_hours = 0.0
+        late_count = 0
 
         now_utc_naive = datetime.utcnow()
 
@@ -272,8 +285,8 @@ class WelcomeDashboard(models.TransientModel):
 
         res['week_present_days'] = len(present_dates)
         res['week_working_days'] = working_days
-        res['week_hours']        = round(total_hours, 1)
-        res['week_late_count']   = late_count
+        res['week_hours'] = round(total_hours, 1)
+        res['week_late_count'] = late_count
 
     # ------------------------------------------------------------------
     # ANNOUNCEMENTS HELPER
@@ -302,11 +315,11 @@ class WelcomeDashboard(models.TransientModel):
             raise
 
         return {
-            'type':       'ir.actions.act_window',
-            'res_model':  'welcome.dashboard',
-            'view_mode':  'form',
-            'target':     'main',
-            'name':       'Welcome',
+            'type': 'ir.actions.act_window',
+            'res_model': 'welcome.dashboard',
+            'view_mode': 'form',
+            'target': 'main',
+            'name': 'Welcome',
         }
 
     # ------------------------------------------------------------------
@@ -333,11 +346,11 @@ class WelcomeDashboard(models.TransientModel):
         if not employee:
             return False
         return {
-            'type':      'ir.actions.act_window',
+            'type': 'ir.actions.act_window',
             'res_model': 'hr.employee',
-            'res_id':    employee.id,
+            'res_id': employee.id,
             'view_mode': 'form',
-            'target':    'current',
+            'target': 'current',
         }
 
     def action_view_my_monthly_summary(self):
