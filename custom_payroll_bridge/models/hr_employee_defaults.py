@@ -69,6 +69,8 @@ _ROLE_GROUPS = {
         # though HR has broad access elsewhere in this module (tasks,
         # stages, etc. via hr.group_hr_user checks). If that ever needs to
         # change, add 'custom_project.group_team_manager' here too.
+        'account.group_account_invoice',  # or account.group_account_readonly, depending on scope
+        'stock.group_stock_user',
     ],
     'manager': [
         # ── Base ──────────────────────────────────────────────────────────────
@@ -117,6 +119,8 @@ _ROLE_GROUPS = {
         # group_mrp_custom_manager implied_ids already pulls in
         # group_mrp_custom_user, so all menus/views are covered.
         'custom_manufacturing.group_mrp_custom_manager',
+        'account.group_account_manager',
+        'stock.group_stock_manager',
     ],
 }
 
@@ -205,8 +209,8 @@ class HrEmployeeDefaults(models.Model):
         # Also treat the manufacturing groups as managed so they are stripped
         # cleanly when an employee moves out of the manufacturing department.
         for xml_id in (
-            'custom_manufacturing.group_mrp_custom_user',
-            'custom_manufacturing.group_mrp_custom_manager',
+                'custom_manufacturing.group_mrp_custom_user',
+                'custom_manufacturing.group_mrp_custom_manager',
         ):
             try:
                 all_managed_ids.add(self.env.ref(xml_id).id)
