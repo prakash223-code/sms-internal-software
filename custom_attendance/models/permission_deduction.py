@@ -75,6 +75,21 @@ class HrAttendancePermissionDeduction(models.Model):
         elif new_remaining * 60 <= 30:
             self._notify_permission_low(employee, round(new_remaining * 60))
 
+    def write(self, vals):
+        res = super().write(vals)
+        if 'check_in' in vals or 'employee_id' in vals:
+            for record in self:
+                if record.check_in and record.employee_id:
+                    record.flush_recordset(['is_late', 'late_minutes'])
+                    record._apply_permission_deduction()
+        return res
+
+    def unlink(self):
+        for record in self:
+            if record.check_in and record.employee_id:
+                record._clear_stale_auto_permission_leave()
+        return super().unlink()
+
     # ------------------------------------------------------------------
     # HELPERS
     # ------------------------------------------------------------------
@@ -266,3 +281,4 @@ class HrAttendancePermissionDeduction(models.Model):
             body=body,
             subtype_xmlid='mail.mt_comment',
         )
+
