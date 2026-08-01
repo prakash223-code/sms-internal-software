@@ -59,7 +59,7 @@ class HrEmployeePermissionPolicy(models.Model):
             hours_per_day = employee.resource_calendar_id.hours_per_day or 8.0
             number_of_days = (PERMISSION_MINUTES / 60.0) / hours_per_day
 
-            Allocation.create({
+            new_alloc = Allocation.create({
                 'name': f'Permission — {month_start.strftime("%B %Y")}',
                 'employee_id': employee.id,
                 'holiday_status_id': leave_type.id,
@@ -68,6 +68,7 @@ class HrEmployeePermissionPolicy(models.Model):
                 'date_to': month_end,
                 'state': 'confirm',
             })
+            new_alloc.action_approve()
             created += 1
 
         _logger.info(

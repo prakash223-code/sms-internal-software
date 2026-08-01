@@ -15,14 +15,12 @@ class HrAttendancePermissionDeduction(models.Model):
 
     def _apply_permission_deduction(self):
         self.ensure_one()
-
         self._clear_stale_auto_permission_leave()
-
         if not self.is_late or self.late_minutes <= 0:
+            self.permission_overflow_minutes = 0
             return
 
         leave_type = self._get_permission_leave_type()
-        # ... rest unchanged from here
         if not leave_type:
             _logger.warning(
                 'Permission deduction: leave type not found — skipped for attendance %s',
@@ -281,4 +279,3 @@ class HrAttendancePermissionDeduction(models.Model):
             body=body,
             subtype_xmlid='mail.mt_comment',
         )
-
