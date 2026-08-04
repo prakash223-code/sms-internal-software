@@ -438,3 +438,4 @@ odoo-bin --addons-path=odoo/addons,custom_addons -d test_db -u <module_name> --s
 ---
 
 *Document generated from direct source inspection of all 16 custom modules (`custom_attendance`, `custom_payroll_bridge`, `custom_project`, `custom_project_document`, `case_study`, `custom_crm_project`, `custom_expense`, `custom_hr_document`, `custom_work_report`, `custom_welcome`, `custom_login_theme`, `custom_session_expire`, `custom_manual`, `custom_company_auto_id`, `custom_employee_id`, `custom_manufacturing`) plus the third-party dependency list, as of the module versions stated in each section. No content here was inferred without a corresponding code reference.*
+masteradmin
