@@ -74,7 +74,7 @@
     <menuitem
             id="menu_company_holidays"
             name="Company Holidays"
-            parent="hr_attendance.menu_hr_attendance_root"
+            parent="hr_holidays.menu_hr_holidays_configuration"
             action="action_company_holidays"
             sequence="80"
             groups="hr.group_hr_user,hr_attendance.group_hr_attendance_manager"/>

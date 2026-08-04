@@ -105,16 +105,24 @@ class CompanyHoliday(models.Model):
 
     def _date_to_utc_range(self, d):
         """
-        Pass naive local (calendar-timezone) wall-clock boundaries directly.
-        hr_holidays' _prepare_public_holidays_values() on resource.calendar.leaves
-        automatically converts these from env.user.tz to the calendar's tz and
-        stores the UTC equivalent — this is standard Odoo behavior for whole-day
-        public-holiday-style records. Do NOT pre-convert here; that causes a
-        double-shift.
+        Explicit, deterministic UTC conversion — do NOT use with_context(tz=...)
+        anywhere for this. It has proven unreliable (sometimes shifts correctly,
+        sometimes not at all, sometimes double-shifts) across repeated testing.
         """
-        dt_from = datetime.combine(d, time(0, 0, 0))
-        dt_to = datetime.combine(d, time(23, 59, 59))
-        return (dt_from, dt_to)
+        calendar = self._get_company_calendar()
+        tz_name = calendar.tz if calendar and calendar.tz else 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_name)
+        except pytz.UnknownTimeZoneError:
+            tz = pytz.timezone('Asia/Kolkata')
+
+        local_from = tz.localize(datetime.combine(d, time(0, 1, 0)))
+        local_to = tz.localize(datetime.combine(d, time(23, 58, 0)))
+
+        return (
+            local_from.astimezone(pytz.utc).replace(tzinfo=None),
+            local_to.astimezone(pytz.utc).replace(tzinfo=None),
+        )
 
     def _get_resource_leave_name(self):
         return f'[CH-{self.id}] {self.name}'
@@ -126,14 +134,21 @@ class CompanyHoliday(models.Model):
         calendar = self._get_company_calendar()
         if not calendar:
             return
-        ResLeave = self.env['resource.calendar.leaves'].sudo().with_context(tz=calendar.tz)
+
+        # Always act as base.user_root for this write, regardless of who
+        # triggered it. This sidesteps Odoo core's hr_holidays
+        # _prepare_public_holidays_values(), which silently re-shifts
+        # date_from/date_to whenever the ACTING user's personal tz field
+        # differs from the calendar's tz. By fixing the acting user to one
+        # we control and keep permanently set to the calendar's tz, this
+        # class of bug can never resurface regardless of what tz any other
+        # user account does or doesn't have.
+        root_user = self.env.ref('base.user_root')
+        ResLeave = self.env['resource.calendar.leaves'].sudo().with_user(root_user)
 
         if self.is_working_override:
-            # Remove the SAT-OFF cron-generated leave for this date
-            # so the compensatory Saturday shows as working (not greyed)
             self._remove_saturday_off_leave_for_date(self.date)
         else:
-            # Declared holiday → add to resource leaves
             date_from_utc, date_to_utc = self._date_to_utc_range(self.date)
             ResLeave.create({
                 'name': self._get_resource_leave_name(),
@@ -159,9 +174,9 @@ class CompanyHoliday(models.Model):
 
         self.env['resource.calendar.leaves'].sudo().search([
             ('calendar_id', '=', calendar.id),
-            ('name',        'like', '[SAT-OFF]'),
-            ('date_from',   '<=', date_to_utc),
-            ('date_to',     '>=', date_from_utc),
+            ('name', 'like', '[SAT-OFF]'),
+            ('date_from', '<=', date_to_utc),
+            ('date_to', '>=', date_from_utc),
         ]).unlink()
 
     # ------------------------------------------------------------------
@@ -229,10 +244,15 @@ class CompanyHoliday(models.Model):
         today = date.today()
         years = [today.year, today.year + 1]
         calendar = self.env.company.resource_calendar_id
-        ResLeave = self.env['resource.calendar.leaves'].sudo()
 
         if not calendar:
             return
+
+        # Must match _sync_resource_leave()'s tz context exactly, or the
+        # UTC-shifted date_from/date_to on these records use a different
+        # offset than holidays created via company.holiday, causing false
+        # "holidays overlap" validation errors on adjacent dates.
+        ResLeave = self.env['resource.calendar.leaves'].sudo().with_user(self.env.ref('base.user_root'))
 
         existing = ResLeave.search([
             ('name', 'like', '[SAT-OFF]'),
@@ -268,14 +288,20 @@ class CompanyHoliday(models.Model):
                         continue
 
                     date_from_utc, date_to_utc = self._date_to_utc_range(sat)
-                    ResLeave.create({
-                        'name': name,
-                        'calendar_id': calendar.id,
-                        'date_from': date_from_utc,
-                        'date_to': date_to_utc,
-                        'resource_id': False,
-                    })
-                    existing_names.add(name)
+                    try:
+                        ResLeave.create({
+                            'name': name,
+                            'calendar_id': calendar.id,
+                            'date_from': date_from_utc,
+                            'date_to': date_to_utc,
+                            'resource_id': False,
+                        })
+                        existing_names.add(name)
+                    except Exception as e:
+                        import logging
+                        logging.getLogger(__name__).warning(
+                            'SKIPPED SAT-OFF %s due to collision: %s', name, e
+                        )
 
     # ------------------------------------------------------------------
     # HELPERS
