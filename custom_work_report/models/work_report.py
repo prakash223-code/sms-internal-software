@@ -1,6 +1,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
+
 class WorkReport(models.Model):
     _name = 'work.report'
     _inherit = ['mail.thread']
@@ -72,6 +73,26 @@ class WorkReport(models.Model):
         return records
 
     def write(self, vals):
+        # Block edits to submitted reports for plain employees.
+        # HR/Manager are exempt so they can still fix things or use
+        # action_reset_draft without a chicken-and-egg deadlock.
+        is_hr_or_manager = self.env.user.has_group(
+            'custom_work_report.group_work_report_hr'
+        ) or self.env.user.has_group(
+            'custom_work_report.group_work_report_manager'
+        )
+        # allow the state field itself to change (e.g. action_reset_draft, action_submit)
+        non_state_fields = set(vals.keys()) - {'state'}
+
+        if non_state_fields and not is_hr_or_manager:
+            for rec in self:
+                if rec.state == 'submitted':
+                    raise ValidationError(
+                        _("This work report has already been submitted and can "
+                          "no longer be edited. Ask your HR/Manager to reset it "
+                          "to Draft first.")
+                    )
+
         res = super().write(vals)
         if 'attachment_ids' in vals:
             self._reparent_attachments()

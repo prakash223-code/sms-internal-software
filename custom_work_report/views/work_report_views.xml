@@ -116,21 +116,25 @@
                     <group>
                         <group>
                             <field name="employee_id" readonly="1"/>
-                            <field name="date"/>
+                            <field name="date" readonly="state == 'submitted'"/>
                         </group>
                         <group>
-                            <field name="project_id"/>
-                            <field name="hours_spent"/>
+                            <field name="project_id" readonly="state == 'submitted'"/>
+                            <field name="hours_spent" readonly="state == 'submitted'"/>
                         </group>
                     </group>
                     <group string="Work Done">
                         <field name="description"
                                nolabel="1"
+                               colspan="2"
+                               class="w-100"
+                               readonly="state == 'submitted'"
                                placeholder="Describe what was accomplished today..."/>
                     </group>
                     <group string="Attachments">
                         <field name="attachment_ids"
                                widget="attachment_preview"
+                               readonly="state == 'submitted'"
                                nolabel="1"/>
                     </group>
                 </sheet>
