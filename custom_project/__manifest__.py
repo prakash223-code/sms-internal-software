@@ -14,6 +14,7 @@
         'data/sequences.xml',
         # 3. Default stage records
         'data/project_stage_data.xml',
+        'data/timesheet_action_overrides.xml',
         # 4. Views
         'views/team_views.xml',
         'views/task_views.xml',

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- My Timesheets — employee-facing -->
+    <record id="hr_timesheet.act_hr_timesheet_line" model="ir.actions.act_window">
+        <field name="domain">[
+            ('project_id', '!=', False),
+            ('user_id', '=', uid),
+            ('project_id.name', '!=', 'Internal'),
+        ]</field>
+    </record>
+
+    <!-- All Timesheets — HR/Manager-facing -->
+    <record id="hr_timesheet.timesheet_action_all" model="ir.actions.act_window">
+        <field name="domain">[
+            ('project_id', '!=', False),
+            ('project_id.name', '!=', 'Internal'),
+        ]</field>
+    </record>
+
+</odoo>

@@ -17,13 +17,13 @@
                   create="0"
                   delete="0"
                   decoration-muted="unit_amount == 0">
-                <field name="date"          string="Date"/>
-                <field name="employee_id"   string="Employee"/>
-                <field name="project_id"    string="Project"/>
-                <field name="task_id"       string="Task"          optional="show"/>
-                <field name="name"          string="Description"   optional="show"/>
+                <field name="date" string="Date"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="project_id" string="Project"/>
+                <field name="task_id" string="Task" optional="show"/>
+                <field name="name" string="Description" optional="show"/>
                 <field name="software_used" string="Software Used" optional="show"/>
-                <field name="unit_amount"   string="Hours"
+                <field name="unit_amount" string="Hours"
                        widget="float_time"
                        sum="Total Hours"/>
             </list>
@@ -38,8 +38,8 @@
             <search string="Search Timesheets">
 
                 <field name="employee_id" string="Employee"/>
-                <field name="project_id"  string="Project"/>
-                <field name="task_id"     string="Task"/>
+                <field name="project_id" string="Project"/>
+                <field name="task_id" string="Task"/>
 
                 <separator/>
 
@@ -85,7 +85,8 @@
         <field name="context">{
             'search_default_today': 1,
             'search_default_grp_date': 1,
-        }</field>
+            }
+        </field>
         <field name="view_ids" eval="[
             (5, 0, 0),
             (0, 0, {'view_mode': 'list', 'view_id': ref('view_timesheet_log_list')}),

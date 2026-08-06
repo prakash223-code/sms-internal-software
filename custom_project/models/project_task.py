@@ -112,7 +112,11 @@ class ProjectTask(models.Model):
         is_priv = self._is_privileged()
         uid = self.env.uid
         for task in self:
-            task.can_edit_task = is_priv or task.create_uid.id == uid
+            task.can_edit_task = (
+                    is_priv
+                    or not task.id  # NEW: unsaved record → creator editing
+                    or task.create_uid.id == uid
+            )
 
     @api.model
     def _group_expand_states(self, states, domain):
@@ -366,7 +370,18 @@ class ProjectTask(models.Model):
             target_emp = self.env['hr.employee'].browse(emp_id)
             assignee_teams = self._get_employee_teams(target_emp)
 
-            if task_team and task_team in assignee_teams:
+            if task_team:
+                # Task already has a defined team (e.g. from a project) — check
+                # against that specifically.
+                is_same_team = task_team in assignee_teams
+            else:
+                # No project/task team resolved (private/internal task created
+                # from My Tasks). Fall back to comparing the assigner's own
+                # teams against the assignee's teams — same-team assignment
+                # should still be immediate even with no project involved.
+                is_same_team = bool(assigner_teams & assignee_teams)
+
+            if is_same_team:
                 any_immediate = True
             else:
                 pending_list.append({
@@ -384,8 +399,10 @@ class ProjectTask(models.Model):
         # visible on the task (as "pending") while the request awaits a
         # decision. task_state is the signal: 'assigned' only if at least
         # one employee could be assigned immediately, 'draft' otherwise.
-        if 'task_state' not in vals:
-            vals['task_state'] = 'assigned' if any_immediate else 'draft'
+        if any_immediate:
+            vals['task_state'] = 'assigned'
+        elif 'task_state' not in vals:
+            vals['task_state'] = 'draft'
 
         return vals, pending_list
 
@@ -651,8 +668,8 @@ class ProjectTask(models.Model):
                 '<p>You have been assigned to task <b>%s</b>.</p>'
                 '<p>Project: %s</p>'
             ) % (
-                employee.name,
-                self.name,
-                self.project_id.name if self.project_id else _('N/A'),
-            ),
+                     employee.name,
+                     self.name,
+                     self.project_id.name if self.project_id else _('N/A'),
+                 ),
         )
