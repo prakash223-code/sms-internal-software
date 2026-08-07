@@ -15,6 +15,7 @@
             'custom_work_report/static/src/js/attachment_preview_widget.js',
         ],
     },
+    'depends': ['hr', 'project', 'mail', 'custom_project'],
     'installable': True,
     'application': True,
     'web_icon': 'custom_work_report,static/description/icon.png',

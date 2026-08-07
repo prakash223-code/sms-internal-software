@@ -1,6 +1,7 @@
 from . import models
 from . import controllers
 
+
 def post_init_hook(env):
     """Assign work report groups to existing users after install."""
 
@@ -13,6 +14,11 @@ def post_init_hook(env):
     employee_group.write({
         'user_ids': [(4, u.id) for u in internal_users]
     })
+
+    # Sync team-lead group for existing teams
+    team_model = env['team.team'].sudo()
+    if team_model:
+        team_model.search([])._sync_work_report_team_lead_group()
 
     # HR Officers → hr group
     hr_users = env.ref('hr.group_hr_user').user_ids

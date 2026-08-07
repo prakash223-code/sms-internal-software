@@ -137,17 +137,24 @@ class WorkReport(models.Model):
     def _notify_managers_on_submit(self):
         """
         Pushes an Inbox notification to every user in the Work Report
-        Manager group when an employee submits their report.
+        Manager group, plus the lead(s) of any custom project team
+        (team.team) the submitting employee belongs to.
         """
         self.ensure_one()
         manager_group = self.env.ref(
             'custom_work_report.group_work_report_manager',
             raise_if_not_found=False,
         )
-        if not manager_group:
-            return
 
-        manager_partners = manager_group.user_ids.mapped('partner_id')
+        manager_partners = self.env['res.partner']
+        if manager_group:
+            manager_partners |= manager_group.user_ids.mapped('partner_id')
+
+        team_leads = self.employee_id.sudo().team_ids.mapped('team_lead_id')
+        for lead in team_leads:
+            if lead.user_id:
+                manager_partners |= lead.user_id.partner_id
+
         manager_partners = manager_partners - self.env.user.partner_id
         if not manager_partners:
             return
