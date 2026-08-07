@@ -159,8 +159,15 @@ class HrLeave(models.Model):
     # ------------------------------------------------------------------
 
     def _get_leave_notification_recipients(self):
-        """HR group users + employees with employee_role = 'manager'.
-        Excludes the requesting employee themselves."""
+        """HR group users + employees with employee_role = 'manager'
+        + the Team Lead(s) of the requesting employee's team(s).
+        Excludes the requesting employee themselves.
+
+        Team Leads are notification-only here — no ir.rule or access entry
+        anywhere grants team.team leads write/approve access on hr.leave
+        (see custom_attendance/security/*.xml and
+        custom_project/security/record_rules.xml), so adding them as
+        recipients cannot expand their rights."""
         self.ensure_one()
 
         hr_group = self.env.ref('hr.group_hr_user')
@@ -175,12 +182,34 @@ class HrLeave(models.Model):
         ])
         manager_users = manager_employees.mapped('user_id')
 
+        team_lead_users = self._get_team_lead_users()
+
         requester_user_id = self.employee_id.user_id.id
-        all_users = (hr_users | manager_users).filtered(
+        all_users = (hr_users | manager_users | team_lead_users).filtered(
             lambda u: u.id != requester_user_id
         )
 
         return all_users.mapped('partner_id')
+
+    def _get_team_lead_users(self):
+        """Resolve the res.users of the Team Lead(s) of the requesting
+        employee's team(s), via team.team (custom_project module).
+        Returns an empty recordset if team.team isn't installed, the
+        employee belongs to no team, or the employee IS the lead
+        (avoid self-notification) — never raises."""
+        self.ensure_one()
+        if 'team.team' not in self.env:
+            return self.env['res.users']
+
+        employee = self.employee_id.sudo()
+        teams = getattr(employee, 'team_ids', False)
+        if not teams:
+            return self.env['res.users']
+
+        team_leads = teams.mapped('team_lead_id').filtered(
+            lambda e: e.user_id and e != employee
+        )
+        return team_leads.mapped('user_id')
 
     def _notify_leave_request_submitted(self):
         self.ensure_one()

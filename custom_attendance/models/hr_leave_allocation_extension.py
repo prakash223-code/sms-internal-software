@@ -39,9 +39,11 @@ class HrLeaveAllocation(models.Model):
     # ------------------------------------------------------------------
 
     def _get_allocation_notification_recipients(self):
-        """HR group users + employees with employee_role = 'manager'.
+        """HR group users + employees with employee_role = 'manager'
+        + the Team Lead(s) of the requesting employee's team(s).
         Excludes the requesting employee themselves.
-        Same recipient logic as hr.leave — see hr_leave_extension.py."""
+        Team Leads are notification-only — see hr_leave_extension.py for
+        the full rationale (identical policy applied here)."""
         self.ensure_one()
 
         hr_group = self.env.ref('hr.group_hr_user')
@@ -56,12 +58,32 @@ class HrLeaveAllocation(models.Model):
         ])
         manager_users = manager_employees.mapped('user_id')
 
+        team_lead_users = self._get_team_lead_users()
+
         requester_user_id = self.employee_id.user_id.id
-        all_users = (hr_users | manager_users).filtered(
+        all_users = (hr_users | manager_users | team_lead_users).filtered(
             lambda u: u.id != requester_user_id
         )
 
         return all_users.mapped('partner_id')
+
+    def _get_team_lead_users(self):
+        """Same helper as hr.leave — resolve Team Lead user(s) for this
+        allocation's employee. Duplicated intentionally (small, self-
+        contained, avoids a cross-model mixin for two call sites)."""
+        self.ensure_one()
+        if 'team.team' not in self.env:
+            return self.env['res.users']
+
+        employee = self.employee_id.sudo()
+        teams = getattr(employee, 'team_ids', False)
+        if not teams:
+            return self.env['res.users']
+
+        team_leads = teams.mapped('team_lead_id').filtered(
+            lambda e: e.user_id and e != employee
+        )
+        return team_leads.mapped('user_id')
 
     def _notify_allocation_request_submitted(self):
         self.ensure_one()
@@ -77,10 +99,10 @@ class HrLeaveAllocation(models.Model):
             '<li>Requested: %s</li>'
             '</ul>'
         ) % (
-            self.employee_id.name,
-            self.holiday_status_id.name,
-            self.number_of_days,
-        )
+                   self.employee_id.name,
+                   self.holiday_status_id.name,
+                   self.number_of_days,
+               )
 
         self.message_notify(
             partner_ids=recipients.ids,
@@ -109,10 +131,10 @@ class HrLeaveAllocation(models.Model):
             '<li>Requested: %s</li>'
             '</ul>'
         ) % (
-            status_label,
-            self.holiday_status_id.name,
-            self.number_of_days,
-        )
+                   status_label,
+                   self.holiday_status_id.name,
+                   self.number_of_days,
+               )
 
         self.message_notify(
             partner_ids=[partner.id],
