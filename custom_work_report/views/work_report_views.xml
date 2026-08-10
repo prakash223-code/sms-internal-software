@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Sequence -->
-    <record id="seq_work_report" model="ir.sequence">
-        <field name="name">Work Report Sequence</field>
-        <field name="code">work.report.seq</field>
-        <field name="prefix">WR/%(year)s/</field>
-        <field name="padding">4</field>
-        <field name="number_increment">1</field>
-        <field name="number_next">1</field>
-    </record>
+    <!-- Sequence: noupdate so -u never resets number_next on an existing DB -->
+    <data noupdate="1">
+        <record id="seq_work_report" model="ir.sequence">
+            <field name="name">Work Report Sequence</field>
+            <field name="code">work.report.seq</field>
+            <field name="prefix">WR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+        </record>
+    </data>
 
     <!-- List view -->
     <record id="view_work_report_list" model="ir.ui.view">
@@ -20,6 +22,7 @@
                   decoration-muted="state == 'draft'"
                   decoration-success="state == 'submitted'">
                 <field name="name"/>
+                <field name="create_date" string="Created On"/>
                 <field name="date"/>
                 <field name="employee_id"/>
                 <field name="project_id"/>
