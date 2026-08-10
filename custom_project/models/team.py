@@ -103,3 +103,45 @@ class Team(models.Model):
                 raise models.ValidationError(
                     _('A team named "%s" already exists.') % team.name
                 )
+
+    # ── Auto-synced "Any Team Lead" group ───────────────────────────────────
+    # Keeps custom_project.group_any_team_lead in sync with who is currently
+    # set as team_lead_id on ANY team.team, so menus/features gated to Team
+    # Leads (e.g. My Completion Requests) update automatically the moment a
+    # team's lead changes — no manual checkbox on the user form needed.
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._sync_any_team_lead_group()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'team_lead_id' in vals:
+            self._sync_any_team_lead_group()
+        return res
+
+    def unlink(self):
+        res = super().unlink()
+        self.env['team.team']._sync_any_team_lead_group()
+        return res
+
+    def _sync_any_team_lead_group(self):
+        group = self.env.ref(
+            'custom_project.group_any_team_lead', raise_if_not_found=False
+        )
+        if not group:
+            return
+
+        all_teams = self.sudo().search([])
+        current_lead_users = all_teams.mapped('team_lead_id.user_id')
+
+        existing_group_users = self.env['res.users'].sudo().search(
+            [('group_ids', 'in', group.id)]
+        )
+
+        for u in (existing_group_users - current_lead_users):
+            u.sudo().write({'group_ids': [(3, group.id)]})
+        for u in current_lead_users:
+            u.sudo().write({'group_ids': [(4, group.id)]})

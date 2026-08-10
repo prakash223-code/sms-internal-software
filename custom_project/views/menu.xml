@@ -71,7 +71,7 @@
               parent="menu_team_management_completion_requests"
               sequence="10"
               action="action_my_completion_requests"
-              groups="base.group_user"/>
+              groups="custom_project.group_any_team_lead,hr.group_hr_user,custom_project.group_team_manager"/>
 
     <menuitem id="menu_team_management_all_completion_requests"
               name="All Completion Requests"
