@@ -33,6 +33,7 @@ class WelcomeDashboard(models.TransientModel):
         ('in', 'Checked In'),
         ('done', 'All Done Today'),
         ('holiday', 'Holiday Today'),
+        ('wfh', 'Work From Home'),
         ('no_employee', 'No Employee Linked'),
     ], readonly=True)
 
@@ -146,6 +147,15 @@ class WelcomeDashboard(models.TransientModel):
 
         now_utc = pytz.utc.localize(fields.Datetime.now())
         today_local = now_utc.astimezone(tz).date()
+
+        # WFH check — takes priority over open-session/holiday/completed checks.
+        # Weekly stats still compute normally below so the dashboard doesn't
+        # lose "This Week" data on WFH days.
+        if employee._is_on_wfh(today_local):
+            res['status'] = 'wfh'
+            self._compute_weekly_stats(res, employee, today_local, tz)
+            self._load_announcements(res)
+            return res
 
         # ── 5. Weekly summary ──────────────────────────────────────────
         self._compute_weekly_stats(res, employee, today_local, tz)

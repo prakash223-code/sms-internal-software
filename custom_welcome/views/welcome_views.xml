@@ -86,6 +86,20 @@
                                 </div>
                             </div>
 
+                            <!-- Work From Home today -->
+                            <div invisible="status != 'wfh'"
+                                 class="o_welcome_status_card o_welcome_card_holiday">
+                                <div class="o_welcome_status_row">
+                                    <span class="o_welcome_status_dot o_welcome_dot_teal"/>
+                                    <span class="o_welcome_status_text o_welcome_text_teal">
+                                        <strong>Work From Home today.</strong>
+                                    </span>
+                                </div>
+                                <div class="o_welcome_holiday_note">
+                                    Check-in isn't required — work at your own schedule today.
+                                </div>
+                            </div>
+
                             <!-- Ready to check in -->
                             <div invisible="status != 'out'"
                                  class="o_welcome_status_card o_welcome_card_out">
@@ -249,11 +263,11 @@
                                 <list string=""
                                       create="false" delete="false" edit="false"
                                       decoration-info="is_pinned == True">
-                                    <field name="is_pinned"  string="📌" width="32" readonly="1"/>
-                                    <field name="title"      string="Announcement"/>
+                                    <field name="is_pinned" string="📌" width="32" readonly="1"/>
+                                    <field name="title" string="Announcement"/>
                                     <field name="date_label" string="When" readonly="1"/>
-                                    <field name="posted_by"  string="By"/>
-                                    <field name="body"       string="Details" optional="show"/>
+                                    <field name="posted_by" string="By"/>
+                                    <field name="body" string="Details" optional="show"/>
                                 </list>
                             </field>
 
@@ -262,9 +276,9 @@
                     </div><!-- /o_welcome_content_grid -->
 
                     <!-- Hidden fields required by invisible conditions -->
-                    <field name="status"            invisible="1"/>
-                    <field name="is_late"           invisible="1"/>
-                    <field name="late_minutes"      invisible="1"/>
+                    <field name="status" invisible="1"/>
+                    <field name="is_late" invisible="1"/>
+                    <field name="late_minutes" invisible="1"/>
                     <field name="week_present_days" invisible="1"/>
                     <field name="week_working_days" invisible="1"/>
 
