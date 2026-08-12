@@ -8,3 +8,4 @@ from . import leave_policy
 from . import permission_deduction
 from . import permission_policy
 from . import res_users_tz
+from . import hr_employee_wfh

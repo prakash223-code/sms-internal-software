@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from datetime import timedelta
 from datetime import datetime, time
 from markupsafe import Markup
@@ -153,6 +154,69 @@ class HrLeave(models.Model):
 
         for attendance in same_day_attendance:
             attendance._apply_permission_deduction()
+
+    WFH_XMLID = 'custom_attendance.leave_type_wfh'
+
+    def _get_wfh_leave_type_id(self):
+        try:
+            return self.env.ref(self.WFH_XMLID).id
+        except Exception:
+            return False
+
+    def _check_wfh_date_lock(self, action_label):
+        """
+        Blocks employees (non-HR/Manager) from editing or deleting a WFH
+        record once its date has passed. HR and Manager (both covered by
+        hr.group_hr_user) can always override — matches the same role
+        pattern used throughout custom_attendance for HR/Manager exceptions.
+        """
+        wfh_type_id = self._get_wfh_leave_type_id()
+        if not wfh_type_id or self.env.user.has_group('hr.group_hr_user'):
+            return
+
+        today = fields.Date.context_today(self)
+        for leave in self:
+            if (leave.holiday_status_id.id == wfh_type_id
+                    and leave.date_from
+                    and leave.date_from.date() < today):
+                raise UserError(_(
+                    "This Work From Home request is for %(date)s, which has already "
+                    "passed, so it can no longer be %(action)s.\n\n"
+                    "If something needs to change, please reach out to HR."
+                ) % {
+                                    'date': leave.date_from.date().strftime('%d %b %Y'),
+                                    'action': action_label,
+                                })
+
+    def write(self, vals):
+        self._check_wfh_date_lock('edited')
+        return super().write(vals)
+
+    def unlink(self):
+        self._check_wfh_date_lock('deleted')
+        return super().unlink()
+
+    @api.depends('employee_id', 'leave_type_request_unit', 'request_date_from', 'request_date_to',
+                 'request_hour_from', 'request_hour_to', 'request_date_from_period', 'request_date_to_period')
+    def _compute_dashboard_warning_message(self):
+        # Core Odoo computes the standard overlap-conflict message for every
+        # leave type. allow_request_on_top=True on the WFH type (set in
+        # leave_type_data.xml) already prevents WFH from appearing as a
+        # "conflicting" candidate against OTHER leave requests — but it does
+        # NOT prevent a *new* WFH request from being blocked by an existing
+        # leave of another type, since the core search domain filters
+        # candidates by their own allow_request_on_top, not by the type of
+        # the record being validated. This override closes that gap: after
+        # the core computation runs, force-clear the warning for any WFH
+        # leave in this recordset, allowing it to coexist with CL/EL/ML/
+        # Permission on the same dates in both directions.
+        super(HrLeave, self)._compute_dashboard_warning_message()
+        wfh_type_id = self._get_wfh_leave_type_id()
+        if not wfh_type_id:
+            return
+        for holiday in self:
+            if holiday.holiday_status_id.id == wfh_type_id:
+                holiday.dashboard_warning_message = False
 
     # ------------------------------------------------------------------
     # NOTIFICATION HELPERS

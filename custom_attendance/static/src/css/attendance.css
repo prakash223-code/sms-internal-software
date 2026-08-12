@@ -11,6 +11,7 @@
     padding: 22px 24px 20px;
     border-radius: 4px 4px 0 0;
 }
+
 .o_att_header_label {
     font-size: 11px;
     font-weight: 600;
@@ -20,6 +21,7 @@
     margin-bottom: 4px;
     display: block;
 }
+
 .o_att_header_title {
     font-size: 20px;
     font-weight: 700;
@@ -111,6 +113,14 @@
     border-radius: 6px;
 }
 
+.o_att_banner_wfh {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+    border-left: 4px solid #14b8a6;
+    color: #134e4a;
+    font-weight: 600;
+}
+
 /* ── Status pills row (HR form) ─────────────────────────────── */
 .o_att_pills_row {
     display: flex;
@@ -181,29 +191,83 @@
 }
 
 /* Stat card colour variants */
-.o_att_card_neutral   { background: #f8fafc; border: 1px solid #e2e8f0; }
-.o_att_card_neutral   .o_att_stat_label { color: #64748b; }
-.o_att_card_neutral   .o_att_stat_value { color: #0f172a; }
+.o_att_card_neutral {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
 
-.o_att_card_green     { background: #f0fdfa; border: 1px solid #ccfbf1; }
-.o_att_card_green     .o_att_stat_label { color: #0d9488; }
-.o_att_card_green     .o_att_stat_value { color: #0d9488; }
+.o_att_card_neutral .o_att_stat_label {
+    color: #64748b;
+}
 
-.o_att_card_amber     { background: #fffbeb; border: 1px solid #fef3c7; }
-.o_att_card_amber     .o_att_stat_label { color: #92400e; }
-.o_att_card_amber     .o_att_stat_value { color: #92400e; }
+.o_att_card_neutral .o_att_stat_value {
+    color: #0f172a;
+}
 
-.o_att_card_orange    { background: #fff7ed; border: 1px solid #ffedd5; }
-.o_att_card_orange    .o_att_stat_label { color: #9a3412; }
-.o_att_card_orange    .o_att_stat_value { color: #9a3412; }
+.o_att_card_green {
+    background: #f0fdfa;
+    border: 1px solid #ccfbf1;
+}
 
-.o_att_card_red       { background: #fef2f2; border: 1px solid #fee2e2; }
-.o_att_card_red       .o_att_stat_label { color: #991b1b; }
-.o_att_card_red       .o_att_stat_value { color: #991b1b; }
+.o_att_card_green .o_att_stat_label {
+    color: #0d9488;
+}
 
-.o_att_card_blue      { background: #eff6ff; border: 1px solid #dbeafe; }
-.o_att_card_blue      .o_att_stat_label { color: #1d4ed8; }
-.o_att_card_blue      .o_att_stat_value { color: #1d4ed8; }
+.o_att_card_green .o_att_stat_value {
+    color: #0d9488;
+}
+
+.o_att_card_amber {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+}
+
+.o_att_card_amber .o_att_stat_label {
+    color: #92400e;
+}
+
+.o_att_card_amber .o_att_stat_value {
+    color: #92400e;
+}
+
+.o_att_card_orange {
+    background: #fff7ed;
+    border: 1px solid #ffedd5;
+}
+
+.o_att_card_orange .o_att_stat_label {
+    color: #9a3412;
+}
+
+.o_att_card_orange .o_att_stat_value {
+    color: #9a3412;
+}
+
+.o_att_card_red {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+}
+
+.o_att_card_red .o_att_stat_label {
+    color: #991b1b;
+}
+
+.o_att_card_red .o_att_stat_value {
+    color: #991b1b;
+}
+
+.o_att_card_blue {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+}
+
+.o_att_card_blue .o_att_stat_label {
+    color: #1d4ed8;
+}
+
+.o_att_card_blue .o_att_stat_value {
+    color: #1d4ed8;
+}
 
 /* ── Payroll deduction highlight ────────────────────────────── */
 .o_att_payroll_card {
@@ -303,8 +367,13 @@
     display: block;
 }
 
-.o_att_result_card_green .o_att_result_label { color: #0d9488; }
-.o_att_result_card_blue  .o_att_result_label { color: #1d4ed8; }
+.o_att_result_card_green .o_att_result_label {
+    color: #0d9488;
+}
+
+.o_att_result_card_blue .o_att_result_label {
+    color: #1d4ed8;
+}
 
 .o_att_result_value {
     font-size: 28px;
@@ -312,8 +381,13 @@
     line-height: 1;
 }
 
-.o_att_result_card_green .o_att_result_value { color: #0d9488; }
-.o_att_result_card_blue  .o_att_result_value { color: #1d4ed8; }
+.o_att_result_card_green .o_att_result_value {
+    color: #0d9488;
+}
+
+.o_att_result_card_blue .o_att_result_value {
+    color: #1d4ed8;
+}
 
 .o_att_skipped_card {
     background: #f8fafc;
@@ -419,7 +493,7 @@
 /* ── Stat cards — lighter number weight ─────────────────────── */
 .o_att_stat_value {
     font-size: 28px;
-    font-weight: 600;   /* was 800 — toned down to match Odoo style */
+    font-weight: 600; /* was 800 — toned down to match Odoo style */
     line-height: 1;
 }
 

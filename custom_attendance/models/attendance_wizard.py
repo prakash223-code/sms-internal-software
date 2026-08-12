@@ -12,6 +12,7 @@ class AttendanceCheckInWizard(models.TransientModel):
         ('out', 'Not Checked In'),
         ('in', 'Checked In'),
         ('done', 'Completed for Today'),
+        ('wfh', 'Work From Home'),
     ], string='Status', readonly=True)
     last_check_in = fields.Datetime(string='Checked In At', readonly=True)
     last_check_out = fields.Datetime(string='Checked Out At', readonly=True)
@@ -30,6 +31,11 @@ class AttendanceCheckInWizard(models.TransientModel):
                 'Please contact HR or the system administrator.'
             ))
         res['employee_id'] = employee.id
+
+        today = fields.Date.context_today(self)
+        if employee._is_on_wfh(today):
+            res['status'] = 'wfh'
+            return res
 
         # sudo() — employee may not have hr.attendance read access
         Attendance = self.env['hr.attendance'].sudo()

@@ -45,4 +45,17 @@
         <field name="color" eval="7"/>
     </record>
 
+    <record id="leave_type_wfh" model="hr.leave.type">
+        <field name="name">Work From Home</field>
+        <field name="requires_allocation" eval="False"/>
+        <field name="employee_requests" eval="True"/>
+        <field name="allocation_validation_type">no_validation</field>
+        <field name="leave_validation_type">hr</field>
+        <field name="unpaid" eval="False"/>
+        <field name="color" eval="3"/>
+        <field name="request_unit">day</field>
+        <field name="time_type">other</field>
+        <field name="allow_request_on_top" eval="True"/>
+    </record>
+
 </odoo>

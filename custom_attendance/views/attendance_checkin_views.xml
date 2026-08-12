@@ -28,6 +28,15 @@
 
                     <div class="o_att_divider"/>
 
+                    <!-- WFH: no check-in required -->
+                    <div invisible="status != 'wfh'">
+                        <div class="o_att_banner o_att_banner_wfh">
+                            <i class="fa fa-home" title="WFH"/>
+                            <strong>You're on Work From Home today.</strong>
+                            Check-in / check-out is not required — work at your own schedule.
+                        </div>
+                    </div>
+
                     <!-- CHECKED IN: active session -->
                     <div invisible="status != 'in'">
                         <div class="o_att_session_label">Active Session</div>

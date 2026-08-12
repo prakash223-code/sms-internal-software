@@ -48,12 +48,19 @@ class CustomAttendance(models.Model):
     @api.depends('check_in', 'employee_id')
     def _compute_is_late(self):
         LATE_HOUR = 9
-        LATE_MINUTE = 30  # standard threshold
+        LATE_MINUTE = 30
 
         Leave = self.env['hr.leave'].sudo()
 
         for record in self:
             if not record.check_in or not record.employee_id:
+                record.is_late = False
+                record.late_minutes = 0
+                continue
+
+            # WFH override — no late detection on WFH days
+            check_in_date_naive = record.check_in.date()
+            if record.employee_id._is_on_wfh(check_in_date_naive):
                 record.is_late = False
                 record.late_minutes = 0
                 continue
@@ -130,6 +137,7 @@ class CustomAttendance(models.Model):
         """
         Single entry point for employee check-in / check-out.
         Rules:
+          - If today is a WFH day (approved), block entirely — no check-in/out needed.
           - If today is a company holiday or 2nd/4th Saturday → block check-in.
           - If open session exists → check out.
           - If no open session → check in, only if no completed session exists today.
@@ -152,6 +160,15 @@ class CustomAttendance(models.Model):
 
         now_utc = pytz.utc.localize(now)
         today_local = now_utc.astimezone(tz).date()
+
+        # ── WFH BLOCK — no check-in/out required or allowed on approved WFH days.
+        # Both UI entry points (custom wizard, native welcome dashboard) already
+        # hide their buttons on WFH days via default_get(), but this guards the
+        # shared model method directly in case of any other call path.
+        if employee._is_on_wfh(today_local):
+            raise UserError(_(
+                "You're on Work From Home today — check-in/check-out isn't required."
+            ))
 
         # ── HOLIDAY CHECK — block check-in only, allow check-out ──────
         open_attendance = self._get_open_session(employee)
@@ -377,6 +394,15 @@ class CustomAttendance(models.Model):
                 check_in_utc = pytz.utc.localize(check_in_utc)
 
             check_in_local = check_in_utc.astimezone(tz)
+
+            # WFH override — should be rare/impossible if check-in is hidden
+            # on WFH days, but guards against a stale open session from
+            # before WFH was approved (e.g. employee checked in, then WFH
+            # got approved retroactively for today — shouldn't auto-close
+            # at 19:00 since WFH has no fixed schedule).
+            if attendance.employee_id._is_on_wfh(check_in_local.date()):
+                continue
+
             auto_checkout_local = tz.localize(
                 datetime.combine(check_in_local.date(), time(19, 0))
             )

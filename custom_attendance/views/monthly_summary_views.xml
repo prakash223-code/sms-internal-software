@@ -137,7 +137,17 @@
                                 Approved Leave
                             </span>
                             <div class="o_att_stat_value">
-                                <field name="leave_days" readonly="1" nolabel="1"/>
+                                <field name="leave_days_excl_wfh" readonly="1" nolabel="1"/>
+                            </div>
+                        </div>
+
+                        <div class="o_att_stat_card o_att_card_blue">
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-home" title="WFH"/>
+                                Work From Home
+                            </span>
+                            <div class="o_att_stat_value">
+                                <field name="wfh_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
                         <div class="o_att_stat_card o_att_card_orange">

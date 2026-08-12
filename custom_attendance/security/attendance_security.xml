@@ -98,15 +98,39 @@
          the record; only write/unlink are locked down.
     ================================================================ -->
 
+    <record id="rule_hr_leave_read_own" model="ir.rule">
+        <field name="name">Time Off: employee can always read own records</field>
+        <field name="model_id" ref="hr_holidays.model_hr_leave"/>
+        <field name="domain_force">[(1, '=', 1)] if user.has_group('hr.group_hr_user') else [('employee_id.user_id',
+            '=', user.id)]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
     <record id="rule_hr_leave_write_hr_or_own" model="ir.rule">
         <field name="name">Time Off: WRITE restricted to HR or own pending record</field>
         <field name="model_id" ref="hr_holidays.model_hr_leave"/>
         <field name="domain_force">[(1, '=', 1)] if user.has_group('hr.group_hr_user') else [('employee_id.user_id',
             '=', user.id), ('state', 'in', ('draft', 'confirm'))]
         </field>
-        <field name="perm_read" eval="True"/>
+        <field name="perm_read" eval="False"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_hr_leave_allocation_read_own" model="ir.rule">
+        <field name="name">Allocation: employee can always read own records</field>
+        <field name="model_id" ref="hr_holidays.model_hr_leave_allocation"/>
+        <field name="domain_force">[(1, '=', 1)] if user.has_group('hr.group_hr_user') else [('employee_id.user_id',
+            '=', user.id)]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
         <field name="perm_unlink" eval="False"/>
     </record>
 
@@ -116,7 +140,7 @@
         <field name="domain_force">[(1, '=', 1)] if user.has_group('hr.group_hr_user') else [('employee_id.user_id',
             '=', user.id), ('state', 'in', ('draft', 'confirm'))]
         </field>
-        <field name="perm_read" eval="True"/>
+        <field name="perm_read" eval="False"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="False"/>
