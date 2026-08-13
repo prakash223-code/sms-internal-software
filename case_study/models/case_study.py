@@ -25,6 +25,16 @@ class CaseStudyDepartment(models.Model):
     description = fields.Text()
     active = fields.Boolean(default=True)
 
+    # NEW: links this Case Study department to the actual HR department
+    # (hr.department) so employees in that HR department automatically
+    # get visibility of case studies under this Case Study department.
+    hr_department_id = fields.Many2one(
+        'hr.department',
+        string='Linked HR Department',
+        help='Employees belonging to this HR Department will be able to '
+             'view Case Studies under this Case Study Department.',
+    )
+
     case_study_ids = fields.One2many(
         'case.study', 'department_id', string='Case Studies'
     )
@@ -49,8 +59,6 @@ class CaseStudyDepartment(models.Model):
             'domain': [('department_id', '=', self.id)],
             'context': {'default_department_id': self.id},
         }
-
-
 class CaseStudySoftware(models.Model):
     # Kept for data integrity — no longer exposed in Configuration menus
     _name = 'case.study.software'
@@ -77,12 +85,34 @@ class CaseStudyTimesheet(models.Model):
     _order = 'date desc, id desc'
 
     case_study_id = fields.Many2one('case.study', required=True, ondelete='cascade')
-    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    employee_id = fields.Many2one(
+        'hr.employee', string='Employee', required=True,
+        default=lambda self: self.env.user.employee_id,
+    )
     date = fields.Date(required=True, default=fields.Date.context_today)
     hours = fields.Float(required=True)
     description = fields.Char(string='Work Description')
-    # Free-text field — no longer linked to case.study.software master list
     software_name = fields.Char(string='Software Used')
+
+    is_own_line = fields.Boolean(
+        string='Is Own Line',
+        compute='_compute_is_own_line',
+        help='True if current user is HR, this is a new/unsaved row, or '
+             'this timesheet line belongs to them. Used to lock the row '
+             'in the UI so employees only save their own entries.',
+    )
+
+    @api.depends('employee_id')
+    def _compute_is_own_line(self):
+        is_hr = self.env.user.has_group('hr.group_hr_user')
+        my_employee = self.env.user.employee_id
+        for rec in self:
+            # New/unsaved row (not yet created) is always editable so
+            # "Add a line" works — ownership is enforced once it's saved,
+            # since employee_id defaults to the current user's employee.
+            is_new = not rec.id
+            is_own = rec.employee_id and rec.employee_id == my_employee
+            rec.is_own_line = is_hr or is_new or is_own
 
 
 class CaseStudyDocument(models.Model):
@@ -100,6 +130,25 @@ class CaseStudyDocument(models.Model):
     preview = fields.Binary(string='Preview', compute='_compute_preview')
     uploaded_on = fields.Datetime(string='Uploaded On', default=fields.Datetime.now)
 
+    is_own_doc = fields.Boolean(
+        string='Is Own Document',
+        compute='_compute_is_own_doc',
+        help='True if current user is HR, this is a new/unsaved row, or '
+             'they uploaded this document. Used to lock the row in the '
+             'UI so employees only save their own uploads.',
+    )
+
+    @api.depends('create_uid')
+    def _compute_is_own_doc(self):
+        is_hr = self.env.user.has_group('hr.group_hr_user')
+        for rec in self:
+            # New/unsaved row has no create_uid yet — always editable so
+            # "Add a line" works. Ownership is enforced once it's saved
+            # (create_uid gets set to the current user automatically).
+            is_new = not rec.id
+            is_own = rec.create_uid == self.env.user
+            rec.is_own_doc = is_hr or is_new or is_own
+
     @api.depends('file_name')
     def _compute_file_info(self):
         for rec in self:
@@ -116,7 +165,6 @@ class CaseStudyDocument(models.Model):
             rec.preview = rec.file_data if (
                     rec.mimetype and rec.mimetype.startswith('image/')
             ) else False
-
 
 class CaseStudy(models.Model):
     _name = 'case.study'
@@ -200,20 +248,20 @@ class CaseStudy(models.Model):
         for rec in self:
             rec.total_hours = sum(rec.timesheet_ids.mapped('hours'))
 
-    can_edit_case_study = fields.Boolean(
-        string='Can Edit',
-        compute='_compute_can_edit_case_study',
-        help='True if the current user is HR/Manager, or is one of this '
-             'case study\'s assigned employees. Drives readonly on the '
-             'Case Study Details, Documents, and Timesheet tabs.',
+    is_hr_user = fields.Boolean(
+        string='Is HR',
+        compute='_compute_is_hr_user',
+        help='True only for HR/Manager group. Drives readonly on the '
+             'case study\'s own fields (name, department, dates, etc.) — '
+             'only HR can edit the case study itself. Timesheet and '
+             'Document rows use their own per-row is_own_line/is_own_doc '
+             'checks instead of this field.',
     )
 
-    @api.depends('assigned_employee_ids')
-    def _compute_can_edit_case_study(self):
-        user = self.env.user
-        is_hr = user.has_group('hr.group_hr_user')
+    def _compute_is_hr_user(self):
+        is_hr = self.env.user.has_group('hr.group_hr_user')
         for rec in self:
-            rec.can_edit_case_study = is_hr or user in rec.assigned_employee_ids.user_id
+            rec.is_hr_user = is_hr
 
     def _read_group_stage_ids(self, stages, domain):
         return self.env['case.study.stage'].search([], order='sequence asc')
