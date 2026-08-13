@@ -89,7 +89,10 @@ class WelcomeDashboard(models.TransientModel):
         res['name'] = 'Welcome'
 
         # ── 1. Quote of the day ────────────────────────────────────────
-        quotes = self.env['welcome.quote'].search([('active', '=', True)])
+        quotes = self.env['welcome.quote'].search([
+            ('active', '=', True),
+            ('kural_number', '>', 0),  # guard: never show legacy motivation quotes (kural_number=0)
+        ])
         if quotes:
             idx = date.today().toordinal() % len(quotes)
             q = quotes[idx]

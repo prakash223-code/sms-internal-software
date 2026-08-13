@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Welcome Dashboard',
-    'version': '19.0.2.0.0',
+    'version': '19.0.2.1.0',
     'category': 'Human Resources',
     'summary': 'Daily quote home page with live clock, check-in/out, weekly summary and announcements',
     'author': 'Internal ERP Team',
