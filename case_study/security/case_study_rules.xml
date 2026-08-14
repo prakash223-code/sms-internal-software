@@ -1,17 +1,20 @@
 <odoo>
     <data>
         <!--  ══════════════ case.study ══════════════
-                     Employee: READ case studies whose Case Study Department is
-                     linked to the employee's own HR Department (hr.department),
-                     plus any case study they are personally assigned to.
-                     WRITE nothing — case study fields are HR-only.
-                     HR: full access to everything, all departments.
+                     Employee: READ (view) every case study whose linked HR
+                     Department matches the employee's own HR Department —
+                     covers EVERYONE in that department, assigned or not.
+                     PLUS anyone personally assigned (cross-department cases).
+                     WRITE only if personally assigned — non-assigned employees
+                     can view but never edit.
+                     HR: full access to everything.
                 ══════════════════════════════════════════════  -->
-        <record id="rule_case_study_employee_read_own_dept" model="ir.rule">
+        <record id="rule_case_study_employee_read_all_dept" model="ir.rule">
             <field name="name">Case Study: Employee reads own department + assigned</field>
             <field name="model_id" ref="model_case_study"/>
-            <field name="domain_force">['|', ('department_id.hr_department_id.member_ids.user_id', '=', user.id),
-                ('assigned_employee_ids.user_id', '=', user.id)]
+            <field name="domain_force">['|', ('department_id.hr_department_id', '=', user.employee_id.department_id.id
+                if user.employee_id and user.employee_id.department_id else -1), ('assigned_employee_ids.user_id', '=',
+                user.id)]
             </field>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="perm_read" eval="True"/>
@@ -19,8 +22,18 @@
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
+        <record id="rule_case_study_employee_write_assigned" model="ir.rule">
+            <field name="name">Case Study: Employee edits only if personally assigned</field>
+            <field name="model_id" ref="model_case_study"/>
+            <field name="domain_force">[('assigned_employee_ids.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
         <record id="rule_case_study_hr" model="ir.rule">
-            <field name="name">Case Study: HR full access (all departments)</field>
+            <field name="name">Case Study: HR full access</field>
             <field name="model_id" ref="model_case_study"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('hr.group_hr_user'))]"/>
@@ -30,16 +43,16 @@
             <field name="perm_unlink" eval="True"/>
         </record>
         <!--  ══════════════ case.study.timesheet ══════════════
-                     Employee: READ timesheet lines only for case studies whose
-                     department maps to their own HR department (or ones they're
-                     assigned to). WRITE/CREATE/UNLINK only their own entries.
-                     HR: full access to everything.
+                     Employee: READ every timesheet line for case studies in
+                     their own department (view-only for everyone). WRITE only
+                     their own entries.
                 ══════════════════════════════════════════════  -->
-        <record id="rule_case_study_timesheet_employee_read_own_dept" model="ir.rule">
+        <record id="rule_case_study_timesheet_employee_read_all_dept" model="ir.rule">
             <field name="name">Case Study Timesheet: Employee reads own department + assigned</field>
             <field name="model_id" ref="model_case_study_timesheet"/>
-            <field name="domain_force">['|', ('case_study_id.department_id.hr_department_id.member_ids.user_id', '=',
-                user.id), ('case_study_id.assigned_employee_ids.user_id', '=', user.id)]
+            <field name="domain_force">['|', ('case_study_id.department_id.hr_department_id', '=',
+                user.employee_id.department_id.id if user.employee_id and user.employee_id.department_id else -1),
+                ('case_study_id.assigned_employee_ids.user_id', '=', user.id)]
             </field>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="perm_read" eval="True"/>
@@ -68,17 +81,16 @@
             <field name="perm_unlink" eval="True"/>
         </record>
         <!--  ══════════════ case.study.document ══════════════
-                     Employee: READ documents only for case studies whose
-                     department maps to their own HR department (or ones they're
-                     assigned to). WRITE/CREATE/UNLINK only documents THEY
-                     uploaded, within that visible scope.
-                     HR: full access to everything.
+                     Employee: READ every document for case studies in their own
+                     department (view-only for everyone). WRITE only documents
+                     THEY uploaded.
                 ══════════════════════════════════════════════  -->
-        <record id="rule_case_study_document_employee_read_own_dept" model="ir.rule">
+        <record id="rule_case_study_document_employee_read_all_dept" model="ir.rule">
             <field name="name">Case Study Document: Employee reads own department + assigned</field>
             <field name="model_id" ref="model_case_study_document"/>
-            <field name="domain_force">['|', ('case_study_id.department_id.hr_department_id.member_ids.user_id', '=',
-                user.id), ('case_study_id.assigned_employee_ids.user_id', '=', user.id)]
+            <field name="domain_force">['|', ('case_study_id.department_id.hr_department_id', '=',
+                user.employee_id.department_id.id if user.employee_id and user.employee_id.department_id else -1),
+                ('case_study_id.assigned_employee_ids.user_id', '=', user.id)]
             </field>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="perm_read" eval="True"/>
