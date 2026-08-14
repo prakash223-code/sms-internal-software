@@ -323,6 +323,7 @@ class AttendanceMonthlySummary(models.Model):
         leave_date_fractions = {}
         unpaid_leave_date_fractions = {}
         wfh_date_fractions = {}
+        non_wfh_date_fractions = {}
 
         for leave in hr_leaves:
             date_from_utc = leave.date_from
@@ -372,6 +373,9 @@ class AttendanceMonthlySummary(models.Model):
                 if is_wfh:
                     existing_wfh = wfh_date_fractions.get(current, 0.0)
                     wfh_date_fractions[current] = min(1.0, existing_wfh + record_fraction)
+                else:
+                    existing_non_wfh = non_wfh_date_fractions.get(current, 0.0)
+                    non_wfh_date_fractions[current] = min(1.0, existing_non_wfh + record_fraction)
 
                 current = date.fromordinal(current.toordinal() + 1)
 
@@ -387,7 +391,8 @@ class AttendanceMonthlySummary(models.Model):
             paid_fraction = fraction - unpaid_fraction
             leave_days_total += paid_fraction
             unpaid_leave_days_total += unpaid_fraction
-            wfh_days_total += wfh_date_fractions.get(d, 0.0)
+            if non_wfh_date_fractions.get(d, 0.0) == 0.0:
+                wfh_days_total += wfh_date_fractions.get(d, 0.0)
 
         return leave_days_total, unpaid_leave_days_total, wfh_days_total, leave_date_fractions
 
