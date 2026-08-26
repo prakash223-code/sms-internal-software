@@ -19,6 +19,8 @@
                 <field name="working_days" string="Working"/>
                 <field name="present_days" string="Present"/>
                 <field name="leave_days" string="Leave"/>
+                <field name="wfh_days" string="WFH" optional="show"/>
+                <field name="od_days" string="OD" optional="show"/>
                 <field name="late_days" string="Late"/>
                 <field name="absent_days" string="Absent"/>
                 <field name="unpaid_absent_days" string="Unpaid Absent"/>
@@ -129,7 +131,7 @@
                         </div>
                     </div>
 
-                    <!-- Row 2: Leave / Unpaid / Absent -->
+                    <!-- Row 2: Leave / WFH / OD / Unpaid / Absent -->
                     <div class="o_att_stats_row">
                         <div class="o_att_stat_card o_att_card_blue">
                             <span class="o_att_stat_label">
@@ -150,6 +152,17 @@
                                 <field name="wfh_days" readonly="1" nolabel="1"/>
                             </div>
                         </div>
+
+                        <div class="o_att_stat_card o_att_card_teal">
+                            <span class="o_att_stat_label">
+                                <i class="fa fa-briefcase" title="On Duty"/>
+                                On Duty
+                            </span>
+                            <div class="o_att_stat_value">
+                                <field name="od_days" readonly="1" nolabel="1"/>
+                            </div>
+                        </div>
+
                         <div class="o_att_stat_card o_att_card_orange">
                             <span class="o_att_stat_label">
                                 <i class="fa fa-minus-circle" title="Unpaid leave"/>

@@ -65,6 +65,12 @@ class CustomAttendance(models.Model):
                 record.late_minutes = 0
                 continue
 
+            # OD override — no late detection on On Duty days
+            if record.employee_id._is_on_od(check_in_date_naive):
+                record.is_late = False
+                record.late_minutes = 0
+                continue
+
             tz_name = record.employee_id.tz or 'Asia/Kolkata'
             try:
                 tz = pytz.timezone(tz_name)
@@ -168,6 +174,12 @@ class CustomAttendance(models.Model):
         if employee._is_on_wfh(today_local):
             raise UserError(_(
                 "You're on Work From Home today — check-in/check-out isn't required."
+            ))
+
+        # ── OD BLOCK — no check-in/out required on approved On Duty days.
+        if employee._is_on_od(today_local):
+            raise UserError(_(
+                "You're On Duty today — check-in/check-out isn't required."
             ))
 
         # ── HOLIDAY CHECK — block check-in only, allow check-out ──────
@@ -371,14 +383,14 @@ class CustomAttendance(models.Model):
         return 14, 0  # fallback — matches confirmed weekday afternoon start
 
     # ------------------------------------------------------------------
-    # CRON: Auto checkout at 19:00 employee local time
+    # CRON: Auto checkout at 23:59 employee local time
     # ------------------------------------------------------------------
 
     @api.model
     def _cron_auto_checkout(self):
         """
-        Runs daily. Finds all open sessions and closes them at 19:00
-        in the employee's local timezone.
+        Runs daily. Finds all open sessions and closes them at 23:59
+        in the employee's local timezone (11:59 PM, same calendar day).
         """
         open_sessions = self.search([('check_out', '=', False)])
 
@@ -403,8 +415,12 @@ class CustomAttendance(models.Model):
             if attendance.employee_id._is_on_wfh(check_in_local.date()):
                 continue
 
+            # OD override — same guard for On Duty days.
+            if attendance.employee_id._is_on_od(check_in_local.date()):
+                continue
+
             auto_checkout_local = tz.localize(
-                datetime.combine(check_in_local.date(), time(19, 0))
+                datetime.combine(check_in_local.date(), time(23, 59))
             )
             auto_checkout_utc = auto_checkout_local.astimezone(pytz.utc).replace(tzinfo=None)
 
@@ -419,7 +435,7 @@ class CustomAttendance(models.Model):
     def _notify_hr_missed_checkout(self, attendance_date):
         """
         Notifies HR + Managers whenever the auto-checkout cron has to
-        close a session at 19:00 because the employee forgot to check
+        close a session at 23:59 because the employee forgot to check
         out. Fired once per record, right after auto_checkout is set.
         """
         self.ensure_one()
@@ -447,7 +463,7 @@ class CustomAttendance(models.Model):
         body = Markup(
             '<p><strong>%s</strong> did not check out on %s (%s).</p>'
             '<p>The system automatically closed their attendance session '
-            'at 7:00 PM.</p>'
+            'at 11:59 PM.</p>'
         ) % (self.employee_id.name, date_label, date_str)
 
         self.message_notify(

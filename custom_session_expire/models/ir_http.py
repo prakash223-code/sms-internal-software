@@ -15,7 +15,12 @@ class IrHttp(models.AbstractModel):
             #   pageshow → pending_logout_at gets cleared
             # - Browser close: next visit is minutes/hours later → always
             #   > 5s → log out
-            elapsed = time.time() - request.session['pending_logout_at']
+            try:
+                elapsed = time.time() - float(request.session['pending_logout_at'])
+            except (TypeError, ValueError):
+                # Corrupt or non-numeric value — clear it and carry on safely
+                request.session.pop('pending_logout_at', None)
+                elapsed = 0
             if elapsed > 5:
                 request.session.logout(keep_db=True)
         return result

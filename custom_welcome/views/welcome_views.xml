@@ -100,6 +100,20 @@
                                 </div>
                             </div>
 
+                            <!-- On Duty today -->
+                            <div invisible="status != 'od'"
+                                 class="o_welcome_status_card o_welcome_card_od">
+                                <div class="o_welcome_status_row">
+                                    <span class="o_welcome_status_dot o_welcome_dot_od"/>
+                                    <span class="o_welcome_status_text o_welcome_text_od">
+                                        <strong>On Duty today.</strong>
+                                    </span>
+                                </div>
+                                <div class="o_welcome_od_note">
+                                    Check-in isn't required — you're working off-site today.
+                                </div>
+                            </div>
+
                             <!-- Ready to check in -->
                             <div invisible="status != 'out'"
                                  class="o_welcome_status_card o_welcome_card_out">

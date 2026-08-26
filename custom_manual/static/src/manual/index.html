@@ -884,8 +884,9 @@
                     <li><strong>Attendance</strong> — check-in/check-out, late detection, half-day leave logic, company
                         holidays.
                     </li>
-                    <li><strong>Leave</strong> — Casual, Earned, Medical, and Permission leave, with anniversary-based
-                        allocation and carry-forward.
+                    <li><strong>Leave</strong> — Casual, Earned, Medical, Permission, Work From Home (WFH), and
+                        On Duty (OD) leave — anniversary-based allocation, carry-forward for allocated types,
+                        and paid no-deduction status for WFH &amp; OD.
                     </li>
                     <li><strong>Payroll</strong> — monthly salary computation, driven by your attendance and leave
                         register.
@@ -951,20 +952,50 @@
                 </div>
 
                 <h3>If you forget to check out</h3>
-                <p>The system auto-closes any open session at <strong>7:00 PM</strong> your local time. This shows on
+                <p>The system auto-closes any open session at <strong>11:59 PM</strong> your local time. This shows on
                     your record as <strong>Auto Checkout</strong>. HR and Managers get notified automatically whenever
                     this happens to you.</p>
+                <div class="stamp-note info">
+                    <span class="tag">Why 11:59 PM and not midnight?</span>
+                    The system deliberately uses 11:59 PM (one minute before midnight) rather than 12:00 AM. Midnight
+                    belongs to the <em>next</em> calendar day, which would create a date mismatch between your check-in
+                    and check-out records. At 11:59 PM, both timestamps always fall on the same working day — keeping
+                    your attendance record clean and your monthly summary accurate.
+                </div>
 
-                <h3>Holidays and Saturdays</h3>
+                <h3>Work From Home (WFH) and On Duty (OD)</h3>
+                <p>If you have an approved <strong>Work From Home</strong> or <strong>On Duty</strong> leave for today,
+                    the system recognises it automatically — no check-in or check-out is needed.</p>
                 <ul>
-                    <li>On a declared company holiday, check-in is blocked with a message telling you why.</li>
-                    <li>The <strong>2nd and 4th Saturday</strong> of every month are automatically treated as days off —
-                        no check-in needed, nothing to configure.
+                    <li>Your Home dashboard shows a coloured banner — <em>teal</em> for WFH,
+                        <em>indigo</em> for On Duty — instead of the Check In / Check Out buttons.
                     </li>
-                    <li>If HR has marked a specific Saturday as a <strong>Compensatory Working Day</strong> (see Section
-                        15), check-in works normally that day even though it's a Saturday.
+                    <li>The Attendance Check In / Check Out popup also shows the banner and hides all
+                        action buttons — there is nothing for you to click.
+                    </li>
+                    <li>The day is counted as <strong>present</strong> in your monthly summary and carries
+                        <strong>no salary deduction</strong> — it is a paid, non-deductible status.
+                    </li>
+                    <li>Late detection is fully bypassed for that day — you cannot be marked late on a
+                        WFH or OD day.
+                    </li>
+                    <li>The auto-checkout cron also skips WFH and OD days, so no phantom checkout is
+                        recorded.
                     </li>
                 </ul>
+                <div class="stamp-note info">
+                    <span class="tag">What's the difference?</span>
+                    <strong>Work From Home (WFH)</strong> — you're working remotely from your residence.<br>
+                    <strong>On Duty (OD)</strong> — you're working off-site (field visit, client meeting, travel, etc.).
+                    Both behave identically in the system — paid, no check-in required, no deductions.
+                </div>
+                <div class="stamp-note warn">
+                    <span class="tag">WFH / OD requires prior HR approval</span>
+                    You must submit a leave request (<strong>Time Off → New</strong>, choose
+                    <em>Work From Home</em> or <em>On Duty</em>) and wait for HR to approve it
+                    <em>before</em> the day. The banner will not appear and the day will not be
+                    protected unless the leave is in <strong>Validated</strong> state.
+                </div>
 
                 <h2>Viewing your own records</h2>
                 <p>Go to <strong>Attendances → My Attendance → My Records</strong> to see your check-in/check-out
@@ -975,8 +1006,8 @@
             <section class="page" id="page-leave" data-role="employee,manager,hr">
                 <div class="crumb">Manual / Your Desk</div>
                 <h1><span class="num">02</span> Leave & Half-Days</h1>
-                <p class="dek">Three leave types, an anniversary-based year, and half-days split cleanly into AM and
-                    PM.</p>
+                <p class="dek">Five leave types — three allocated (CL, EL, ML) and two special paid types (WFH, OD) — an
+                    anniversary-based year, and half-days split cleanly into AM and PM.</p>
 
                 <h2>Leave types & entitlement</h2>
                 <table class="ledger">
@@ -1000,7 +1031,23 @@
                         <td>3 days</td>
                         <td>Full carry-forward</td>
                     </tr>
+                    <tr>
+                        <td>Work From Home (WFH)</td>
+                        <td>No fixed quota</td>
+                        <td>N/A — not allocated</td>
+                    </tr>
+                    <tr>
+                        <td>On Duty (OD)</td>
+                        <td>No fixed quota</td>
+                        <td>N/A — not allocated</td>
+                    </tr>
                 </table>
+                <div class="stamp-note good">
+                    <span class="tag">WFH &amp; OD are paid, non-deductible</span>
+                    Work From Home and On Duty do <strong>not</strong> draw from any leave balance and
+                    carry <strong>no salary deduction</strong>. They are tracked separately in your monthly
+                    summary under their own columns. See Section 01 for how they affect check-in behaviour.
+                </div>
 
                 <p>Your leave year runs from your <strong>joining anniversary</strong>, not the calendar year. Each year
                     on that date, the system automatically closes your previous cycle and opens a new one — unused leave
@@ -1915,11 +1962,29 @@
                         <td>3 days / year</td>
                         <td>3 days (full)</td>
                     </tr>
+                    <tr>
+                        <td>Work From Home (WFH)</td>
+                        <td>No fixed quota</td>
+                        <td>N/A — not allocated</td>
+                    </tr>
+                    <tr>
+                        <td>On Duty (OD)</td>
+                        <td>No fixed quota</td>
+                        <td>N/A — not allocated</td>
+                    </tr>
                 </table>
 
+                <div class="stamp-note good">
+                    <span class="tag">WFH &amp; OD — no allocation needed</span>
+                    Work From Home and On Duty are special <strong>paid, non-deductible</strong> leave types.
+                    They require <strong>no allocation</strong> — employees can submit requests any time and
+                    HR simply approves them. Approved WFH/OD days are counted separately in the monthly summary
+                    and do <strong>not</strong> affect the employee's salary deduction.
+                </div>
+
                 <div class="stamp-note info">
-                    <span class="tag">All three types require HR approval to allocate</span>
-                    Casual, Earned, and Medical Leave are all configured with allocation approval required — no employee
+                    <span class="tag">Allocated types require HR approval</span>
+                    Casual, Earned, and Medical Leave are configured with allocation approval required — no employee
                     (or HR user, for that matter) can self-approve an allocation. Every allocation, whether generated
                     automatically or requested manually, must go through an HR approval step before it counts toward the
                     employee's balance.
@@ -2113,6 +2178,48 @@
                 </ol>
                 <p>No further action is needed after refusing — the recalculation happens immediately, you don't need to
                     manually edit the attendance record itself.</p>
+
+                <h2>Auto-checkout behaviour</h2>
+                <p>A daily system cron runs and checks for any attendance session with no check-out. If the current
+                    time has passed <strong>11:59 PM</strong> in the employee's local timezone, the session is
+                    automatically closed at that time and the <strong>Auto Checkout</strong> flag is set on the
+                    record.</p>
+                <div class="stamp-note warn">
+                    <span class="tag">Why 11:59 PM — not midnight</span>
+                    The auto-checkout time is set to <strong>23:59 (11:59 PM)</strong> rather than
+                    <strong>00:00 (midnight)</strong> to prevent a date conflict. Midnight is technically the start of
+                    the next calendar day — storing a check-out at 00:00 would make the checkout date one day ahead of
+                    the check-in date, breaking daily attendance queries, monthly summaries, and payroll calculations.
+                    At 11:59 PM, both timestamps are guaranteed to share the same calendar date.
+                </div>
+                <p>Whenever auto-checkout fires for an employee, HR and all Managers receive an inbox notification
+                    identifying the employee, the date, and confirming that the session was closed at 11:59 PM. No
+                    manual action is required unless a correction to the actual check-out time is needed.</p>
+                <div class="stamp-note info">
+                    <span class="tag">Correcting an auto-checkout time</span>
+                    If an employee can confirm they actually left at a different time (e.g. 6:00 PM), open the
+                    attendance record from <strong>Attendance → All Attendance</strong>, edit the Check-Out field to
+                    the correct time, and save. The Auto Checkout flag will remain set for audit purposes — it simply
+                    indicates the session was originally auto-closed, not that the time shown is wrong after a
+                    correction.
+                </div>
+
+                <h2>WFH &amp; OD days in the monthly summary</h2>
+                <p>When computing a monthly summary, the system counts each approved <strong>Work From Home</strong>
+                    or <strong>On Duty</strong> leave day into its own separate column (<em>wfh_days</em> /
+                    <em>od_days</em>). These days are treated as <strong>present</strong> and do
+                    <strong>not</strong> contribute to absent days or unpaid absent days,
+                    so they carry no payroll deduction.</p>
+                <p>The <strong>Approved Leave</strong> stat card on the summary form shows leave days
+                    <em>excluding</em> WFH and OD, so HR can see regular leave and special paid types
+                    independently at a glance.</p>
+                <div class="stamp-note info">
+                    <span class="tag">Approving a WFH or OD request</span>
+                    Go to <strong>Time Off → Management → Time Off</strong>, find the employee's WFH or OD
+                    request, and click <strong>Approve</strong> (then <strong>Validate</strong> if a
+                    second confirmation is needed). The leave must be in <strong>Validated</strong> state
+                    before the day for the check-in bypass and dashboard banner to activate.
+                </div>
 
                 <h2>Batch summary generation</h2>
                 <p>Use <strong>Generate Summaries (Batch)</strong> to compute or recompute Monthly Summary records for

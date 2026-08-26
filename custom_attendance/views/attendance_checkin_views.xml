@@ -37,6 +37,15 @@
                         </div>
                     </div>
 
+                    <!-- OD: no check-in required -->
+                    <div invisible="status != 'od'">
+                        <div class="o_att_banner o_att_banner_od">
+                            <i class="fa fa-briefcase" title="On Duty"/>
+                            <strong>You're On Duty today.</strong>
+                            Check-in / check-out is not required — you're working off-site.
+                        </div>
+                    </div>
+
                     <!-- CHECKED IN: active session -->
                     <div invisible="status != 'in'">
                         <div class="o_att_session_label">Active Session</div>

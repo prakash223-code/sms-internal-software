@@ -193,6 +193,7 @@
 .o_welcome_card_in      { background: #eff6ff; border: 1px solid #bfdbfe; }
 .o_welcome_card_done    { background: #f0fdf4; border: 1px solid #bbf7d0; }
 .o_welcome_card_holiday { background: #f0fdfa; border: 1px solid #99f6e4; }
+.o_welcome_card_od      { background: #eef2ff; border: 1px solid #c7d2fe; }
 .o_welcome_card_warn    { background: #fffbeb; border: 1px solid #fef3c7; }
 
 .o_welcome_status_row {
@@ -213,6 +214,7 @@
 .o_welcome_dot_done { background: #22c55e; }
 .o_welcome_dot_teal { background: #14b8a6; }
 .o_welcome_dot_warn { background: #f59e0b; }
+.o_welcome_dot_od   { background: #6366f1; box-shadow: 0 0 0 3px #c7d2fe; }
 
 .o_welcome_dot_in {
     background: #3b82f6;
@@ -230,6 +232,7 @@
 .o_welcome_text_green  { color: #15803d; }
 .o_welcome_text_teal   { color: #0f766e; }
 .o_welcome_text_muted  { color: #64748b; }
+.o_welcome_text_od     { color: #4338ca; }
 
 /* ── 8. TIME ROW ─────────────────────────────────────────── */
 .o_welcome_time_row {
@@ -308,9 +311,10 @@
     color: #78350f !important;
 }
 
-/* ── 10. DONE / HOLIDAY NOTES ────────────────────────────── */
+/* ── 10. DONE / HOLIDAY / OD NOTES ──────────────────────── */
 .o_welcome_done_note    { font-size: 13px; color: #15803d; font-style: italic; }
 .o_welcome_holiday_note { font-size: 13px; color: #0f766e; }
+.o_welcome_od_note      { font-size: 13px; color: #4338ca; }
 
 /* ── 11. ACTION BUTTONS ──────────────────────────────────── */
 .o_welcome_action_row { margin-top: 4px; }

@@ -38,11 +38,10 @@ window.addEventListener('pagehide', () => {
     // Only a genuine tab/browser close will leave it armed long enough
     // to trip the server-side grace period.
     sessionStorage.setItem(PENDING_KEY, '1');
-    navigator.sendBeacon(
-        '/web/session/request_logout',
-        new Blob(
-            [JSON.stringify({ jsonrpc: '2.0', method: 'call', params: {} })],
-            { type: 'application/json' }
-        )
-    );
+    fetch('/web/session/request_logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: {} }),
+        keepalive: true,  // completes even after page is unloaded; works in Safari 17+
+    }).catch(() => {});
 });

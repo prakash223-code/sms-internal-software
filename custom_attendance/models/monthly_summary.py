@@ -96,6 +96,13 @@ class AttendanceMonthlySummary(models.Model):
         help='Approved WFH days this month — included in Approved Leave for payroll purposes, shown separately for clarity.',
     )
 
+    od_days = fields.Float(
+        string='On Duty Days',
+        readonly=True,
+        default=0.0,
+        help='Approved On Duty days this month — counted as present, no salary deduction, shown separately for clarity.',
+    )
+
     permission_overflow_minutes = fields.Integer(
         string='Permission Overflow (Minutes)',
         readonly=True,
@@ -134,6 +141,7 @@ class AttendanceMonthlySummary(models.Model):
         )
     ]
     WFH_XMLID = 'custom_attendance.leave_type_wfh'
+    OD_XMLID = 'custom_attendance.leave_type_od'
 
     # ------------------------------------------------------------------
     # COMPUTED
@@ -216,7 +224,7 @@ class AttendanceMonthlySummary(models.Model):
         )
 
         # --- 4. Leave days ---
-        leave_days_count, unpaid_leave_days_count, wfh_days_count, leave_date_fractions = \
+        leave_days_count, unpaid_leave_days_count, wfh_days_count, od_days_count, leave_date_fractions = \
             self._get_leave_data(employee, year, month, working_day_dates, tz)
 
         # --- 5. Absent days (fractional) ---
@@ -242,6 +250,7 @@ class AttendanceMonthlySummary(models.Model):
             'late_days': late_days_count,
             'leave_days': leave_days_count,
             'wfh_days': wfh_days_count,
+            'od_days': od_days_count,
             'unpaid_leave_days': unpaid_leave_days_count,
             'absent_days': absent_days_count,
             'unpaid_absent_days': unpaid_absent_days_count,
@@ -304,6 +313,10 @@ class AttendanceMonthlySummary(models.Model):
             wfh_type_id = self.env.ref(self.WFH_XMLID).id
         except Exception:
             wfh_type_id = False
+        try:
+            od_type_id = self.env.ref(self.OD_XMLID).id
+        except Exception:
+            od_type_id = False
         num_days = calendar.monthrange(year, month)[1]
         first_day = date(year, month, 1)
         last_day = date(year, month, num_days)
@@ -312,17 +325,28 @@ class AttendanceMonthlySummary(models.Model):
             first_day, last_day
         )
 
+        # Build month boundaries in the employee's local timezone, then
+        # convert to UTC for the ORM query.  hr.leave.date_from/date_to are
+        # stored in UTC, so comparing with naive datetimes (which the ORM
+        # treats as UTC) against IST boundaries would mis-include leaves from
+        # the previous month whose UTC timestamp falls inside our window.
+        month_start_local = tz.localize(datetime(year, month, 1, 0, 0, 0))
+        month_end_local   = tz.localize(datetime(year, month, num_days, 23, 59, 59))
+        month_start_utc   = month_start_local.astimezone(pytz.utc).replace(tzinfo=None)
+        month_end_utc     = month_end_local.astimezone(pytz.utc).replace(tzinfo=None)
+
         hr_leaves = self.env['hr.leave'].search([
             ('employee_id', '=', employee.id),
             ('state', '=', 'validate'),
-            ('date_from', '<=', datetime(year, month, num_days, 23, 59, 59)),
-            ('date_to', '>=', datetime(year, month, 1, 0, 0, 0)),
+            ('date_from', '<=', month_end_utc),
+            ('date_to', '>=', month_start_utc),
         ])
 
         # date -> accumulated fraction (paid + unpaid combined, capped at 1.0)
         leave_date_fractions = {}
         unpaid_leave_date_fractions = {}
         wfh_date_fractions = {}
+        od_date_fractions = {}
         non_wfh_date_fractions = {}
 
         for leave in hr_leaves:
@@ -343,12 +367,20 @@ class AttendanceMonthlySummary(models.Model):
 
             is_unpaid = bool(leave.holiday_status_id.unpaid)
 
+            # Skip hourly leave types (e.g. Permission).  Permission is measured
+            # in minutes/hours and is tracked separately via
+            # permission_overflow_minutes — it must NOT contribute to leave_days.
+            if leave.holiday_status_id.request_unit == 'hour':
+                continue
+
             # Fraction this specific leave record contributes per date it touches.
-            # Half-day leaves are always single-date (date_from == date_to), so
-            # the fraction applies to that one date only. Multi-day leaves
-            # (full-day) contribute 1.0 to every date in their range.
-            record_fraction = 0.5 if leave.request_unit_half else 1.0
+            # A genuine half-day request has exactly 0.5 number_of_days — use that
+            # as the canonical signal rather than request_unit_half, which can be
+            # True on multi-day leaves (e.g. Aug 25→26 with period selection).
+            # Any leave that isn't exactly 0.5 days contributes 1.0 per working date.
+            record_fraction = 0.5 if leave.number_of_days == 0.5 else 1.0
             is_wfh = wfh_type_id and leave.holiday_status_id.id == wfh_type_id
+            is_od = od_type_id and leave.holiday_status_id.id == od_type_id
 
             current = date_from_local
             while current <= date_to_local:
@@ -373,6 +405,9 @@ class AttendanceMonthlySummary(models.Model):
                 if is_wfh:
                     existing_wfh = wfh_date_fractions.get(current, 0.0)
                     wfh_date_fractions[current] = min(1.0, existing_wfh + record_fraction)
+                elif is_od:
+                    existing_od = od_date_fractions.get(current, 0.0)
+                    od_date_fractions[current] = min(1.0, existing_od + record_fraction)
                 else:
                     existing_non_wfh = non_wfh_date_fractions.get(current, 0.0)
                     non_wfh_date_fractions[current] = min(1.0, existing_non_wfh + record_fraction)
@@ -383,6 +418,7 @@ class AttendanceMonthlySummary(models.Model):
         leave_days_total = 0.0
         unpaid_leave_days_total = 0.0
         wfh_days_total = 0.0
+        od_days_total = 0.0
 
         for d, fraction in leave_date_fractions.items():
             if d not in working_day_dates:
@@ -391,10 +427,12 @@ class AttendanceMonthlySummary(models.Model):
             paid_fraction = fraction - unpaid_fraction
             leave_days_total += paid_fraction
             unpaid_leave_days_total += unpaid_fraction
-            if non_wfh_date_fractions.get(d, 0.0) == 0.0:
+            if non_wfh_date_fractions.get(d, 0.0) == 0.0 and od_date_fractions.get(d, 0.0) == 0.0:
                 wfh_days_total += wfh_date_fractions.get(d, 0.0)
+            if non_wfh_date_fractions.get(d, 0.0) == 0.0 and wfh_date_fractions.get(d, 0.0) == 0.0:
+                od_days_total += od_date_fractions.get(d, 0.0)
 
-        return leave_days_total, unpaid_leave_days_total, wfh_days_total, leave_date_fractions
+        return leave_days_total, unpaid_leave_days_total, wfh_days_total, od_days_total, leave_date_fractions
 
     # ------------------------------------------------------------------
     # CRON
@@ -439,14 +477,14 @@ class AttendanceMonthlySummary(models.Model):
                 new_record._compute_summary()
 
     leave_days_excl_wfh = fields.Float(
-        string='Approved Leave (Excl. WFH)',
+        string='Approved Leave (Excl. WFH & OD)',
         compute='_compute_leave_days_excl_wfh',
         store=True,
-        help='Approved Leave Days minus Work From Home days — for clearer display only. '
+        help='Approved Leave Days minus Work From Home and On Duty days — for clearer display only. '
              'Payroll calculations continue to use leave_days/unpaid_absent_days as before.',
     )
 
-    @api.depends('leave_days', 'wfh_days')
+    @api.depends('leave_days', 'wfh_days', 'od_days')
     def _compute_leave_days_excl_wfh(self):
         for rec in self:
-            rec.leave_days_excl_wfh = rec.leave_days - rec.wfh_days
+            rec.leave_days_excl_wfh = rec.leave_days - rec.wfh_days - rec.od_days

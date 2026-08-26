@@ -34,6 +34,7 @@ class WelcomeDashboard(models.TransientModel):
         ('done', 'All Done Today'),
         ('holiday', 'Holiday Today'),
         ('wfh', 'Work From Home'),
+        ('od', 'On Duty'),
         ('no_employee', 'No Employee Linked'),
     ], readonly=True)
 
@@ -156,6 +157,13 @@ class WelcomeDashboard(models.TransientModel):
         # lose "This Week" data on WFH days.
         if employee._is_on_wfh(today_local):
             res['status'] = 'wfh'
+            self._compute_weekly_stats(res, employee, today_local, tz)
+            self._load_announcements(res)
+            return res
+
+        # OD check — same priority as WFH. Weekly stats still computed.
+        if employee._is_on_od(today_local):
+            res['status'] = 'od'
             self._compute_weekly_stats(res, employee, today_local, tz)
             self._load_announcements(res)
             return res

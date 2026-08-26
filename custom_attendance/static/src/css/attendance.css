@@ -121,6 +121,14 @@
     font-weight: 600;
 }
 
+.o_att_banner_od {
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-left: 4px solid #6366f1;
+    color: #312e81;
+    font-weight: 600;
+}
+
 /* ── Status pills row (HR form) ─────────────────────────────── */
 .o_att_pills_row {
     display: flex;
@@ -267,6 +275,20 @@
 
 .o_att_card_blue .o_att_stat_value {
     color: #1d4ed8;
+}
+
+/* On Duty — indigo/violet */
+.o_att_card_teal {
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+}
+
+.o_att_card_teal .o_att_stat_label {
+    color: #4338ca;
+}
+
+.o_att_card_teal .o_att_stat_value {
+    color: #4338ca;
 }
 
 /* ── Payroll deduction highlight ────────────────────────────── */
