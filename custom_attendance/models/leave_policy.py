@@ -41,7 +41,7 @@ class HrEmployeeLeavePolicy(models.Model):
         return employees
 
     def _create_initial_leave_allocations(self):
-        Allocation = self.env['hr.leave.allocation'].sudo()
+        Allocation = self.env['hr.leave.allocation'].sudo().with_context(leave_policy_internal=True)
         today = fields.Date.context_today(self)
 
         for employee in self:
@@ -99,7 +99,7 @@ class HrEmployeeLeavePolicy(models.Model):
 
     def _process_leave_carry_forward(self, cycle_start):
         self.ensure_one()
-        Allocation = self.env['hr.leave.allocation'].sudo()
+        Allocation = self.env['hr.leave.allocation'].sudo().with_context(leave_policy_internal=True)
         cycle_end_prev = cycle_start - relativedelta(days=1)
 
         for code, policy in LEAVE_POLICY.items():

@@ -4,6 +4,7 @@ from . import attendance_wizard
 from . import company_holiday
 from . import attendance_batch_wizard
 from . import hr_leave_extension
+from . import hr_leave_allocation_extension
 from . import leave_policy
 from . import permission_deduction
 from . import permission_policy
