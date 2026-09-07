@@ -316,10 +316,11 @@
                                     <field name="name" string="Document Name" readonly="not is_own_doc"/>
                                     <field name="category" string="Category" readonly="not is_own_doc"/>
                                     <field name="type" string="Type" readonly="1"/>
-                                    <field name="file_data" filename="file_name" string="File"
+                                    <field name="file_data" filename="file_name" string="File Size"
                                            readonly="not is_own_doc"/>
-                                    <field name="file_name" invisible="1"/>
-                                    <field name="preview" widget="image" string="Preview" options="{'size': [40, 40]}"/>
+                                    <field name="file_name" column_invisible="1"/>
+                                    <button name="action_preview_document" type="object" string="View" icon="fa-eye"
+                                            invisible="not file_data" class="btn-link"/>
                                     <field name="create_uid" string="Uploaded By"/>
                                     <field name="uploaded_on" string="Uploaded On"/>
                                 </list>

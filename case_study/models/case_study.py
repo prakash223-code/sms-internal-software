@@ -150,7 +150,24 @@ class CaseStudyDocument(models.Model):
     def _compute_preview(self):
         for rec in self:
             rec.preview = rec.file_data if (rec.mimetype and rec.mimetype.startswith('image/')) else False
+    @api.depends('file_data', 'mimetype')
+    def _compute_preview(self):
+        for rec in self:
+            rec.preview = rec.file_data if (rec.mimetype and rec.mimetype.startswith('image/')) else False
 
+    def action_preview_document(self):
+        """Open the uploaded file in a new browser tab, regardless of type."""
+        self.ensure_one()
+        if not self.file_data:
+            return False
+        url = '/web/content/case.study.document/%s/file_data/%s?download=false' % (
+            self.id, self.file_name or self.name or 'file',
+        )
+        return {
+            'type': 'ir.actions.act_url',
+            'url': url,
+            'target': 'new',
+        }
 
 class CaseStudy(models.Model):
     _name = 'case.study'
