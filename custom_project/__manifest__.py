@@ -10,6 +10,7 @@
         'security/security_groups.xml',
         'security/ir.model.access.csv',
         'security/record_rules.xml',
+        'security/attachment_rules.xml',
         # 2. Sequences
         'data/sequences.xml',
         # 3. Default stage records

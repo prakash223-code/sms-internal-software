@@ -1,53 +1,64 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--
-        PURPOSE: Timesheet tab on the project form.
-          • Shows total hours spent and remaining hours (computed, read-only)
-          • Inline editable timesheet lines linked to this project
-          • software_used — free-text field declared in account_analytic_line.py
-    -->
     <record id="project_project_form_timesheet" model="ir.ui.view">
         <field name="name">project.project.form.timesheet</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
-
             <xpath expr="//notebook" position="inside">
-
+                <!--  ========== TIMESHEETS TAB ==========  -->
                 <page string="Timesheets" name="timesheets">
-
                     <group>
                         <group string="Time Summary">
-                            <field name="total_time_spent"
-                                   string="Total Hours Spent"
-                                   widget="float_time"
-                                   readonly="1"/>
-                            <field name="remaining_time"
-                                   string="Remaining Hours"
-                                   widget="float_time"
-                                   readonly="1"/>
+                            <field name="total_time_spent" string="Total Hours Spent" widget="float_time" readonly="1"/>
+                            <field name="remaining_time" string="Remaining Hours" widget="float_time" readonly="1"/>
                         </group>
                     </group>
-
                     <field name="timesheet_ids" nolabel="1">
-                        <list editable="bottom"
-                              decoration-muted="unit_amount == 0">
-                            <field name="date"          string="Date"/>
-                            <field name="employee_id"   string="Employee"/>
-                            <field name="name"          string="Description"   optional="show"/>
-                            <field name="task_id"       string="Task"          optional="show"/>
+                        <list editable="bottom" decoration-muted="unit_amount == 0">
+                            <field name="date" string="Date"/>
+                            <field name="employee_id" string="Employee"/>
+                            <field name="name" string="Description" optional="show"/>
+                            <field name="task_id" string="Task" optional="show"/>
                             <field name="software_used" string="Software Used" optional="show"/>
-                            <field name="unit_amount"   string="Hours"
-                                   widget="float_time"
-                                   sum="Total Hours"/>
+                            <field name="unit_amount" string="Hours" widget="float_time" sum="Total Hours"/>
                         </list>
                     </field>
-
                 </page>
-
+                <!--  ========== PROJECT DETAILS TAB ==========  -->
+                <page string="Project Details" name="project_details">
+                    <field name="is_locked" invisible="1"/>
+                    <!--  HR sees editable version  -->
+                    <separator string="Problem Statement" groups="hr.group_hr_user"/>
+                    <field name="problem_statement" placeholder="What problem/requirement did the client have?"
+                           readonly="is_locked" nolabel="1" groups="hr.group_hr_user"/>
+                    <!--  Employee sees readonly version  -->
+                    <separator string="Problem Statement" groups="!hr.group_hr_user"/>
+                    <field name="problem_statement" readonly="1" nolabel="1" groups="!hr.group_hr_user"/>
+                    <separator string="Objective / Scope" groups="hr.group_hr_user"/>
+                    <field name="objective" placeholder="What exactly was analyzed / delivered?" readonly="is_locked"
+                           nolabel="1" groups="hr.group_hr_user"/>
+                    <separator string="Objective / Scope" groups="!hr.group_hr_user"/>
+                    <field name="objective" readonly="1" nolabel="1" groups="!hr.group_hr_user"/>
+                    <separator string="Document Requirement" groups="hr.group_hr_user"/>
+                    <field name="document_requirement" placeholder="List all documents required..." readonly="is_locked"
+                           nolabel="1" groups="hr.group_hr_user"/>
+                    <separator string="Document Requirement" groups="!hr.group_hr_user"/>
+                    <field name="document_requirement" readonly="1" nolabel="1" groups="!hr.group_hr_user"/>
+                    <!--  ✅ ALL users edit when not locked  -->
+                    <separator string="Methodology / Approach"/>
+                    <field name="methodology" placeholder="How was the work carried out?" readonly="is_locked"
+                           nolabel="1"/>
+                    <separator string="Challenges Faced"/>
+                    <field name="challenges" placeholder="Technical difficulties and how they were solved..."
+                           readonly="is_locked" nolabel="1"/>
+                    <separator string="Results / Outcome"/>
+                    <field name="results" placeholder="Key findings, improvements, numbers achieved..."
+                           readonly="is_locked" nolabel="1"/>
+                    <separator string="Conclusion"/>
+                    <field name="conclusion" placeholder="Summary and recommendations..." readonly="is_locked"
+                           nolabel="1"/>
+                </page>
             </xpath>
-
         </field>
     </record>
-
 </odoo>

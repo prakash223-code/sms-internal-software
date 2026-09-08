@@ -1,0 +1,27 @@
+<odoo>
+    <data>
+        <record id="rule_attachment_project_team_view" model="ir.rule">
+            <field name="name">Attachment: Employee views only own project team's files</field>
+            <field name="model_id" ref="base.model_ir_attachment"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">['|', ('res_model', '!=', 'project.project'), '|',
+                ('project_id.team_id.member_ids.user_id', '=', user.id), ('project_id.team_id.team_lead_id.user_id',
+                '=', user.id)]
+            </field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_attachment_project_hr_manager_view" model="ir.rule">
+            <field name="name">Attachment: HR + Manager view all project files</field>
+            <field name="model_id" ref="base.model_ir_attachment"/>
+            <field name="groups" eval="[(4, ref('hr.group_hr_user')), (4, ref('custom_project.group_team_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+    </data>
+</odoo>
