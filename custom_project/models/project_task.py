@@ -216,7 +216,7 @@ class ProjectTask(models.Model):
                     )
                 )
 
-    _ASSIGNEE_EDITABLE_FIELDS = {'task_state', 'timesheet_ids', 'state'}
+    _ASSIGNEE_EDITABLE_FIELDS = {'task_state', 'timesheet_ids', 'state', 'stage_id', 'sequence'}
 
     def _check_edit_access(self, vals):
         """
