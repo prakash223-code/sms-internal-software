@@ -204,5 +204,123 @@
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
+        <!--  ══ project.software rules ═══════════════════════════════════
+
+                 FINAL POLICY:
+                   • All internal users: read-only (dropdown visibility)
+                     — granted via ir.model.access.csv, no rule needed.
+                   • HR + Manager: full unrestricted create/edit/delete.
+                   • Team Lead (STATIC group_team_lead): model-level
+                     create + write granted in ir.model.access.csv, but
+                     write here is narrowed to records they personally
+                     created.
+                   • Delete for Team Lead uses group_any_team_lead —
+                     the DYNAMIC group auto-synced by
+                     team.py:_sync_any_team_lead_group() whenever any
+                     team's team_lead_id changes. This means: the
+                     moment a Team Lead is replaced on their team, they
+                     immediately lose delete rights on software they
+                     created while they held the role — and the new
+                     Team Lead only gains delete rights over software
+                     THEY create going forward (no retroactive
+                     ownership transfer — old TL's existing entries are
+                     only editable by HR/Manager from that point on,
+                     by design).
+                   • Admin/superuser bypasses via env.su.
+            ══════════════════════════════════════════════════════════════  -->
+        <!--  ══ project.software rules ═══════════════════════════════════
+
+             FINAL POLICY:
+               • All internal users: read-only (dropdown visibility)
+                 — granted via ir.model.access.csv, no rule needed.
+               • HR + Manager: full unrestricted create/edit/delete.
+               • Team Lead (STATIC group_team_lead): model-level
+                 create + write granted in ir.model.access.csv, but
+                 write here is narrowed to records they personally
+                 created.
+               • Delete for Team Lead uses group_any_team_lead —
+                 the DYNAMIC group auto-synced by
+                 team.py:_sync_any_team_lead_group() whenever any
+                 team's team_lead_id changes. This means: the
+                 moment a Team Lead is replaced on their team, they
+                 immediately lose delete rights on software they
+                 created while they held the role — and the new
+                 Team Lead only gains delete rights over software
+                 THEY create going forward (no retroactive
+                 ownership transfer — old TL's existing entries are
+                 only editable by HR/Manager from that point on,
+                 by design).
+               • Admin/superuser bypasses via env.su.
+        ══════════════════════════════════════════════════════════════  -->
+        <record id="rule_software_hr_manager_all" model="ir.rule">
+            <field name="name">Project Software: HR + Manager full access</field>
+            <field name="model_id" ref="model_project_software"/>
+            <field name="groups" eval="[
+                (4, ref('hr.group_hr_user')),
+                (4, ref('custom_project.group_team_manager')),
+            ]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="rule_software_team_lead_write_own" model="ir.rule">
+            <field name="name">Project Software: Team Lead edits own records only</field>
+            <field name="model_id" ref="model_project_software"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_team_lead'))]"/>
+            <field name="domain_force">[('create_uid', '=', user.id)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_software_current_team_lead_unlink_own" model="ir.rule">
+            <field name="name">Project Software: CURRENT Team Lead deletes own records only</field>
+            <field name="model_id" ref="model_project_software"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_any_team_lead'))]"/>
+            <field name="domain_force">[('create_uid', '=', user.id)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        <record id="rule_software_hr_manager_all" model="ir.rule">
+            <field name="name">Project Software: HR + Manager full access</field>
+            <field name="model_id" ref="model_project_software"/>
+            <field name="groups" eval="[
+                (4, ref('hr.group_hr_user')),
+                (4, ref('custom_project.group_team_manager')),
+            ]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="rule_software_team_lead_write_own" model="ir.rule">
+            <field name="name">Project Software: Team Lead edits own records only</field>
+            <field name="model_id" ref="model_project_software"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_any_team_lead'))]"/>
+            <field name="domain_force">[('create_uid', '=', user.id)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_software_current_team_lead_unlink_own" model="ir.rule">
+            <field name="name">Project Software: CURRENT Team Lead deletes own records only</field>
+            <field name="model_id" ref="model_project_software"/>
+            <field name="groups" eval="[(4, ref('custom_project.group_any_team_lead'))]"/>
+            <field name="domain_force">[('create_uid', '=', user.id)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
     </data>
 </odoo>

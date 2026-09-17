@@ -3,6 +3,7 @@ from . import hr_employee
 from . import project_project
 from . import project_task
 from . import project_task_type
+from . import project_software
 from . import task_assignment_request
 from . import project_completion_request
 from . import project

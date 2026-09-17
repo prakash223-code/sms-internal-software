@@ -96,4 +96,11 @@
               action="action_project_stage_management"
               groups="custom_project.group_team_manager,hr.group_hr_user"/>
 
+    <menuitem id="menu_project_software_config"
+          name="Software"
+          parent="project.menu_main_pm"
+          sequence="80"
+          action="action_project_software"
+          groups="custom_project.group_team_lead,custom_project.group_any_team_lead,custom_project.group_team_manager,hr.group_hr_user"/>
+
 </odoo>

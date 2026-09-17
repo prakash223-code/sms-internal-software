@@ -532,7 +532,7 @@ class ProjectTask(models.Model):
         # own cross-team decision applied.
         current_employee = self._get_current_employee()
         old_assigned = {task.id: set(task.assigned_to_ids.ids) for task in self}
-        pending_requests = []  # list of (task, pending_info)
+        pending_requests = []
         per_task_vals = {}
 
         for task in self:
@@ -545,6 +545,24 @@ class ProjectTask(models.Model):
                 pending_requests.append((task, pending_info))
 
         result = True
+        for task in self:
+            result = super(ProjectTask, task).write(per_task_vals[task.id])
+
+        # NEW: auto-cancel any still-pending assignment request whose target
+        # employee was just removed from assigned_to_ids on this write.
+        for task in self:
+            new_ids = set(task.assigned_to_ids.ids)
+            removed_ids = old_assigned.get(task.id, set()) - new_ids
+            if removed_ids:
+                self.env['task.assignment.request'].sudo().search([
+                    ('task_id', '=', task.id),
+                    ('state', '=', 'pending'),
+                    ('target_employee_id', 'in', list(removed_ids)),
+                ]).write({
+                    'state': 'rejected',
+                    'manager_comment': _('Auto-rejected: employee was removed from the task before approval.'),
+                    'decision_date': fields.Datetime.now(),
+                })
         for task in self:
             result = super(ProjectTask, task).write(per_task_vals[task.id])
 

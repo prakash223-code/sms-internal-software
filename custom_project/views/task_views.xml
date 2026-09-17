@@ -231,7 +231,8 @@
                 <attribute name="readonly">not can_edit_line</attribute>
             </xpath>
             <xpath expr="//field[@name='timesheet_ids']//field[@name='unit_amount']" position="before">
-                <field name="software_used" string="Software Used" optional="show" readonly="not can_edit_line"/>
+                <field name="software_used" string="Software Used" optional="show" readonly="not can_edit_line"
+                       widget="many2many_tags" options="{'no_create_edit': True}"/>
             </xpath>
             <xpath expr="//field[@name='timesheet_ids']//field[@name='unit_amount']" position="attributes">
                 <attribute name="readonly">not can_edit_line</attribute>

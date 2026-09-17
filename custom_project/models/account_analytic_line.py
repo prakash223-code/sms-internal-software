@@ -1,7 +1,8 @@
 # account_analytic_line.py
 # PURPOSE: Extend timesheet entries (account.analytic.line) with a
-#   "Software Used" free-text field so employees can log which tool
-#   or application they worked with during each timesheet entry.
+#   "Software Used" dropdown (Many2one to project.software) so employees
+#   can log which tool or application they worked with during each
+#   timesheet entry.
 #   Also adds a per-row "can I edit this line" flag so the UI can make
 #   other people's lines readonly instead of letting users hit Save
 #   and get a raw Access Error, plus a friendlier server-side message
@@ -12,6 +13,14 @@
 #   timesheet line. HR and Manager are exempted — either can view AND
 #   edit/delete ANY employee's line. Team Lead is view-only on
 #   everyone's entries. Admin/superuser always bypasses via env.su.
+#
+#   software_used CHANGE (v3): was a free-text Char field — employees
+#   typed software names manually, leading to inconsistent spelling
+#   ("Excel" / "excel" / "MS Excel"). Now a Many2one to project.software,
+#   a small shared lookup list. Who may create/edit/delete entries in
+#   that list is governed separately by project_software's own
+#   ir.model.access.csv + ir.rule records — NOT by anything in this
+#   file. This file only stores the reference on the timesheet line.
 #
 #   WHY _apply_ir_rules IS OVERRIDDEN BELOW:
 #   security/record_rules.xml already grants Employees an unrestricted
@@ -42,9 +51,15 @@ from odoo.exceptions import UserError
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
-    software_used = fields.Char(
+    software_used = fields.Many2many(
+        'project.software',
+        'account_analytic_line_software_rel',
+        'line_id',
+        'software_id',
         string='Software Used',
-        help='The software or tool used during this timesheet entry.',
+        help='The software or tool(s) used during this timesheet entry. '
+             'Select from the shared list — contact HR, your Manager, '
+             'or your Team Lead to add a new one.',
     )
 
     # Drives readonly on the inline timesheet list so a user can SEE

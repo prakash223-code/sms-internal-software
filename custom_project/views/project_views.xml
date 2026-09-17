@@ -19,7 +19,8 @@
                             <field name="employee_id" string="Employee"/>
                             <field name="name" string="Description" optional="show"/>
                             <field name="task_id" string="Task" optional="show"/>
-                            <field name="software_used" string="Software Used" optional="show"/>
+                            <field name="software_used" string="Software Used" optional="show"
+                                   widget="many2many_tags" options="{'no_create_edit': True}"/>
                             <field name="unit_amount" string="Hours" widget="float_time" sum="Total Hours"/>
                         </list>
                     </field>

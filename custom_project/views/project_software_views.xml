@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══ List view ══════════════════════════════════════════════════════ -->
+    <record id="view_project_software_list" model="ir.ui.view">
+        <field name="name">project.software.list</field>
+        <field name="model">project.software</field>
+        <field name="arch" type="xml">
+            <list string="Software" editable="bottom" decoration-muted="not active">
+                <field name="name" string="Software Name"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Form view ══════════════════════════════════════════════════════ -->
+    <record id="view_project_software_form" model="ir.ui.view">
+        <field name="name">project.software.form</field>
+        <field name="model">project.software</field>
+        <field name="arch" type="xml">
+            <form string="Software">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Software Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. AutoCAD, Excel, Figma"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Search view ════════════════════════════════════════════════════ -->
+    <record id="view_project_software_search" model="ir.ui.view">
+        <field name="name">project.software.search</field>
+        <field name="model">project.software</field>
+        <field name="arch" type="xml">
+            <search string="Search Software">
+                <field name="name" string="Software Name"/>
+                <separator/>
+                <filter string="Active"   name="active"   domain="[('active','=',True)]"/>
+                <filter string="Archived" name="archived" domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Action ═════════════════════════════════════════════════════════ -->
+    <record id="action_project_software" model="ir.actions.act_window">
+        <field name="name">Software</field>
+        <field name="res_model">project.software</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_project_software_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No software entries yet.
+            </p>
+            <p>
+                Create the list of software/tools here so employees can pick
+                from a dropdown on their timesheet lines instead of typing
+                free text. Team Leads can add entries and edit/delete only
+                the ones they created; HR and Managers can manage all
+                entries.
+            </p>
+        </field>
+    </record>
+
+</odoo>

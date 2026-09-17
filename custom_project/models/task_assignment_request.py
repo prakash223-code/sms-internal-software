@@ -1,5 +1,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Command
 
 
 class TaskAssignmentRequest(models.Model):
@@ -144,7 +145,7 @@ class TaskAssignmentRequest(models.Model):
         )
 
         self.task_id.sudo().write({
-            'assigned_to': self.target_employee_id.id,
+            'assigned_to_ids': [Command.link(self.target_employee_id.id)],
             'team_id': self.target_team_id.id if self.target_team_id else False,
             'task_state': 'assigned',
         })
@@ -195,7 +196,7 @@ class TaskAssignmentRequest(models.Model):
         })
 
         self.task_id.sudo().write({
-            'assigned_to': False,
+            'assigned_to_ids': [Command.unlink(self.target_employee_id.id)],
         })
 
         return {
