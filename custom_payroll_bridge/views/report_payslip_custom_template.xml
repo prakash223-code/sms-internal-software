@@ -190,6 +190,17 @@
                     <li>Salary credited via bank transfer</li>
                 </ul>
 
+                <table style="width:100%; border:none; border-collapse:collapse; margin-top:90px; margin-left:30px">
+                    <tr>
+                        <td style="border:none; width:65%;"> </td>
+                        <td style="border:none; width:35%; text-align:left; vertical-align:bottom; font-size:15px; line-height:1.5;">
+                            HR<br/>
+                            SMS ENTERPRISES<br/>
+                            <strong>contact@smsenergytech.com</strong>
+                        </td>
+                    </tr>
+                </table>
+
             </div>
         </xpath>
     </template>
