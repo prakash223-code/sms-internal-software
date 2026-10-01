@@ -132,9 +132,8 @@ class HrLeave(models.Model):
                         leave.sudo()._notify_leave_decision('refused')
                     leave.flush_recordset(['state'])
                     leave.sudo()._recompute_attendance_lateness_for_date()
-                    if leave.is_auto_permission:
-                        # HR refused a system deduction — recompute the linked
-                        # attendance so permission_overflow_minutes stays accurate.
+                    if (leave.is_auto_permission
+                            and not self.env.context.get('skip_auto_permission_recompute')):
                         leave.sudo()._recompute_attendance_for_auto_permission()
 
         return res

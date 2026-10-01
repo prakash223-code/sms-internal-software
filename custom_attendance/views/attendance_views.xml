@@ -144,6 +144,7 @@
                 <field name="worked_hours" string="Hours" widget="float_time"/>
                 <field name="is_late" string="Late" readonly="1"/>
                 <field name="late_minutes" string="Late (min)" optional="show"/>
+                <field name="permission_overflow_minutes" string="Perm. Overflow (min)" optional="show"/>
                 <field name="auto_checkout" string="Auto CO" optional="hide" readonly="1"/>
             </list>
         </field>
@@ -219,6 +220,7 @@
                         <group>
                             <field name="is_late" readonly="1"/>
                             <field name="late_minutes" string="Late By (Min)" readonly="1"/>
+                            <field name="permission_overflow_minutes" string="Permission Overflow (Min)" readonly="1"/>
                         </group>
                         <group>
                             <field name="auto_checkout" string="Auto Checkout" readonly="1"/>

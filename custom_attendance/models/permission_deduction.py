@@ -73,6 +73,15 @@ class HrAttendancePermissionDeduction(models.Model):
         elif new_remaining * 60 <= 30:
             self._notify_permission_low(employee, round(new_remaining * 60))
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for record in records:
+            if record.check_in and record.employee_id:
+                record.flush_recordset(['is_late', 'late_minutes'])
+                record._apply_permission_deduction()
+        return records
+
     def write(self, vals):
         res = super().write(vals)
         if 'check_in' in vals or 'employee_id' in vals:
@@ -186,7 +195,7 @@ class HrAttendancePermissionDeduction(models.Model):
             ('date_to', '>=', day_start),
         ])
         if stale:
-            stale.action_refuse()
+            stale.with_context(skip_auto_permission_recompute=True).action_refuse()
 
     def _get_late_threshold_hour(self):
         """

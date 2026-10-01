@@ -235,7 +235,7 @@ class CustomAttendance(models.Model):
             'employee_id': employee.id,
             'check_in': now,
         })
-        new_record._apply_permission_deduction()
+
         return {
             'status': 'checked_in',
             'check_in': now,
