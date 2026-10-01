@@ -73,7 +73,7 @@
 
                     <!-- Auto checkout notice -->
                     <div invisible="not auto_checkout" class="o_att_banner o_att_banner_autoco mt-3">
-                        This session was automatically closed at 19:00 — no manual check-out was recorded.
+                        This session was automatically closed at 23:59 — no manual check-out was recorded.
                     </div>
 
                     <!-- Hidden -->

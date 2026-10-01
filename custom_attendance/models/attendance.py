@@ -5,6 +5,9 @@ from markupsafe import Markup
 import pytz
 import calendar
 from datetime import datetime, time
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class CustomAttendance(models.Model):
@@ -389,48 +392,50 @@ class CustomAttendance(models.Model):
     @api.model
     def _cron_auto_checkout(self):
         """
-        Runs daily. Finds all open sessions and closes them at 23:59
-        in the employee's local timezone (11:59 PM, same calendar day).
+        Runs hourly. Closes any open session whose 23:59 (employee local
+        time, same calendar day as check-in) has already passed.
+        Each record is isolated in a savepoint so one failure cannot
+        roll back or block the others.
         """
+        now_utc = fields.Datetime.now()
         open_sessions = self.search([('check_out', '=', False)])
 
         for attendance in open_sessions:
-            tz_name = attendance.employee_id.tz or 'Asia/Kolkata'
             try:
-                tz = pytz.timezone(tz_name)
-            except pytz.UnknownTimeZoneError:
-                tz = pytz.timezone('Asia/Kolkata')
+                with self.env.cr.savepoint():
+                    tz_name = attendance.employee_id.tz or 'Asia/Kolkata'
+                    try:
+                        tz = pytz.timezone(tz_name)
+                    except pytz.UnknownTimeZoneError:
+                        tz = pytz.timezone('Asia/Kolkata')
 
-            check_in_utc = attendance.check_in
-            if check_in_utc.tzinfo is None:
-                check_in_utc = pytz.utc.localize(check_in_utc)
+                    check_in_utc = attendance.check_in
+                    if check_in_utc.tzinfo is None:
+                        check_in_utc = pytz.utc.localize(check_in_utc)
+                    check_in_local = check_in_utc.astimezone(tz)
 
-            check_in_local = check_in_utc.astimezone(tz)
+                    if attendance.employee_id._is_on_wfh(check_in_local.date()):
+                        continue
+                    if attendance.employee_id._is_on_od(check_in_local.date()):
+                        continue
 
-            # WFH override — should be rare/impossible if check-in is hidden
-            # on WFH days, but guards against a stale open session from
-            # before WFH was approved (e.g. employee checked in, then WFH
-            # got approved retroactively for today — shouldn't auto-close
-            # at 19:00 since WFH has no fixed schedule).
-            if attendance.employee_id._is_on_wfh(check_in_local.date()):
-                continue
+                    auto_checkout_local = tz.localize(
+                        datetime.combine(check_in_local.date(), time(23, 59))
+                    )
+                    auto_checkout_utc = auto_checkout_local.astimezone(
+                        pytz.utc).replace(tzinfo=None)
 
-            # OD override — same guard for On Duty days.
-            if attendance.employee_id._is_on_od(check_in_local.date()):
-                continue
+                    if now_utc < auto_checkout_utc:
+                        continue
 
-            auto_checkout_local = tz.localize(
-                datetime.combine(check_in_local.date(), time(23, 59))
-            )
-            auto_checkout_utc = auto_checkout_local.astimezone(pytz.utc).replace(tzinfo=None)
-
-            now_utc = fields.Datetime.now()
-            if now_utc >= auto_checkout_utc:
-                attendance.write({
-                    'check_out': auto_checkout_utc,
-                    'auto_checkout': True,
-                })
-                attendance._notify_hr_missed_checkout(check_in_local.date())
+                    attendance.write({
+                        'check_out': auto_checkout_utc,
+                        'auto_checkout': True,
+                    })
+                    attendance._notify_hr_missed_checkout(check_in_local.date())
+            except Exception:
+                _logger.exception(
+                    'Auto checkout failed for attendance id=%s', attendance.id)
 
     def _notify_hr_missed_checkout(self, attendance_date):
         """
