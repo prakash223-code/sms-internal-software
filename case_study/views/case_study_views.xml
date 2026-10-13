@@ -157,7 +157,7 @@
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <div class="mt-2" t-if="record.planned_hours.raw_value">
                                 <div class="progress" style="height: 5px;">
-                                    <div class="progress-bar"
+                                    <div t-attf-class="progress-bar #{record.total_hours.raw_value > record.planned_hours.raw_value ? 'bg-danger' : ''}"
                                          t-attf-style="width: #{Math.min(100, (record.total_hours.raw_value / record.planned_hours.raw_value) * 100)}%;"/>
                                 </div>
                                 <span class="text-muted small">
@@ -278,7 +278,7 @@
                             <field name="date_end" readonly="locked or not is_hr_user"/>
                             <field name="planned_hours" readonly="locked or not is_hr_user"/>
                             <field name="total_hours" widget="progressbar"
-                                   options="{'current_value': 'total_hours', 'max_value': 'planned_hours'}"/>
+                                   options="{'current_value': 'total_hours', 'max_value': 'planned_hours', 'overflow_class': 'bg-danger'}"/>
                         </group>
                     </group>
                     <notebook>
