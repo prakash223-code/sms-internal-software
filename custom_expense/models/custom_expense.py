@@ -17,13 +17,33 @@ class CustomExpense(models.Model):
         copy=False,
         default='New',
     )
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        default=lambda self: self.env.company,
+        readonly=True,
+    )
     submitted_by = fields.Many2one(
         'hr.employee',
-        string='Submitted By',
+        string='Employee Name',
         required=True,
         default=lambda self: self.env['hr.employee'].search(
             [('user_id', '=', self.env.uid)], limit=1
         ),
+        tracking=True,
+    )
+    employee_code = fields.Char(
+        string='Employee ID',
+        related='submitted_by.employee_code',
+        store=True,
+        readonly=True,
+    )
+    department_id = fields.Many2one(
+        'hr.department',
+        string='Department',
+        compute='_compute_department',
+        store=True,
+        readonly=False,
         tracking=True,
     )
 
@@ -33,12 +53,6 @@ class CustomExpense(models.Model):
         string='Expense Category',
         required=True,
         tracking=True,
-    )
-    project_id = fields.Many2one(
-        'project.project',
-        string='Related Project',
-        tracking=True,
-        help='Link this expense to a project if applicable.',
     )
     amount = fields.Monetary(
         string='Amount',
@@ -69,7 +83,7 @@ class CustomExpense(models.Model):
         'custom_expense_attachment_rel',
         'expense_id',
         'attachment_id',
-        string='Attachments',
+        string='Bill / Receipt',
         help='Attach bill or invoice proof. Mandatory before submission.',
     )
     attachment_count = fields.Integer(
@@ -85,7 +99,7 @@ class CustomExpense(models.Model):
             ('approved', 'Approved'),
             ('rejected', 'Rejected'),
         ],
-        string='Status',
+        string='Approval Status',
         default='draft',
         required=True,
         readonly=True,
@@ -98,12 +112,9 @@ class CustomExpense(models.Model):
         copy=False,
     )
 
-    # ── Phase 2 Placeholders (hidden in UI, ready for accounting upgrade) ─────
+    # ── Phase 2 Placeholders ──────────────────────────────────────────────────
     payment_state = fields.Selection(
-        selection=[
-            ('unpaid', 'Unpaid'),
-            ('paid', 'Paid'),
-        ],
+        selection=[('unpaid', 'Unpaid'), ('paid', 'Paid')],
         string='Payment Status',
         default='unpaid',
         copy=False,
@@ -121,6 +132,11 @@ class CustomExpense(models.Model):
         for rec in self:
             rec.attachment_count = len(rec.attachment_ids)
 
+    @api.depends('submitted_by')
+    def _compute_department(self):
+        for rec in self:
+            rec.department_id = rec.submitted_by.sudo().department_id
+
     # ── Sequence Generation ───────────────────────────────────────────────────
     @api.model_create_multi
     def create(self, vals_list):
@@ -132,15 +148,10 @@ class CustomExpense(models.Model):
 
     # ── Notification Helpers ──────────────────────────────────────────────────
     def _get_approver_partners(self):
-        """Partners of all HR + Manager users, for notifying them on submission.
-        Excludes the submitter's own partner (in case they themselves are
-        HR/Manager) to avoid self-notification. Searches res.users directly by
-        group_ids rather than going through res.groups' inverse relation, since
-        that field name changed in Odoo 19."""
+        """Partners of all HR + Manager users, excluding the submitter."""
         self.ensure_one()
-        group_xml_ids = ['hr.group_hr_user', 'hr.group_hr_manager']
         group_ids = []
-        for xml_id in group_xml_ids:
+        for xml_id in ('hr.group_hr_user', 'hr.group_hr_manager'):
             group = self.env.ref(xml_id, raise_if_not_found=False)
             if group:
                 group_ids.append(group.id)
@@ -148,10 +159,14 @@ class CustomExpense(models.Model):
             return self.env['res.partner']
         users = self.env['res.users'].sudo().search([('group_ids', 'in', group_ids)])
         partners = users.mapped('partner_id')
-        submitter_partner = self.submitted_by.user_id.partner_id
+        submitter_partner = self.submitted_by.sudo().user_id.partner_id
         if submitter_partner:
             partners -= submitter_partner
         return partners
+
+    def _check_approver(self):
+        if not self.env.user.has_group('hr.group_hr_user'):
+            raise UserError('Only HR or Managers can approve or reject expenses.')
 
     # ── State Transitions ─────────────────────────────────────────────────────
     def action_submit(self):
@@ -159,6 +174,8 @@ class CustomExpense(models.Model):
         for rec in self:
             if rec.state != 'draft':
                 raise UserError('Only Draft expenses can be submitted.')
+            if not rec.attachment_ids:
+                raise UserError('Please attach the bill / receipt before submitting.')
             rec.state = 'submitted'
             partners = rec._get_approver_partners()
             rec.message_post(
@@ -167,20 +184,21 @@ class CustomExpense(models.Model):
             )
 
     def action_approve(self):
-        """Manager approves the expense; notifies the submitter."""
+        """HR / Manager approves the expense; notifies the submitter."""
+        self._check_approver()
         for rec in self:
             if rec.state != 'submitted':
                 raise UserError('Only Submitted expenses can be approved.')
             rec.state = 'approved'
-            submitter_partner = rec.submitted_by.user_id.partner_id
             rec.message_post(
                 body='Expense approved.',
-                partner_ids=submitter_partner.ids,
+                partner_ids=rec.submitted_by.sudo().user_id.partner_id.ids,
             )
 
     def action_reject(self):
         """Opens rejection wizard to capture mandatory reason."""
         self.ensure_one()
+        self._check_approver()
         if self.state != 'submitted':
             raise UserError('Only Submitted expenses can be rejected.')
         return {
@@ -193,13 +211,17 @@ class CustomExpense(models.Model):
         }
 
     def action_reset_draft(self):
-        """HR resets rejected expense back to draft for correction."""
+        """Resets a rejected expense back to draft for correction."""
         for rec in self:
             if rec.state != 'rejected':
                 raise UserError('Only Rejected expenses can be reset to Draft.')
             rec.rejection_reason = False
             rec.state = 'draft'
             rec.message_post(body='Expense reset to Draft.')
+
+    def action_print_expense(self):
+        self.ensure_one()
+        return self.env.ref('custom_expense.action_report_custom_expense').report_action(self)
 
     # ── Constraints ───────────────────────────────────────────────────────────
     @api.constrains('amount')

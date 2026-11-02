@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_custom_expense" model="ir.actions.report">
+        <field name="name">Expense Form</field>
+        <field name="model">custom.expense</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_expense.report_custom_expense_document</field>
+        <field name="report_file">custom_expense.report_custom_expense_document</field>
+        <field name="print_report_name">'Expense - %s' % (object.name or '').replace('/', '_')</field>
+        <field name="binding_model_id" ref="model_custom_expense"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_custom_expense_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="mb-1">Expense Form</h2>
+                        <h5 class="text-muted mb-4">
+                            <span t-field="o.name"/>
+                        </h5>
+
+                        <table class="table table-sm table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th style="width:25%">Employee Name</th>
+                                    <td style="width:25%">
+                                        <span t-field="o.submitted_by"/>
+                                    </td>
+                                    <th style="width:25%">Employee ID</th>
+                                    <td style="width:25%">
+                                        <span t-field="o.employee_code"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Department</th>
+                                    <td>
+                                        <span t-field="o.department_id"/>
+                                    </td>
+                                    <th>Expense Date</th>
+                                    <td>
+                                        <span t-field="o.date"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Expense Category</th>
+                                    <td>
+                                        <span t-field="o.category_id"/>
+                                    </td>
+                                    <th>Approval Status</th>
+                                    <td>
+                                        <span t-field="o.state"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Amount</th>
+                                    <td colspan="3">
+                                        <strong>
+                                            <span t-field="o.amount"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Description</th>
+                                    <td colspan="3">
+                                        <span t-field="o.description"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Bill / Receipt</th>
+                                    <td colspan="3">
+                                        <t t-if="o.attachment_ids">
+                                            <t t-foreach="o.attachment_ids" t-as="att">
+                                                <div>
+                                                    <span t-field="att.name"/>
+                                                </div>
+                                            </t>
+                                        </t>
+                                        <t t-else="">No attachment</t>
+                                    </td>
+                                </tr>
+                                <tr t-if="o.state == 'rejected'">
+                                    <th>Rejection Reason</th>
+                                    <td colspan="3">
+                                        <span t-field="o.rejection_reason"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="row mt-5 pt-5">
+                            <div class="col-4 text-center">
+                                <div style="border-top:1px solid #000;">Employee Signature</div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div style="border-top:1px solid #000;">HR / Manager Signature</div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div style="border-top:1px solid #000;">Date</div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

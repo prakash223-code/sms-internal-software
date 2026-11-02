@@ -2,7 +2,7 @@
 
 {
     'name': 'Custom Expense',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Controlled internal expense submission and approval',
     'author': 'Internal',
     'category': 'Human Resources',
@@ -20,6 +20,7 @@
         'wizard/expense_reject_wizard_views.xml',
         'views/custom_expense_category_views.xml',
         'views/custom_expense_views.xml',
+        'report/expense_report.xml',
         'views/custom_expense_menu.xml',
     ],
     'assets': {
@@ -29,6 +30,6 @@
     },
     'installable': True,
     'application': True,
-    'web_icon': 'custom_work_report,static/description/icon.png',
+    'web_icon': 'custom_expense,static/description/icon.png',
     'auto_install': False,
 }

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ================================================================
-         LIST VIEW
-         ================================================================ -->
+    <!-- LIST VIEW -->
     <record id="view_custom_expense_list" model="ir.ui.view">
         <field name="name">custom.expense.list</field>
         <field name="model">custom.expense</field>
@@ -16,8 +14,9 @@
                 <field name="name"/>
                 <field name="date"/>
                 <field name="submitted_by"/>
+                <field name="employee_code" optional="hide"/>
+                <field name="department_id" optional="show"/>
                 <field name="category_id"/>
-                <field name="project_id" optional="show"/>
                 <field name="amount"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="attachment_count" string="Attachments"/>
@@ -30,9 +29,7 @@
         </field>
     </record>
 
-    <!-- ================================================================
-         KANBAN VIEW
-         ================================================================ -->
+    <!-- KANBAN VIEW -->
     <record id="view_custom_expense_kanban" model="ir.ui.view">
         <field name="name">custom.expense.kanban</field>
         <field name="model">custom.expense</field>
@@ -43,7 +40,6 @@
                 <field name="date"/>
                 <field name="submitted_by"/>
                 <field name="category_id"/>
-                <field name="project_id"/>
                 <field name="amount"/>
                 <field name="currency_id"/>
                 <field name="state"/>
@@ -52,7 +48,6 @@
                 <templates>
                     <t t-name="card">
 
-                        <!-- ── Reference + badge ── -->
                         <div class="d-flex justify-content-between align-items-start mb-1">
                             <div class="o_exp_kanban_ref">
                                 <i class="fa fa-file-text-o" title="Reference"/>
@@ -66,12 +61,10 @@
                                    decoration-danger="state == 'rejected'"/>
                         </div>
 
-                        <!-- ── Amount ── -->
                         <div class="o_exp_kanban_amount">
                             <field name="amount"/>
                         </div>
 
-                        <!-- ── Date ── -->
                         <div class="o_exp_kanban_meta">
                             <i class="fa fa-calendar" title="Date"/>
                             <field name="date"/>
@@ -79,7 +72,6 @@
 
                         <div class="o_exp_kanban_divider"/>
 
-                        <!-- ── Employee avatar row ── -->
                         <div class="o_exp_kanban_avatar_row">
                             <img t-att-src="'/web/image/hr.employee/' + record.submitted_by.raw_value + '/avatar_128'"
                                  class="o_exp_kanban_avatar"
@@ -89,7 +81,6 @@
                             </span>
                         </div>
 
-                        <!-- ── Category pill ── -->
                         <div class="o_exp_kanban_pill_row">
                             <div class="o_exp_kanban_pill">
                                 <i class="fa fa-tag" title="Category"/>
@@ -97,17 +88,8 @@
                             </div>
                         </div>
 
-                        <!-- ── Project pill (conditional) ── -->
-                        <div class="o_exp_kanban_pill_row" invisible="not project_id">
-                            <div class="o_exp_kanban_pill o_exp_kanban_pill_project">
-                                <i class="fa fa-folder-open" title="Project"/>
-                                <field name="project_id"/>
-                            </div>
-                        </div>
-
                         <div class="o_exp_kanban_divider"/>
 
-                        <!-- ── Footer ── -->
                         <div class="o_exp_kanban_footer">
                             <div class="o_exp_kanban_attach_badge">
                                 <i class="fa fa-paperclip" title="Attachments"/>
@@ -123,9 +105,7 @@
         </field>
     </record>
 
-    <!-- ================================================================
-         PIVOT VIEW
-         ================================================================ -->
+    <!-- PIVOT VIEW -->
     <record id="view_custom_expense_pivot" model="ir.ui.view">
         <field name="name">custom.expense.pivot</field>
         <field name="model">custom.expense</field>
@@ -139,9 +119,7 @@
         </field>
     </record>
 
-    <!-- ================================================================
-         GRAPH VIEW
-         ================================================================ -->
+    <!-- GRAPH VIEW -->
     <record id="view_custom_expense_graph" model="ir.ui.view">
         <field name="name">custom.expense.graph</field>
         <field name="model">custom.expense</field>
@@ -153,16 +131,13 @@
         </field>
     </record>
 
-    <!-- ================================================================
-         FORM VIEW
-         ================================================================ -->
+    <!-- FORM VIEW -->
     <record id="view_custom_expense_form" model="ir.ui.view">
         <field name="name">custom.expense.form</field>
         <field name="model">custom.expense</field>
         <field name="arch" type="xml">
             <form string="Company Expense">
 
-                <!-- ── Header buttons + statusbar ── -->
                 <header>
                     <button name="action_submit"
                             string="Submit for Approval"
@@ -178,24 +153,29 @@
                             type="object"
                             class="btn-primary"
                             invisible="state != 'submitted'"
-                            groups="hr.group_hr_manager"/>
+                            groups="hr.group_hr_user"/>
                     <button name="action_reject"
                             string="Reject"
                             type="object"
                             class="btn-danger"
                             invisible="state != 'submitted'"
-                            groups="hr.group_hr_manager"/>
+                            groups="hr.group_hr_user"/>
+                    <button name="action_print_expense"
+                            string="Print / Export PDF"
+                            type="object"
+                            icon="fa-print"
+                            invisible="not id"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,submitted,approved"/>
                 </header>
 
-                <!-- ── State banners ── -->
                 <div class="o_exp_banner o_exp_banner_draft"
                      invisible="state != 'draft'">
                     <i class="fa fa-pencil-square-o" title="Draft"/>
                     <div>
-                        <strong>Draft</strong> — Fill in all details and attach your
-                        bill or invoice proof before submitting for approval.
+                        <strong>Draft</strong>
+                        — Fill in all details and attach your
+                        bill or receipt before submitting for approval.
                     </div>
                 </div>
 
@@ -203,8 +183,9 @@
                      invisible="state != 'submitted'">
                     <i class="fa fa-clock-o" title="Pending Approval"/>
                     <div>
-                        <strong>Awaiting Approval</strong> — This expense has been
-                        submitted and is pending manager review.
+                        <strong>Awaiting Approval</strong>
+                        — This expense has been
+                        submitted and is pending HR / manager review.
                     </div>
                 </div>
 
@@ -212,7 +193,8 @@
                      invisible="state != 'approved'">
                     <i class="fa fa-check-circle" title="Approved"/>
                     <div>
-                        <strong>Approved</strong> — This expense has been approved.
+                        <strong>Approved</strong>
+                        — This expense has been approved.
                     </div>
                 </div>
 
@@ -220,14 +202,14 @@
                      invisible="state != 'rejected'">
                     <i class="fa fa-times-circle" title="Rejected"/>
                     <div>
-                        <strong>Rejected</strong> — See the rejection reason below.
+                        <strong>Rejected</strong>
+                        — See the rejection reason below.
                         Reset to Draft to correct and resubmit.
                     </div>
                 </div>
 
                 <sheet>
 
-                    <!-- ── Reference block ── -->
                     <div class="oe_title">
                         <div class="o_exp_ref_block">
                             <div class="o_exp_ref_icon">
@@ -242,17 +224,16 @@
                         </div>
                     </div>
 
-                    <!-- ── Amount card ── -->
                     <div class="o_exp_amount_card">
                         <div class="o_exp_amount_label">
-                            <i class="fa fa-money" title="Amount"/> Expense Amount
+                            <i class="fa fa-money" title="Amount"/>
+                            Amount
                         </div>
                         <div class="o_exp_amount_value">
                             <field name="amount"
                                    readonly="state != 'draft'"
                                    nolabel="1"/>
                         </div>
-                        <!-- Currency shown as small label below amount, only when multi-currency -->
                         <div class="o_exp_amount_currency" groups="base.group_multi_currency">
                             <field name="currency_id"
                                    readonly="state != 'draft'"
@@ -262,32 +243,53 @@
 
                     <div class="o_exp_divider"/>
 
-                    <!-- ── Expense Details ── -->
+                    <!-- Employee details -->
                     <div class="o_exp_section_label">
-                        <i class="fa fa-list-alt" title="Details"/> Expense Details
+                        <i class="fa fa-user" title="Employee"/>
+                        Employee Details
                     </div>
                     <div class="o_exp_info_card">
                         <group>
-                            <!-- Managers can edit submitted_by in Draft; all others always readonly.
-                                 Single field avoids the duplicate render caused by group inheritance. -->
-                            <field name="submitted_by"
-                                   readonly="state != 'draft'"
-                                   groups="hr.group_hr_manager"/>
-                            <field name="submitted_by"
-                                   readonly="1"
-                                   invisible="1"
-                                   groups="base.group_user"/>
-                            <field name="category_id" readonly="state != 'draft'"/>
-                            <field name="project_id"  readonly="state != 'draft'"/>
-                            <field name="date"        readonly="state != 'draft'"/>
+                            <group>
+                                <!-- HR/Manager can change the employee in Draft; everyone else: read-only -->
+                                <field name="submitted_by"
+                                       readonly="state != 'draft'"
+                                       groups="hr.group_hr_user"/>
+                                <field name="submitted_by"
+                                       readonly="1"
+                                       groups="!hr.group_hr_user"/>
+                                <field name="employee_code"/>
+                            </group>
+                            <group>
+                                <field name="department_id" readonly="state != 'draft'"/>
+                            </group>
+                        </group>
+                    </div>
+
+                    <!-- Expense details -->
+                    <div class="o_exp_section_label">
+                        <i class="fa fa-list-alt" title="Details"/>
+                        Expense Details
+                    </div>
+                    <div class="o_exp_info_card">
+                        <group>
+                            <group>
+                                <field name="date" readonly="state != 'draft'"/>
+                                <field name="category_id"
+                                       readonly="state != 'draft'"
+                                       options="{'no_create': True, 'no_open': True}"/>
+                            </group>
+                            <group>
+                                <field name="state" string="Approval Status"/>
+                            </group>
                         </group>
                     </div>
 
                     <div class="o_exp_divider"/>
 
-                    <!-- ── Description ── -->
                     <div class="o_exp_section_label">
-                        <i class="fa fa-align-left" title="Description"/> Description
+                        <i class="fa fa-align-left" title="Description"/>
+                        Description
                     </div>
                     <field name="description"
                            nolabel="1"
@@ -296,19 +298,19 @@
 
                     <div class="o_exp_divider"/>
 
-                    <!-- ── Attachments ── -->
                     <div class="o_exp_section_label">
-                        <i class="fa fa-paperclip" title="Attachments"/> Attachments
+                        <i class="fa fa-paperclip" title="Attachments"/>
+                        Bill / Receipt
                     </div>
                     <field name="attachment_ids"
                            widget="many2many_binary"
                            readonly="state != 'draft'"
                            nolabel="1"/>
 
-                    <!-- ── Rejection panel ── -->
                     <div class="o_exp_rejection_panel" invisible="state != 'rejected'">
                         <div class="o_exp_section_label">
-                            <i class="fa fa-times-circle" title="Rejected"/> Rejection Reason
+                            <i class="fa fa-times-circle" title="Rejected"/>
+                            Rejection Reason
                         </div>
                         <field name="rejection_reason" nolabel="1" readonly="1"/>
                     </div>
@@ -319,33 +321,38 @@
         </field>
     </record>
 
-    <!-- ================================================================
-         SEARCH VIEW
-         ================================================================ -->
+    <!-- SEARCH VIEW -->
     <record id="view_custom_expense_search" model="ir.ui.view">
         <field name="name">custom.expense.search</field>
         <field name="model">custom.expense</field>
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="submitted_by"/>
+                <field name="employee_code"/>
+                <field name="department_id"/>
                 <field name="category_id"/>
-                <field name="project_id"/>
-                <filter name="filter_draft"     string="Draft"     domain="[('state','=','draft')]"/>
+                <filter name="filter_draft" string="Draft" domain="[('state','=','draft')]"/>
                 <filter name="filter_submitted" string="Submitted" domain="[('state','=','submitted')]"/>
-                <filter name="filter_approved"  string="Approved"  domain="[('state','=','approved')]"/>
-                <filter name="filter_rejected"  string="Rejected"  domain="[('state','=','rejected')]"/>
+                <filter name="filter_approved" string="Approved" domain="[('state','=','approved')]"/>
+                <filter name="filter_rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+                <group>
+                    <filter name="group_employee" string="Employee" context="{'group_by': 'submitted_by'}"/>
+                    <filter name="group_department" string="Department" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
             </search>
         </field>
     </record>
 
-    <!-- ================================================================
-         ACTIONS
-         ================================================================ -->
+    <!-- ACTIONS -->
+    <!-- My Expenses: every user (incl. HR/Manager) sees only their own here -->
     <record id="action_custom_expense_hr" model="ir.actions.act_window">
-        <field name="name">Expenses</field>
+        <field name="name">My Expenses</field>
         <field name="res_model">custom.expense</field>
         <field name="view_mode">kanban,list,form,pivot,graph</field>
-        <field name="context">{'search_default_filter_draft': 1}</field>
+        <field name="domain">[('submitted_by.user_id', '=', uid)]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No expenses found. Create your first expense!
@@ -353,8 +360,9 @@
         </field>
     </record>
 
+    <!-- All Expenses: HR + Manager, defaults to pending approval -->
     <record id="action_custom_expense_manager" model="ir.actions.act_window">
-        <field name="name">Expenses</field>
+        <field name="name">All Expenses</field>
         <field name="res_model">custom.expense</field>
         <field name="view_mode">kanban,list,form,pivot,graph</field>
         <field name="context">{'search_default_filter_submitted': 1}</field>
