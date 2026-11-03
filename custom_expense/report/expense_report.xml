@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="paperformat_custom_expense" model="report.paperformat">
+        <field name="name">Expense Form A4</field>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">8</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">12</field>
+        <field name="margin_right">12</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
     <record id="action_report_custom_expense" model="ir.actions.report">
         <field name="name">Expense Form</field>
         <field name="model">custom.expense</field>
@@ -10,97 +23,128 @@
         <field name="print_report_name">'Expense - %s' % (object.name or '').replace('/', '_')</field>
         <field name="binding_model_id" ref="model_custom_expense"/>
         <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_custom_expense"/>
     </record>
 
     <template id="report_custom_expense_document">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-call="web.external_layout">
-                    <div class="page">
-                        <h2 class="mb-1">Expense Form</h2>
-                        <h5 class="text-muted mb-4">
-                            <span t-field="o.name"/>
-                        </h5>
+                <t t-call="web.basic_layout">
+                    <div class="page exp_wrap" style="font-size:17px; position:relative; height:318mm;">
+                        <style>
+                            .exp_wrap .exp_row { overflow:hidden; border-bottom:1px solid #e5e5e5; }
+                            .exp_wrap .exp_label,
+                            .exp_wrap .exp_value { float:left; width:50%; box-sizing:border-box; padding:11px 4px; }
+                        </style>
 
-                        <table class="table table-sm table-bordered">
-                            <tbody>
-                                <tr>
-                                    <th style="width:25%">Employee Name</th>
-                                    <td style="width:25%">
-                                        <span t-field="o.submitted_by"/>
-                                    </td>
-                                    <th style="width:25%">Employee ID</th>
-                                    <td style="width:25%">
-                                        <span t-field="o.employee_code"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Department</th>
-                                    <td>
-                                        <span t-field="o.department_id"/>
-                                    </td>
-                                    <th>Expense Date</th>
-                                    <td>
-                                        <span t-field="o.date"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Expense Category</th>
-                                    <td>
-                                        <span t-field="o.category_id"/>
-                                    </td>
-                                    <th>Approval Status</th>
-                                    <td>
-                                        <span t-field="o.state"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Amount</th>
-                                    <td colspan="3">
-                                        <strong>
-                                            <span t-field="o.amount"/>
-                                        </strong>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Description</th>
-                                    <td colspan="3">
-                                        <span t-field="o.description"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Bill / Receipt</th>
-                                    <td colspan="3">
-                                        <t t-if="o.attachment_ids">
-                                            <t t-foreach="o.attachment_ids" t-as="att">
-                                                <div>
-                                                    <span t-field="att.name"/>
-                                                </div>
-                                            </t>
-                                        </t>
-                                        <t t-else="">No attachment</t>
-                                    </td>
-                                </tr>
-                                <tr t-if="o.state == 'rejected'">
-                                    <th>Rejection Reason</th>
-                                    <td colspan="3">
-                                        <span t-field="o.rejection_reason"/>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="row mt-5 pt-5">
-                            <div class="col-4 text-center">
-                                <div style="border-top:1px solid #000;">Employee Signature</div>
+                        <!-- ── Header: logo + address side by side ── -->
+                        <div style="white-space:nowrap; border-bottom:1px solid #e5e5e5; padding-bottom:12px; margin-bottom:26px;">
+                            <div style="display:inline-block; vertical-align:middle;">
+                                <img t-if="o.company_id.logo"
+                                     t-att-src="image_data_uri(o.company_id.logo)"
+                                     style="max-height:170px; max-width:220px;"
+                                     alt="Logo"/>
                             </div>
-                            <div class="col-4 text-center">
-                                <div style="border-top:1px solid #000;">HR / Manager Signature</div>
-                            </div>
-                            <div class="col-4 text-center">
-                                <div style="border-top:1px solid #000;">Date</div>
+                            <div style="display:inline-block; vertical-align:middle; white-space:normal; width:62%; margin-left:-22px;">
+                                <div style="font-size:24px; font-weight:bold;">
+                                    <span t-field="o.company_id.name"/>
+                                </div>
+                                <div style="color:#555; font-size:15px; margin-top:3px;">
+                                    <span t-if="o.company_id.street" t-out="o.company_id.street"/>,
+                                    <span t-if="o.company_id.street2">,
+                                        <t t-out="o.company_id.street2"/>
+                                    </span>
+                                </div>
+                                <div style="color:#555; font-size:15px;">
+                                    <span t-if="o.company_id.city" t-out="o.company_id.city"/>
+                                    - <span t-esc="o.company_id.zip"/>,
+                                    <span t-if="o.company_id.state_id">
+                                        <t t-out="o.company_id.state_id.name"/>,
+                                    </span>
+                                    <span t-if="o.company_id.country_id">
+                                        <t t-out="o.company_id.country_id.name"/>.
+                                    </span>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- ── Title ── -->
+                        <div style="text-align:center; margin-bottom:28px;">
+                            <div style="font-size:34px; font-weight:bold; letter-spacing:1px;">EXPENSE FORM</div>
+                            <div style="font-size:15px; color:#666; margin-top:4px;">
+                                Reference No:
+                                <span t-field="o.name"/>
+                            </div>
+                        </div>
+
+                        <!-- ── Details ── -->
+                        <div class="exp_row">
+                            <div class="exp_label" style="font-weight:bold;">Employee Name</div>
+                            <div class="exp_value" style="font-weight:bold;">
+                                <span t-field="o.submitted_by"/>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Employee ID</div>
+                            <div class="exp_value">
+                                <span t-field="o.employee_code"/>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Department</div>
+                            <div class="exp_value">
+                                <span t-field="o.department_id"/>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Expense Date</div>
+                            <div class="exp_value">
+                                <span t-field="o.date" t-options='{"format": "dd-MMM-yyyy"}'/>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Expense Category</div>
+                            <div class="exp_value">
+                                <span t-field="o.category_id"/>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Amount</div>
+                            <div class="exp_value">
+                                <span t-field="o.amount"/>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Description</div>
+                            <div class="exp_value">
+                                <span t-field="o.description"/>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Bill / Receipt</div>
+                            <div class="exp_value">
+                                <t t-if="o.attachment_ids">Attached</t>
+                                <t t-else="">Not attached</t>
+                            </div>
+                        </div>
+                        <div class="exp_row">
+                            <div class="exp_label">Approval Status</div>
+                            <div class="exp_value">
+                                <span t-field="o.state"/>
+                            </div>
+                        </div>
+                        <div class="exp_row" t-if="o.state == 'rejected'">
+                            <div class="exp_label">Rejection Reason</div>
+                            <div class="exp_value">
+                                <span t-field="o.rejection_reason"/>
+                            </div>
+                        </div>
+
+                        <!-- ── Signature: pinned to bottom-right of the page ── -->
+                        <div style="position:absolute; bottom:0; right:0; width:38%; text-align:center; border-top:1px solid #999; padding-top:6px; font-weight:bold; font-size:17px;">
+                            HR / Manager Signature
+                        </div>
+
                     </div>
                 </t>
             </t>

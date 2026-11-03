@@ -224,6 +224,8 @@
                         </div>
                     </div>
 
+                    <field name="currency_id" invisible="1"/>
+
                     <div class="o_exp_amount_card">
                         <div class="o_exp_amount_label">
                             <i class="fa fa-money" title="Amount"/>

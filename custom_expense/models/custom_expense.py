@@ -84,7 +84,7 @@ class CustomExpense(models.Model):
         'expense_id',
         'attachment_id',
         string='Bill / Receipt',
-        help='Attach bill or invoice proof. Mandatory before submission.',
+        # help='Attach bill or invoice proof. Mandatory before submission.',
     )
     attachment_count = fields.Integer(
         string='Expense Attachments',
@@ -174,8 +174,8 @@ class CustomExpense(models.Model):
         for rec in self:
             if rec.state != 'draft':
                 raise UserError('Only Draft expenses can be submitted.')
-            if not rec.attachment_ids:
-                raise UserError('Please attach the bill / receipt before submitting.')
+            # if not rec.attachment_ids:
+            #     raise UserError('Please attach the bill / receipt before submitting.')
             rec.state = 'submitted'
             partners = rec._get_approver_partners()
             rec.message_post(
